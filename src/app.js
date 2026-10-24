@@ -124,12 +124,11 @@
       "<div>LKPD " + esc(S.def(aktif).lkpd) + " — " + esc(S.def(aktif).sub) +
       ". Tulis hasilnya di kertas, lalu kembali ke sini.</div></div>";
 
-    var kredit = '<div class="kredit">' +
-      '<div class="eyebrow">Tim pengembang · Kelompok 9</div>' +
-      '<div class="kredit-judul">Statistika Matematika 2026</div>' +
-      '<div class="kredit-sub">Pendidikan Matematika · FKIP · Universitas Sriwijaya</div>' +
-      '<button class="link kredit-link" data-act="tentang">Lihat kredit lengkap →</button>' +
-      "</div>";
+    var kredit = '<button class="creditbar" data-act="tentang" aria-label="Kredit tim pengembang">' +
+      '<span class="cb-line"><b>Tim Pengembang: Kelompok 9 Statistika Matematika 2026</b></span>' +
+      '<span class="cb-line">Ahmad As Siddiq · Annisa Putri S. · Fathia Aiva · Sherin Az Zahra</span>' +
+      '<span class="cb-line cb-inst">Program Studi Pendidikan Matematika · FKIP · Universitas Sriwijaya</span>' +
+      "</button>";
 
     var ident = '<div class="panel" id="identCard"><div class="panel-head"><b>Identitas laporan</b><span>opsional</span></div>' +
       '<div class="idrow">' +
@@ -143,12 +142,12 @@
       right: chip(selesai + " / 5 selesai")
     }) +
       '<main class="body">' +
+      kredit +
+      target +
       '<div class="hero"><div class="eyebrow">Distribusi Bernoulli</div>' + judul + sub + "</div>" +
       segbar() +
       ident +
       '<div class="mlist">' + list + "</div>" +
-      target +
-      kredit +
       (ui.pesan ? '<div class="toast">✓ <div>' + ui.pesan + "</div></div>" : "") +
       "</main>" +
       '<footer class="cta">' +

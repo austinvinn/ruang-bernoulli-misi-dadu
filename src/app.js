@@ -58,9 +58,9 @@
   function chip(txt, tone) {
     return '<span class="chip ' + (tone || "") + '">' + txt + "</span>";
   }
-  function statsHTML(h, label) {
-    return '<div class="stats">' +
-      '<div class="stat"><span>n</span><b>' + h.n + "</b></div>" +
+  function statsHTML(h, label, tanpaN) {
+    return '<div class="stats' + (tanpaN ? " two" : "") + '">' +
+      (tanpaN ? "" : '<div class="stat"><span>n</span><b>' + h.n + "</b></div>") +
       '<div class="stat"><span>k</span><b>' + h.k + "</b></div>" +
       '<div class="stat accent"><span>' + (label || "p̂") + '</span><b>' + dec(h.phat, 3) + "</b></div>" +
       "</div>";
@@ -174,8 +174,6 @@
       '<div class="sheet tentang" data-stop="1">' +
       '<div class="eyebrow">Tentang media</div>' +
       '<h4>Ruang Bernoulli: Misi Dadu</h4>' +
-      '<p>Media pembelajaran interaktif Distribusi Bernoulli untuk mahasiswa statistika matematika. ' +
-      "Satu percobaan (dadu), lima misi, lima bagian LKPD. Berjalan tanpa server dan tanpa akun.</p>" +
       '<div class="divider"></div>' +
       '<div class="eyebrow">Tim pengembang · Kelompok 9</div>' +
       '<ol class="tim">' + tim + "</ol>" +
@@ -234,7 +232,7 @@
       back: true,
       title: m.judul,
       sub: "Misi " + id + " · " + m.lkpd,
-      right: chip("n = " + (id === 4 ? "60/aturan" : id === 5 ? "3 teman" : (r.rolls.length || 0)))
+      right: chip("LKPD " + String(m.lkpd).replace("Bagian ", ""))
     }) +
       '<main class="body ' + (id === 3 ? "wide" : "") + '">' + isi + "</main>" +
       footerArena(id) +
@@ -242,46 +240,144 @@
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
   }
 
+  /* ---------------- instruksi & penutup misi ---------------- */
+  var INSTRUKSI = {
+    1: {
+      ringkas: "5 lemparan · p = 1/6",
+      tujuan: "Tujuan: menunjukkan bahwa hasil dadu dapat dipetakan menjadi dua nilai saja — 1 untuk sukses (muncul 6) dan 0 untuk gagal.",
+      langkah: [
+        "Tekan <b>Lempar dadu</b>. Hasil 6 dihitung sukses (X = 1); hasil lain gagal (X = 0).",
+        "Catat setiap hasil pada tabel 5 baris di <b>LKPD bagian A</b>.",
+        "Lemparan berhenti otomatis setelah 5 kali; tombol bawah berubah menjadi lanjut ke Misi 2."
+      ]
+    },
+    2: {
+      ringkas: "10 lemparan · p = 1/6",
+      tujuan: "Tujuan: membandingkan p (peluang sebenarnya) dengan p̂ (proporsi hasil percobaanmu).",
+      langkah: [
+        "Tekan <b>Lempar dadu</b> sepuluh kali; kamu boleh berhenti di tengah dan melanjutkan nanti.",
+        "Setiap lemparan memperbarui k (jumlah sukses) dan p̂ = k/n.",
+        "Hitung sendiri k dan p̂ di <b>LKPD bagian B</b> sambil membandingkan dengan layar.",
+        "Bandingkan p̂ akhirmu dengan p = 1/6 ≈ 0,167."
+      ]
+    },
+    3: {
+      ringkas: "100 lemparan · p = 1/6",
+      tujuan: "Tujuan: melihat bahwa p̂ makin dekat ke p ketika jumlah lemparan bertambah (hukum bilangan besar).",
+      langkah: [
+        "Tulis dulu <b>tebakanmu</b>, lalu tekan <b>Kunci tebakan</b>. Tebakan tidak bisa diubah setelah dikunci.",
+        "Tekan <b>Lempar 100×</b>. Seratus lemparan dijalankan sekaligus dan grafik p̂ terhadap n muncul.",
+        "Bandingkan |p̂ − p| dengan 2·SE, lalu sketsa grafiknya di <b>LKPD bagian C</b>."
+      ]
+    },
+    4: {
+      ringkas: "3 aturan × 60 lemparan",
+      tujuan: "Tujuan: menunjukkan bahwa p bukan angka tetap — p bergantung pada aturan sukses yang dipilih, dan k/n adalah penduga terbaik (MLE) untuk p.",
+      langkah: [
+        "Pilih aturan sukses di atas: <b>6 saja</b> (p = 1/6), <b>≥ 5</b> (p = 2/6), atau <b>≥ 4</b> (p = 3/6).",
+        "Tekan <b>Lempar 60×</b> untuk aturan itu, lalu ganti aturan dan ulangi sampai ketiganya penuh.",
+        "Isi tabel p, E[X], dan Var(X) di <b>LKPD bagian D</b>, lalu turunkan p̂ = k/n sebagai MLE."
+      ]
+    },
+    5: {
+      ringkas: "gabungan data kelas",
+      tujuan: "Tujuan: menggabungkan data beberapa orang menjadi satu p̂. Ini bukan percobaan baru — datanya diambil dari Misi 3 milikmu dan milik tiga teman, untuk menunjukkan bahwa sampel gabungan lebih dekat dan lebih stabil terhadap p.",
+      langkah: [
+        "Minta tiga teman membuka <b>Papan Data Misi 3</b> masing-masing dan menyebutkan <b>kode laporan</b> mereka.",
+        "Isi nama, <b>n</b> dan <b>k</b> mereka pada tabel di bawah. Data misimu sendiri (n dan k dari Misi 3) otomatis ikut dihitung.",
+        "Bandingkan <b>Σk/Σn</b> (gabungan) dengan <b>rata-rata p̂</b> keempat orang; keduanya bisa berbeda.",
+        "Tulis tabel data kelas dan kesimpulan tiga poin di <b>LKPD bagian E</b>."
+      ]
+    }
+  };
+
+  function instruksiBox(id) {
+    var d = INSTRUKSI[id];
+    var li = d.langkah.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+    return '<div class="panel instruksi" data-stop="1">' +
+      '<div class="panel-head"><b>Instruksi Misi ' + id + "</b><span>" + d.ringkas + "</span></div>" +
+      '<p class="tujuan">' + d.tujuan + "</p>" +
+      '<ol class="steps">' + li + "</ol></div>";
+  }
+
+  function selesaiCard(id, r) {
+    var h = S.hitung(r.rolls, r.aturan);
+    var poin = [];
+    if (id === 1) {
+      poin.push("Ruang hasil Ω = {1, 2, 3, 4, 5, 6} dan pemetaan X: muncul 6 → X = 1, selain 6 → X = 0.");
+      poin.push("P(X = 1) = 1/6 ≈ 0,167 dan P(X = 0) = 5/6 ≈ 0,833.");
+      poin.push("Lima nilai X hasil lemparanmu: <b>" + r.rolls.join(", ") + "</b>.");
+    } else if (id === 2) {
+      poin.push("Isi tabel 10 baris: i, angka dadu, Xᵢ, kᵢ, dan p̂ᵢ.");
+      poin.push("p̂ akhir = k/n = <b>" + h.k + "/10 = " + dec(h.phat, 3) + "</b>, sedangkan p = 0,167.");
+      poin.push("Selisih p̂ − p = <b>" + (h.phat - 1 / 6 >= 0 ? "+" : "") + dec(h.phat - 1 / 6, 3) + "</b>.");
+    } else if (id === 3) {
+      var se = Math.sqrt((1 / 6) * (5 / 6) / 100);
+      poin.push("Tebakanmu: <b>" + r.prediksi + " kali</b> · hasil percobaan: <b>" + h.k + " kali</b> (n = 100).");
+      poin.push("p̂ = <b>" + dec(h.phat, 3) + "</b>, |p̂ − p| = <b>" + dec(Math.abs(h.phat - 1 / 6), 3) +
+        "</b>, SE = <b>" + dec(se, 4) + "</b>, 2·SE = <b>" + dec(2 * se, 4) + "</b>.");
+      poin.push("Sketsa grafik p̂ terhadap n di kotak berpetak, lalu jawab tiga pertanyaan bagian C.");
+    } else if (id === 4) {
+      poin.push("Isi tabel tiga aturan: |A|, p, E[X] = p, dan Var(X) = p(1 − p).");
+      poin.push("Nilai teoretis: p = 0,167 / 0,333 / 0,500 dan Var = 0,139 / 0,222 / 0,250.");
+      poin.push("Turunkan sendiri: ln L(p) = k·ln p + (n − k)·ln(1 − p) → p̂ = k/n.");
+    } else {
+      var d = m5Data(r);
+      poin.push("Isi tabel data kelas dan baris gabungan: Σn = <b>" + d.totalN + "</b>, Σk = <b>" + d.totalK +
+        "</b>, p̂ gabungan = <b>" + dec(d.pGab, 4) + "</b>.");
+      poin.push("Rata-rata p̂ tanpa pembobotan = <b>" + dec(d.rata, 4) +
+        "</b>. Selisih keduanya = <b>" + dec(Math.abs(d.pGab - d.rata), 4) + "</b> — jelaskan mengapa berbeda.");
+      poin.push("Tulis kesimpulan tiga poin: hubungan p dan p̂, peran n, dan mengapa Bernoulli menjadi dasar Binomial.");
+    }
+    var li = poin.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+    var nextHint = id < 5
+      ? "Setelah selesai menulis, tekan <b>Lanjut ke Misi " + (id + 1) + "</b> di bagian bawah layar."
+      : "Semua misi selesai. Tekan <b>Selesai · ke Beranda</b> untuk melihat ringkasan progres.";
+    return '<div class="selesai"><div class="eyebrow">✓ Misi ' + id + " selesai · LKPD " + S.def(id).lkpd + "</div>" +
+      "<h4>Yang harus kamu tulis sekarang</h4>" +
+      '<ol class="steps">' + li + "</ol>" +
+      '<p class="next-hint">' + nextHint + "</p></div>";
+  }
+
   function arenaM1(r) {
     var h = S.hitung(r.rolls, r.aturan);
     var last = r.rolls.length ? r.rolls[r.rolls.length - 1] : 6;
-    var sisa = Math.max(0, 5 - h.n);
-    return '<div class="die-stage">' + dieHTML(last) + "</div>" +
-      '<div class="center small muted">' + (sisa ? "Sisa " + sisa + " lemparan" : "5 lemparan selesai") + "</div>" +
-      statsHTML(h) +
-      '<div class="panel"><div class="panel-head"><b>Aturan pencatatan</b><span>aturan sukses</span></div>' +
+    var penuh = h.n >= 5;
+    return instruksiBox(1) +
+      '<div class="die-stage">' + dieHTML(last) + "</div>" +
+      statsHTML(h, null, true) +
+      '<div class="panel"><div class="panel-head"><b>Aturan pencatatan</b><span>sukses = muncul 6</span></div>' +
       '<p class="note">Muncul <b>6</b> → sukses, ditulis <b>X = 1</b>. Selain 6 → gagal, ditulis <b>X = 0</b>.</p>' +
-      '<div class="chips">' +
-      '<span class="tag">' + (h.k) + " sukses</span>" +
+      '<div class="chips"><span class="tag">' + h.k + " sukses</span>" +
       '<span class="tag">' + (h.n - h.k) + " gagal</span>" +
       '<span class="tag">p = 1/6 ≈ 0,167</span></div></div>' +
-      (h.n >= 5 ? '<div class="toast">✓ <div><b>Misi 1 selesai.</b> Tulis X untuk 5 lemparan di LKPD bagian A, lalu lanjut.</div></div>' : "");
+      (penuh ? selesaiCard(1, r) : "");
   }
 
   function arenaM2(r) {
     var h = S.hitung(r.rolls, r.aturan);
     var last = r.rolls.length ? r.rolls[r.rolls.length - 1] : 6;
+    var penuh = h.n >= 10;
     var rows = r.rolls.slice(-5).reverse().map(function (v, i) {
       var idx = r.rolls.length - i;
       var kk = S.hitung(r.rolls.slice(0, idx), r.aturan);
       return "<tr><td>" + idx + "</td><td>" + v + "</td><td class=\"n\">" + (S.sukses(v, r.aturan) ? 1 : 0) +
         "</td><td class=\"n\">" + kk.k + "</td><td class=\"n\">" + dec(kk.phat, 3) + "</td></tr>";
     }).join("");
-    return '<div class="die-stage">' + dieHTML(last) + "</div>" +
-      statsHTML(h) +
-      '<div class="panel"><div class="panel-head"><b>Catatan terakhir</b><span>dari ' + h.n + " lemparan</span></div>" +
+    return instruksiBox(2) +
+      '<div class="die-stage">' + dieHTML(last) + "</div>" +
+      statsHTML(h, null, true) +
+      '<div class="panel"><div class="panel-head"><b>Lima lemparan terakhir</b><span>dari ' + h.n + " lemparan</span></div>" +
       (rows ? '<table><thead><tr><th>i</th><th>dadu</th><th class="rt">X</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' + rows + "</tbody></table>"
-        : '<p class="note">Belum ada lemparan.</p>') +
-      "</div>" +
-      '<p class="note center">Bandingkan p̂ dengan p = 0,167. Selisih sekarang: <b>' +
-      (h.n ? (h.phat - 1 / 6 >= 0 ? "+" : "") + dec(h.phat - 1 / 6, 3) : "—") + "</b></p>" +
-      (h.n >= 10 ? '<div class="toast">✓ <div><b>Misi 2 selesai.</b> Isi tabel 10 lemparan di LKPD bagian B.</div></div>' : "");
+        : '<p class="note">Belum ada lemparan.</p>') + "</div>" +
+      (penuh ? selesaiCard(2, r) : "");
   }
 
   function arenaM3(r) {
     var h = S.hitung(r.rolls, r.aturan);
     var last = r.rolls.length ? r.rolls[r.rolls.length - 1] : 6;
     var pred = r.prediksi;
+    var penuh = h.n >= 100;
     var predCard = pred === null
       ? '<div class="predict"><div class="q">Tebak dulu: berapa kali angka 6 muncul dari 100 lemparan?</div>' +
         '<div class="stepper"><button data-act="pred" data-d="-1" aria-label="kurangi">−</button>' +
@@ -289,23 +385,17 @@
         '<button data-act="pred" data-d="1" aria-label="tambah">+</button></div>' +
         '<button class="btn btn-primary sm" data-act="pred-simpan">Kunci tebakan</button></div>'
       : '<div class="predict done"><div class="q">Tebakanmu: <b>' + pred + " kali</b>" +
-        (h.n >= 100 ? " · hasil: <b>" + h.k + " kali</b>" : " · belum dijalankan") + "</div></div>";
-    return '<div class="colstack">' +
+        (penuh ? " · hasil: <b>" + h.k + " kali</b>" : " · belum dijalankan") + "</div></div>";
+    return instruksiBox(3) +
+      '<div class="colstack">' +
       '<div class="die-stage">' + dieHTML(last) + "</div>" + predCard +
-      '<div class="panel"><div class="panel-head"><b>Alur misi</b><span>4 langkah</span></div>' +
-      '<ol class="small" style="margin:0;padding-left:18px;color:var(--ink-2);line-height:1.7">' +
-      "<li>Tebak kira-kira berapa kali angka 6 muncul.</li>" +
-      "<li>Kunci tebakan (tombol kuning).</li>" +
-      "<li>Jalankan 100 lemparan sekaligus.</li>" +
-      "<li>Bandingkan p̂ dengan p = 0,167, lalu tulis di LKPD.</li></ol></div>" +
       "</div>" +
       '<div class="colstack">' +
-      statsHTML(h) +
+      statsHTML(h, null, true) +
       '<div class="panel"><div class="panel-head"><b>p̂ terhadap n</b><span>p = 0,167</span></div>' +
       C.konvergensi(r.rolls, r.aturan, 1 / 6) + "</div>" +
       "</div>" +
-      (h.n >= 100 ? '<div class="toast">✓ <div><b>Misi 3 selesai.</b> |p̂ − p| = ' + dec(Math.abs(h.phat - 1 / 6), 3) +
-        " · tulis grafik &amp; kesimpulan di LKPD bagian C.</div></div>" : "");
+      (penuh ? selesaiCard(3, r) : "");
   }
 
   function arenaM4(r) {
@@ -324,18 +414,23 @@
         (a === 1 ? "6 saja" : a === 2 ? "≥ 5" : "≥ 4") + "</button>";
     }).join("");
     var aktifBaris = baris.filter(function (b) { return b.a === aturanAktif; })[0];
-    return '<div class="tabs">' + tabs + "</div>" +
-      '<div class="panel"><div class="panel-head"><b>Aturan aktif</b><span>p = ' + dec(aktifBaris.p, 3) + "</span></div>" +
-      '<p class="note">Sukses jika dadu menunjukkan ' + (aturanAktif === 1 ? "6" : aturanAktif === 2 ? "5 atau 6" : "4, 5, atau 6") +
-      ". Lempar 60× untuk aturan ini (" + aktifBaris.n + "/60).</p>" +
-      '<div class="btn-row"><button class="btn btn-primary sm" data-act="roll60">Lempar 60× aturan ini</button>' +
+    var aturanPenuh = aktifBaris.n >= 60;
+    var semuaPenuh = baris.every(function (b) { return b.n >= 60; });
+    return instruksiBox(4) +
+      '<div class="tabs">' + tabs + "</div>" +
+      '<div class="panel"><div class="panel-head"><b>Aturan aktif: ' +
+      (aturanAktif === 1 ? "muncul 6" : aturanAktif === 2 ? "muncul 5 atau 6" : "muncul 4, 5, atau 6") +
+      "</b><span>p = " + dec(aktifBaris.p, 3) + " · " + aktifBaris.n + "/60</span></div>" +
+      '<p class="note">' + (aturanPenuh ? "Aturan ini sudah 60 lemparan. Pilih aturan lain di atas, atau ulangi aturan ini."
+        : "Tersisa " + (60 - aktifBaris.n) + " lemparan untuk aturan ini.") + "</p>" +
+      '<div class="btn-row"><button class="btn btn-primary sm" data-act="roll60"' + (aturanPenuh ? " disabled" : "") + ">" +
+      "Lempar 60× · aturan ini</button>" +
       '<button class="btn btn-ghost sm" data-act="rule-reset">Ulangi aturan ini</button></div></div>' +
-      '<div class="panel"><div class="panel-head"><b>Ringkasan tiga aturan</b><span>n = 60 per aturan</span></div>' +
+      '<div class="panel"><div class="panel-head"><b>Ringkasan tiga aturan</b><span>60 lemparan per aturan</span></div>' +
       '<table><thead><tr><th>sukses</th><th class="rt">p</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
       tabel + "</tbody></table>" +
       '<div style="margin-top:10px">' + C.aturanBars(baris.map(function (b) { return { label: b.label, p: b.p }; })) + "</div></div>" +
-      (r.rules[1] && r.rules[1].length >= 60 && r.rules[2] && r.rules[2].length >= 60 && r.rules[3] && r.rules[3].length >= 60
-        ? '<div class="toast">✓ <div><b>Misi 4 selesai.</b> Isi tabel p, E[X], Var(X) di LKPD bagian D.</div></div>' : "");
+      (semuaPenuh ? selesaiCard(4, r) : "");
   }
 
   function arenaM5(r) {
@@ -348,12 +443,13 @@
         '<td><input class="inp num" data-m5="n" data-i="' + i + '" inputmode="numeric" value="' + esc(t.n) + '" placeholder="n" aria-label="n teman ' + (i + 1) + '"></td>' +
         '<td><input class="inp num" data-m5="k" data-i="' + i + '" inputmode="numeric" value="' + esc(t.k) + '" placeholder="k" aria-label="k teman ' + (i + 1) + '"></td></tr>';
     }
-    return '<div class="panel"><div class="panel-head"><b>Data teman</b><span>isi n dan k dari kode laporan mereka</span></div>' +
+    return instruksiBox(5) +
+      '<div class="panel"><div class="panel-head"><b>Data tiga teman</b><span>isi n dan k dari kode laporan Misi 3 mereka</span></div>' +
       '<table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>' + baris + "</tbody></table>" +
-      '<p class="note">Data kamu sendiri: n = ' + m5Data(r).mineN + ", k = " + m5Data(r).mineK + " — ikut dihitung pada gabungan.</p></div>" +
+      '<p class="note">Data kamu sendiri: n = ' + m5Data(r).mineN + ", k = " + m5Data(r).mineK + " — otomatis ikut dihitung.</p></div>" +
       '<div class="stats" id="m5stats">' + m5Stats(r) + "</div>" +
       '<div class="panel" id="m5notes">' + m5Notes(r) + "</div>" +
-      '<div class="toast" id="m5toast"' + (m5Lengkap(r) ? "" : ' hidden') + '>✓ <div><b>Misi 5 selesai.</b> Simpulkan peran n di LKPD bagian E.</div></div>';
+      (m5Lengkap(r) ? selesaiCard(5, r) : '<p class="note center">Isi ketiga baris untuk menyelesaikan misi ini.</p>');
   }
 
   function m5Data(r) {
@@ -424,11 +520,15 @@
       utama = '<button class="btn btn-primary" data-act="home">Selesai · ke Beranda</button>';
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 1) {
-      utama = '<button class="btn btn-primary" data-act="roll1">Lempar dadu</button>';
+      var s1 = S.sisa(state, 1);
+      utama = '<button class="btn btn-primary" data-act="roll1"' + (s1 <= 0 ? " disabled" : "") + ">" +
+        (s1 > 0 ? "Lempar dadu · " + h.n + "/5" : "5 lemparan selesai") + "</button>";
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi misi</button>' +
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 2) {
-      utama = '<button class="btn btn-primary" data-act="roll1">Lempar dadu (' + h.n + "/10)</button>";
+      var s2 = S.sisa(state, 2);
+      utama = '<button class="btn btn-primary" data-act="roll1"' + (s2 <= 0 ? " disabled" : "") + ">" +
+        (s2 > 0 ? "Lempar dadu · " + h.n + "/10" : "10 lemparan selesai") + "</button>";
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi misi</button>' +
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 3) {
@@ -439,10 +539,14 @@
       kedua = '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' +
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 4) {
-      utama = '<button class="btn btn-primary" data-act="roll60">Lempar 60×</button>';
+      var a4 = ui.rule || 1;
+      var s4 = S.sisa(state, 4, a4);
+      var n4 = (r.rules[a4] || []).length;
+      utama = '<button class="btn btn-primary" data-act="roll60"' + (s4 <= 0 ? " disabled" : "") + ">" +
+        (s4 > 0 ? "Lempar 60× · aturan ini (" + n4 + "/60)" : "Aturan ini sudah 60/60") + "</button>";
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     } else {
-      utama = '<button class="btn btn-primary" data-act="home">Selesai · ke Beranda</button>';
+      utama = '<button class="btn btn-primary" data-act="home" disabled>Isi 3 data teman dulu</button>';
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     }
 
@@ -450,7 +554,7 @@
       (kedua ? '<div class="btn-row">' + kedua + "</div>" : "") + "</footer>";
   }
 
-  /* ---------------- PAPAN DATA ---------------- */
+  /* ---------------- PAPAN DATA ---------------- */  /* ---------------- PAPAN DATA ---------------- */
   function renderData(id) {
     var m = S.def(id);
     var r = S.rek(state, id);

@@ -156,11 +156,28 @@
     return false;
   }
 
+  /* batas lemparan per misi: lemparan tidak boleh melebihi target */
+  function batas(id) {
+    var d = def(id);
+    return d ? d.target : 0;
+  }
+  function sisa(s, id, aturan) {
+    var r = rek(s, id);
+    if (id === 4) {
+      var a = aturan || 1;
+      return Math.max(0, 60 - (r.rules[a] || []).length);
+    }
+    if (id === 5) return 0;
+    return Math.max(0, batas(id) - r.rolls.length);
+  }
+
   /* ---------- lempar ---------- */
   function lempar(s, id, jumlah, aturan) {
     var r = rek(s, id);
     var a = aturan || r.aturan || 1;
-    for (var i = 0; i < jumlah; i++) {
+    var boleh = Math.min(jumlah, sisa(s, id, a));
+    if (boleh <= 0) return simpan(s);          /* sudah penuh: tidak menambah apa pun */
+    for (var i = 0; i < boleh; i++) {
       var v = 1 + Math.floor(Math.random() * 6);
       if (id === 4) {
         if (!r.rules[a]) r.rules[a] = [];
@@ -218,6 +235,8 @@
     pAturan: pAturan,
     hitung: hitung,
     misiSelesai: misiSelesai,
+    batas: batas,
+    sisa: sisa,
     sinkron: sinkron,
     aktif: aktif,
     jumlahSelesai: jumlahSelesai,

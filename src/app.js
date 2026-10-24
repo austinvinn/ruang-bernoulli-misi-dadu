@@ -411,10 +411,19 @@
   function footerArena(id) {
     var r = S.rek(state, id);
     var h = S.hitung(r.rolls, r.aturan);
+    var selesai = S.status(state, id) === "selesai";
+    var nextId = id < 5 ? id + 1 : null;
     var utama = "";
     var kedua = "";
 
-    if (id === 1) {
+    if (selesai && nextId) {
+      utama = '<button class="btn btn-primary" data-act="open" data-id="' + nextId + '">Lanjut ke Misi ' + nextId + " &nbsp;→</button>";
+      kedua = '<button class="mini-btn" data-act="data">Papan data</button>' +
+              '<button class="mini-btn" data-act="repeat">Ulangi misi</button>';
+    } else if (selesai) {
+      utama = '<button class="btn btn-primary" data-act="home">Selesai · ke Beranda</button>';
+      kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+    } else if (id === 1) {
       utama = '<button class="btn btn-primary" data-act="roll1">Lempar dadu</button>';
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi misi</button>' +
               '<button class="mini-btn" data-act="data">Papan data</button>';
@@ -424,22 +433,16 @@
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 3) {
       var siap = r.prediksi !== null;
-      if (h.n >= 100) {
-        utama = '<button class="btn btn-primary" data-act="data">Lihat papan data</button>';
-        kedua = '<button class="mini-btn" data-act="repeat">Ulangi misi</button>' +
-                '<button class="mini-btn" data-act="roll100">Tambah 100×</button>';
-      } else {
-        utama = siap
-          ? '<button class="btn btn-primary" data-act="roll100">Lempar 100×</button>'
-          : '<button class="btn btn-primary" data-act="pred-simpan">Kunci tebakan dulu</button>';
-        kedua = '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' +
-                '<button class="mini-btn" data-act="data">Papan data</button>';
-      }
+      utama = siap
+        ? '<button class="btn btn-primary" data-act="roll100">Lempar 100×</button>'
+        : '<button class="btn btn-primary" data-act="pred-simpan">Kunci tebakan dulu</button>';
+      kedua = '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' +
+              '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 4) {
       utama = '<button class="btn btn-primary" data-act="roll60">Lempar 60×</button>';
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     } else {
-      utama = '<button class="btn btn-primary" data-act="home">Selesai</button>';
+      utama = '<button class="btn btn-primary" data-act="home">Selesai · ke Beranda</button>';
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     }
 
@@ -481,7 +484,10 @@
       '<footer class="cta">' +
       '<div class="code-card"><div><div class="lab">Kode laporan</div><div class="code" id="kodeTeks">' + kode + '</div></div>' +
       '<button class="copy" data-act="copy">Salin</button></div>' +
-      '<button class="btn btn-primary" data-act="back" style="margin-top:9px">Kembali ke Arena</button>' +
+      (S.status(state, id) === "selesai" && id < 5
+        ? '<button class="btn btn-primary" data-act="open" data-id="' + (id + 1) + '" style="margin-top:9px">Lanjut ke Misi ' + (id + 1) + " &nbsp;→</button>" +
+          '<div class="btn-row"><button class="mini-btn" data-act="back">Kembali ke Arena</button></div>'
+        : '<button class="btn btn-primary" data-act="back" style="margin-top:9px">Kembali ke Arena</button>') +
       "</footer>" +
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
   }

@@ -10,7 +10,7 @@
   var L = window.Laporan;
 
   var state = S.baca();
-  var ui = { sheet: null, pesan: null, salah: null, m5nama: "" };
+  var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "", m5offer: false };
 
   var $app = document.getElementById("app");
 
@@ -187,9 +187,31 @@
       "</div></div>";
   }
 
+  function sheetPapan() {
+    var id = ui.sheetMisi || 1;
+    var m = S.def(id);
+    return '<div class="overlay" data-act="sheet-close">' +
+      '<div class="sheet papan" data-stop="1">' +
+      '<div class="eyebrow">✓ Misi ' + id + " selesai</div>" +
+      "<h4>Buka Papan Data Misi " + id + "?</h4>" +
+      "<p>Angka, grafik, dan kode laporan untuk <b>LKPD " + m.lkpd +
+      "</b> sudah siap di sana. Kalau mau melihat lemparan terakhir dulu, tetap di halaman ini — tombol <b>Papan data</b> selalu tersedia.</p>" +
+      '<div class="acts">' +
+      '<button class="b1 ok" data-act="papan-buka" data-id="' + id + '">Buka Papan Data</button>' +
+      '<button class="b2" data-act="sheet-close">Tetap di sini</button>' +
+      "</div></div></div>";
+  }
+
+  function tawarkanPapan(id) {
+    ui.sheet = "papan";
+    ui.sheetMisi = id;
+    force();
+  }
+
   function sheetHTML() {
     if (ui.sheet === "reset") return sheetReset();
     if (ui.sheet === "tentang") return sheetTentang();
+    if (ui.sheet === "papan") return sheetPapan();
     return "";
   }
 
@@ -696,6 +718,10 @@
     r.teman[i][field] = val;
     S.sinkron(state);
     S.simpan(state);
+    if (!ui.m5offer && S.status(state, 5) === "selesai") {
+      ui.m5offer = true;
+      setTimeout(function () { tawarkanPapan(5); }, 350);
+    }
   }
 
   document.addEventListener("click", function (e) {
@@ -721,28 +747,29 @@
         S.lempar(state, id, 1);
         var d = document.querySelector(".die");
         if (d) d.classList.add("rolling");
+        setTimeout(force, 260);
         if (S.status(state, id) === "selesai" && st1 !== "selesai") {
-          /* percobaan habis: papan data muncul otomatis */
-          setTimeout(function () { go("#/misi/" + id + "/data"); }, 750);
-        } else {
-          setTimeout(force, 260);
+          /* percobaan habis: tawarkan papan data lewat popup */
+          setTimeout(function () { tawarkanPapan(id); }, 700);
         }
         break;
       }
       case "roll100": {
         var st3 = S.status(state, 3);
         S.lempar(state, 3, 100);
+        force();
         if (S.status(state, 3) === "selesai" && st3 !== "selesai") {
-          setTimeout(function () { go("#/misi/3/data"); }, 750);
-        } else { force(); }
+          setTimeout(function () { tawarkanPapan(3); }, 700);
+        }
         break;
       }
       case "roll60": {
         var st4 = S.status(state, 4);
         S.lempar(state, 4, 60, ui.rule || 1);
+        force();
         if (S.status(state, 4) === "selesai" && st4 !== "selesai") {
-          setTimeout(function () { go("#/misi/4/data"); }, 750);
-        } else { force(); }
+          setTimeout(function () { tawarkanPapan(4); }, 700);
+        }
         break;
       }
       case "pred": {
@@ -792,6 +819,12 @@
       case "import": {
         var f = document.getElementById("fileImpor");
         if (f) f.click();
+        break;
+      }
+      case "papan-buka": {
+        var idp = parseInt(el.getAttribute("data-id"), 10) || 1;
+        ui.sheet = null;
+        go("#/misi/" + idp + "/data");
         break;
       }
       case "reset-open": ui.sheet = "reset"; force(); break;

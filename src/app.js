@@ -570,6 +570,7 @@
 
     return header({ back: true, title: "Papan Data", sub: "Misi " + id + " · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
       '<main class="body wide">' +
+      (S.status(state, id) === "selesai" ? selesaiCard(id, r) : '') +
       '<div class="colstack">' +
       statsHTML(h) +
       '<div class="panel"><div class="panel-head"><b>PMF: teoretis vs empiris</b><span>|p̂ − p| = ' +
@@ -636,14 +637,34 @@
       }
       case "data": go("#/misi/" + id + "/data"); break;
       case "roll1": {
+        var st1 = S.status(state, id);
         S.lempar(state, id, 1);
         var d = document.querySelector(".die");
         if (d) d.classList.add("rolling");
-        setTimeout(force, 260);
+        if (S.status(state, id) === "selesai" && st1 !== "selesai") {
+          /* percobaan habis: papan data muncul otomatis */
+          setTimeout(function () { go("#/misi/" + id + "/data"); }, 750);
+        } else {
+          setTimeout(force, 260);
+        }
         break;
       }
-      case "roll100": S.lempar(state, id, 100); force(); break;
-      case "roll60": S.lempar(state, 4, 60, ui.rule || 1); force(); break;
+      case "roll100": {
+        var st3 = S.status(state, 3);
+        S.lempar(state, 3, 100);
+        if (S.status(state, 3) === "selesai" && st3 !== "selesai") {
+          setTimeout(function () { go("#/misi/3/data"); }, 750);
+        } else { force(); }
+        break;
+      }
+      case "roll60": {
+        var st4 = S.status(state, 4);
+        S.lempar(state, 4, 60, ui.rule || 1);
+        if (S.status(state, 4) === "selesai" && st4 !== "selesai") {
+          setTimeout(function () { go("#/misi/4/data"); }, 750);
+        } else { force(); }
+        break;
+      }
       case "pred": {
         var d2 = parseInt(el.getAttribute("data-d"), 10);
         ui.predTmp = Math.max(0, Math.min(100, (ui.predTmp === undefined ? 17 : ui.predTmp) + d2));

@@ -16,7 +16,7 @@ Satu alat peraga (dadu), lima misi, lima bagian LKPD. Light mode, tanpa backend.
 | Papan Data (PMF, konvergensi, tabel, kode laporan) | ✅ jalan |
 | Alat pengembang `rekap.html` (tempel kode → tabel + CSV) | ✅ jalan |
 | Deploy | ✅ https://misi-dadu.pages.dev |
-| Dokumen serah terima LKPD | ✅ `docs/handover-lkpd.tex` |
+| Dokumen serah terima LKPD | 📄 dipegang terpisah (tidak disimpan di repo ini) |
 
 **Alamat:** aplikasi https://misi-dadu.pages.dev · rekap https://misi-dadu.pages.dev/rekap.html
 · mirror https://austinvinn.github.io/ruang-bernoulli-misi-dadu/

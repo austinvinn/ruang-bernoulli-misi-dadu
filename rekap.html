@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekap Kelas — Misi Dadu</title>
+<style>
+:root{--bg:#0a0c10;--panel:#11151d;--panel2:#151b25;--line:#232936;--text:#f4f6fb;--muted:#a0a9b9;--gold:#fbbf24;--cyan:#22d3ee;--red:#fb7185;--green:#4ade80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;padding:26px 18px 60px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:1.7rem;margin:0 0 6px}
+h2{font-size:1.15rem;margin:0 0 12px}
+.eyebrow{font:11px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+p{margin:0 0 12px;color:#c8d0dc}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.card{background:linear-gradient(145deg,#131923,#10141b);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+textarea,input,select{width:100%;background:#090d13;border:1px solid #303a49;color:var(--text);border-radius:9px;padding:10px;font:inherit}
+textarea{min-height:190px;font:13px/1.7 ui-monospace,Consolas,monospace;resize:vertical}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+button{cursor:pointer;border:1px solid var(--line);background:#171d27;color:var(--text);font:inherit;font-weight:600;padding:10px 14px;border-radius:10px}
+button.primary{background:var(--gold);border-color:var(--gold);color:#12161c}
+button.ghost{background:transparent}
+button:hover{border-color:#52607a}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 14px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#090d13}
+.stat b{display:block;font:600 1.25rem/1.3 ui-monospace,Consolas,monospace}
+.stat span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.verdict{border-radius:10px;padding:12px 14px;font-size:.92rem;border:1px solid var(--line);margin-bottom:14px}
+.verdict.ok{border-color:#4ade8055;background:#4ade800c;color:#bbf7d0}
+.verdict.warn{border-color:#fbbf2455;background:#fbbf240b;color:#fde68a}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;text-align:left;border-bottom:1px solid #1d2431}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.num{font-family:ui-monospace,Consolas,monospace;text-align:right}
+code{font-family:ui-monospace,Consolas,monospace;color:var(--gold);font-size:13px}
+.bad{color:var(--red)}
+svg{display:block;width:100%;height:auto}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:600}
+.tab.active{background:#27303d;color:var(--text)}
+@media(max-width:760px){.grid,.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Pengembang · alat rekap</div>
+  <h1>Rekap Kelas — Misi Dadu</h1>
+  <p>Tempel kode laporan dari LKPD mahasiswa. Semua perhitungan berjalan di browser ini —
+     tidak ada data yang dikirim ke server, jadi halaman ini boleh terbuka tanpa login.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1. Tempel kode</h2>
+      <p class="small muted">Satu baris satu kode. Label nama opsional, dipisah spasi/koma.
+        Contoh: <code>P8S0-48T</code> atau <code>P8S0-48T Rani</code></p>
+      <textarea id="input" placeholder="P8S0-48T Rani&#10;7QK3-2M1 Budi&#10;..."></textarea>
+      <div class="btnrow">
+        <button class="primary" id="btnRekap">Rekap sekarang</button>
+        <button class="ghost" id="btnDemo">Isi 20 kode demo</button>
+        <button class="ghost" id="btnClear">Bersihkan</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>2. Uji / buat kode</h2>
+      <p class="small muted">Untuk verifikasi manual dan pembuatan contoh kode di LKPD.</p>
+      <div class="row">
+        <div><label for="gMisi">Misi</label><select id="gMisi"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+        <div><label for="gAturan">Sisi sukses</label><select id="gAturan"><option value="0">—</option><option value="1" selected>1 (p=1/6)</option><option value="2">2 (p=1/3)</option><option value="3">3 (p=1/2)</option><option value="4">4</option><option value="5">5</option><option value="6">6 (p=1)</option></select></div>
+        <div><label for="gN">n</label><input id="gN" type="number" value="100" min="0" max="1023"></div>
+        <div><label for="gK">k</label><input id="gK" type="number" value="17" min="0" max="1023"></div>
+      </div>
+      <div class="stat" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Kode</span><b id="gOut" style="color:var(--gold)">—</b>
+      </div>
+      <p class="small muted" style="margin-top:10px">Kode memuat: misi, aturan sukses, n, k, dan checksum 8-bit.
+        Salah tulis satu karakter akan ditolak, bukan diterima diam-diam.</p>
+    </div>
+  </div>
+
+  <div class="card" id="hasil" hidden>
+    <h2>Hasil rekap</h2>
+    <div id="verdict"></div>
+    <div class="stats" id="stats"></div>
+    <div id="chart"></div>
+    <div style="overflow:auto;margin-top:16px"><table id="tabel"></table></div>
+    <div class="btnrow">
+      <button class="primary" id="btnCsv">Unduh CSV</button>
+      <button class="ghost" id="btnPrint">Cetak</button>
+    </div>
+  </div>
+
+  <div class="card" id="invalidBox" hidden>
+    <h2 class="bad">Baris yang dilewati</h2>
+    <ul id="invalidList" class="small"></ul>
+  </div>
+</div>
+
+<script src="src/laporan.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+  var last = null;
+
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html !== undefined) e.innerHTML = html;
+    return e;
+  }
+  function fmt(x, d) { return Number(x).toFixed(d === undefined ? 3 : d); }
+
+  /* ---------- generator ---------- */
+  function updateGen() {
+    try {
+      var code = Laporan.encode({
+        misi: +$("#gMisi").value,
+        aturan: +$("#gAturan").value,
+        n: +$("#gN").value,
+        k: +$("#gK").value
+      });
+      $("#gOut").textContent = code;
+    } catch (err) {
+      $("#gOut").textContent = "⚠ " + err.message;
+    }
+  }
+  ["gMisi", "gAturan", "gN", "gK"].forEach(function (id) {
+    $("#" + id).addEventListener("input", updateGen);
+    $("#" + id).addEventListener("change", updateGen);
+  });
+  updateGen();
+
+  /* ---------- demo 20 mahasiswa (misi 3: n=100, p=1/6) ---------- */
+  function demo() {
+    var names = ["Rani","Budi","Sari","Dimas","Ayu","Fajar","Nisa","Bagas","Tika","Rizky",
+                 "Wulan","Yoga","Intan","Arif","Sinta","Galih","Maya","Hendra","Dewi","Raka"];
+    var lines = names.map(function (nm) {
+      var n = 100, k = 0;
+      for (var i = 0; i < n; i++) if (Math.random() < 1 / 6) k++;
+      return Laporan.encode({ misi: 3, aturan: 1, n: n, k: k }) + " " + nm;
+    });
+    $("#input").value = lines.join("\n");
+    rekap();
+  }
+
+  /* ---------- rekap ---------- */
+  function rekap() {
+    var parsed = Laporan.parseMany($("#input").value);
+    var entries = parsed.entries;
+
+    $("#invalidBox").hidden = parsed.invalid.length === 0;
+    $("#invalidList").innerHTML = parsed.invalid
+      .map(function (b) { return "<li>baris " + b.line + ": <code>" + b.raw.replace(/</g, "&lt;") + "</code> — " + b.error + "</li>"; })
+      .join("");
+
+    if (!entries.length) {
+      $("#hasil").hidden = true;
+      return;
+    }
+    $("#hasil").hidden = false;
+
+    var pool = Laporan.pool(entries);
+    last = { entries: entries, pool: pool };
+
+    /* stats */
+    var stat = [
+      ["Peserta", pool.peserta, ""],
+      ["Σn", pool.n, "total lemparan"],
+      ["Σk", pool.k, "total sukses"],
+      ["p̂ gabungan", fmt(pool.phat, 4), "Σk/Σn"],
+      ["p teoretis", pool.p ? fmt(pool.p, 4) : "—", pool.p ? "aturan aktif" : "bervariasi"],
+      ["SE", pool.se ? fmt(pool.se, 4) : "—", "√(p(1−p)/Σn)"]
+    ];
+    $("#stats").innerHTML = stat.map(function (s) {
+      return '<div class="stat"><span>' + s[0] + "</span><b>" + s[1] + '</b><span style="text-transform:none;letter-spacing:0">' + s[2] + "</span></div>";
+    }).join("");
+
+    /* verdict */
+    var v = $("#verdict");
+    if (pool.p && pool.se) {
+      var gap = Math.abs(pool.phat - pool.p);
+      var ok = gap <= 2 * pool.se;
+      v.className = "verdict " + (ok ? "ok" : "warn");
+      v.innerHTML = "<strong>" + (ok ? "Konsisten dengan teori" : "Menyimpang dari teori") + "</strong> — " +
+        "|p̂ gabungan − p| = " + fmt(gap, 4) + " sedangkan 2·SE = " + fmt(2 * pool.se, 4) + ". " +
+        (ok ? "Data kelas masih wajar untuk p = " + fmt(pool.p, 3) + "."
+            : "Periksa kemungkinan salah aturan sukses, salah tulis kode, atau p yang berbeda antar mahasiswa.");
+    } else {
+      v.className = "verdict";
+      v.innerHTML = "Sebagian entri tidak memuat aturan sukses, jadi pembanding p dilewati.";
+    }
+
+    /* tabel */
+    var rows = entries.map(function (e, i) {
+      var gap = e.p ? fmt(Math.abs(e.phat - e.p), 3) : "—";
+      return "<tr><td>" + (i + 1) + "</td><td>" + (e.label || '<span class="muted">—</span>') +
+        "</td><td class=\"num\">" + e.misi + "</td><td class=\"num\">" + (e.aturan || "—") +
+        "</td><td class=\"num\">" + e.n + "</td><td class=\"num\">" + e.k +
+        "</td><td class=\"num\">" + fmt(e.phat, 3) + "</td><td class=\"num\">" + gap +
+        "</td><td><code>" + e.code + "</code></td></tr>";
+    }).join("");
+    $("#tabel").innerHTML =
+      "<thead><tr><th>#</th><th>Nama</th><th>Misi</th><th>Sisi</th><th>n</th><th>k</th><th>p̂</th><th>|p̂−p|</th><th>Kode</th></tr></thead><tbody>" + rows + "</tbody>";
+
+    /* dot plot p̂ */
+    $("#chart").innerHTML = dotPlot(entries, pool);
+  }
+
+  function dotPlot(entries, pool) {
+    var W = 760, H = 210, L = 46, R = 22, T = 22, B = 118;
+    var sorted = entries.slice().sort(function (a, b) { return a.phat - b.phat; });
+    var x = function (v) { return L + v * (W - L - R); };
+    var stacks = [];
+    var dots = sorted.map(function (e) {
+      var slot = stacks.findIndex(function (s) { return Math.abs(s - e.phat) > 0.022; });
+      if (slot === -1) { stacks.push(e.phat); slot = stacks.length - 1; }
+      else { stacks[slot] = e.phat; }
+      var y = B - slot * 13;
+      return '<circle cx="' + x(e.phat).toFixed(1) + '" cy="' + y + '" r="5" fill="#fbbf24" opacity=".9"><title>' +
+        (e.label || e.code) + ": p̂ = " + e.phat.toFixed(3) + " (n=" + e.n + ")</title></circle>";
+    }).join("");
+
+    var ticks = [0, .1, 1/6, .25, .5, .75, 1].map(function (v) {
+      return '<line x1="' + x(v) + '" y1="' + T + '" x2="' + x(v) + '" y2="' + B + '" stroke="#ffffff12"/>' +
+        '<text x="' + x(v) + '" y="' + (B + 18) + '" fill="#9aa5b5" font-size="10" text-anchor="middle">' + v.toFixed(2) + "</text>";
+    }).join("");
+
+    var pLine = pool.p ? '<line x1="' + x(pool.p) + '" y1="14" x2="' + x(pool.p) + '" y2="' + (B + 4) +
+      '" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 5"/>' +
+      '<text x="' + x(pool.p) + '" y="11" fill="#22d3ee" font-size="10" text-anchor="middle">p = ' + pool.p.toFixed(3) + "</text>" : "";
+
+    var pooled = '<line x1="' + x(pool.phat) + '" y1="' + (B + 26) + '" x2="' + x(pool.phat) + '" y2="' + (B + 40) +
+      '" stroke="#4ade80" stroke-width="2"/><text x="' + x(pool.phat) + '" y="' + (B + 54) +
+      '" fill="#4ade80" font-size="10" text-anchor="middle">p̂ gabungan ' + pool.phat.toFixed(3) + "</text>";
+
+    return '<p class="small muted" style="margin:0 0 6px">Sebaran p̂ antar mahasiswa — sampel kecil tersebar, data digabung menyempit ke p.</p>' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Sebaran p̂ antar mahasiswa">' +
+      ticks + pLine + dots + pooled +
+      '<line x1="' + L + '" y1="' + B + '" x2="' + (W - R) + '" y2="' + B + '" stroke="#7c8798"/></svg>';
+  }
+
+  /* ---------- ekspor ---------- */
+  function csv() {
+    if (!last) return;
+    var head = "nama,misi,sisi_sukses,n,k,phat,p_teoretis,kode\n";
+    var body = last.entries.map(function (e) {
+      return [e.label || "", e.misi, e.aturan, e.n, e.k, e.phat.toFixed(6), e.p ? e.p.toFixed(6) : "", e.code].join(",");
+    }).join("\n");
+    var blob = new Blob([head + body], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "rekap-misi-dadu.csv";
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  $("#btnRekap").addEventListener("click", rekap);
+  $("#btnDemo").addEventListener("click", demo);
+  $("#btnClear").addEventListener("click", function () {
+    $("#input").value = ""; $("#hasil").hidden = true; $("#invalidBox").hidden = true;
+  });
+  $("#btnCsv").addEventListener("click", csv);
+  $("#btnPrint").addEventListener("click", function () { window.print(); });
+})();
+</script>
+</body>
+</html>

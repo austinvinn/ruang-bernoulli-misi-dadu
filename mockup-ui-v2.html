@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruang Bernoulli: Misi Dadu — Konsep UI v2 (hijau kalem)</title>
+<style>
+/* =========================================================
+   PALETTE v2 — "sage / hutan kalem"
+   Prinsip: saturasi rendah, kontras teks tinggi, satu aksen hijau tua.
+   Status TIDAK dibedakan lewat warna saja (bentuk+ikon juga), karena
+   aksen dan "sukses" sama-sama hijau.
+   ========================================================= */
+:root{
+  --paper:#f6f7f2;        /* kanvas luar */
+  --bg:#ffffff;
+  --ink:#1b211c;
+  --ink-2:#3d4a40;
+  --muted:#6b7568;
+  --line:#e3e6dc;
+  --line-2:#cfd5c7;
+  --accent:#3f6c51;       /* sage tua — aksi utama (kontras 6,0:1) */
+  --accent-2:#315742;
+  --accent-soft:#eef3ec;
+  --accent-line:#c9dccb;
+  --ochre:#8a5e15;        /* prediksi (satu-satunya warna hangat) */
+  --ochre-soft:#fbf3e2;
+  --ochre-line:#ead9b6;
+  --ok:#2e7d53;
+  --ok-soft:#e9f5ee;
+  --ok-line:#bfe3cd;
+  --bad:#a6403a;
+  --bad-soft:#fbeceb;
+  --r-lg:20px; --r:16px; --r-sm:12px;
+  --sh:0 1px 2px rgba(27,33,28,.05),0 4px 12px rgba(27,33,28,.05);
+  --sh-pop:0 10px 28px rgba(27,33,28,.10),0 2px 6px rgba(27,33,28,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;padding:34px 26px 70px;background:radial-gradient(1100px 520px at 12% -8%,#eaf1e6 0%,transparent 62%),var(--paper);color:var(--ink);font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.doc{max-width:1290px;margin:0 auto 24px}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px}
+.doc h1{font-size:1.48rem;margin:0 0 8px;letter-spacing:-.02em}
+.doc p{margin:0;color:var(--muted);font-size:13.5px;max-width:860px;line-height:1.6}
+.tokens{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tokens span{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:11.5px;color:var(--ink-2);box-shadow:var(--sh)}
+.sw{width:11px;height:11px;border-radius:3px}
+.stage{display:flex;gap:30px;justify-content:center;align-items:flex-start;flex-wrap:wrap;max-width:1290px;margin:0 auto}
+figure{margin:0;width:390px}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:30px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 50px rgba(27,33,28,.12),0 2px 8px rgba(27,33,28,.05);display:flex;flex-direction:column;position:relative}
+figcaption{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.55}
+figcaption b{color:var(--ink-2);display:block;font-size:13px;margin-bottom:3px}
+
+/* --- komponen --- */
+.topbar{display:flex;align-items:center;gap:10px;padding:16px 20px 10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#4c7d5e,#315742);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;box-shadow:0 4px 10px rgba(63,108,81,.28);flex:0 0 auto}
+.brand-name{font-weight:700;font-size:14px;letter-spacing:-.01em;line-height:1.15}
+.brand-sub{font-size:10.5px;color:var(--muted)}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:#2c5340;border:1px solid var(--accent-line);border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:650;white-space:nowrap}
+.back{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink-2);font-size:15px;flex:0 0 auto}
+.eyebrow{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.body{padding:0 20px;display:flex;flex-direction:column;gap:13px;flex:1;overflow:hidden}
+h2.title{font-size:1.55rem;line-height:1.2;letter-spacing:-.025em;margin:2px 0 0}
+.sub{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+.seg{display:flex;gap:6px}
+.seg i{height:6px;border-radius:99px;background:#e7eae1;flex:1}
+.seg i.on{background:var(--accent)}
+.seg i.cur{background:linear-gradient(90deg,var(--accent) 50%,#e7eae1 50%)}
+.mission{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;box-shadow:var(--sh)}
+.mission.active{border-color:var(--accent-line);background:linear-gradient(180deg,#fbfdf9,#f5f9f3);box-shadow:var(--sh-pop)}
+.mission.locked{background:#fafbf7;border-style:dashed;color:var(--muted)}
+.m-num{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:12.5px;background:#eff1ea;color:var(--ink-2);flex:0 0 auto}
+.mission.active .m-num{background:var(--accent);color:#fff}
+.mission.done .m-num{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.m-txt{min-width:0;flex:1}
+.m-title{font-weight:660;font-size:13.4px;letter-spacing:-.01em;line-height:1.25}
+.m-note{font-size:11.2px;color:var(--muted);margin-top:2px}
+.m-go{color:var(--accent);font-weight:700}
+.cta-wrap{margin-top:auto;padding:14px 20px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 40%)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:14px;font-weight:700;font-size:14.5px;border:1px solid transparent;letter-spacing:-.01em}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 18px rgba(63,108,81,.24)}
+.btn-ghost{background:#fff;border-color:var(--line-2);color:var(--ink-2)}
+.btn-row{display:flex;gap:9px}
+.btn-row .btn{flex:1;height:44px;font-size:13px}
+.linkrow{display:flex;gap:16px;justify-content:center;margin-top:11px;font-size:12px;font-weight:650}
+.linkrow a{color:var(--muted);text-decoration:none}
+.linkrow a.warn{color:var(--bad)}
+.devicenote{display:flex;gap:7px;justify-content:center;align-items:center;font-size:11px;color:var(--muted);margin-top:9px}
+.dot-ok{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+/* dadu */
+.die-stage{display:flex;align-items:center;justify-content:center;padding:6px 0 2px;position:relative}
+.die-stage:before{content:"";position:absolute;width:184px;height:184px;border-radius:50%;background:radial-gradient(circle,#eaf2e6 0%,#f6f9f3 58%,transparent 74%)}
+.die{width:116px;height:116px;border-radius:25px;background:#fff;border:2px solid #dfe4d8;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:15px;gap:3px;box-shadow:0 16px 34px rgba(27,33,28,.15),0 3px 8px rgba(27,33,28,.06);transform:rotate(-7deg);position:relative;z-index:1}
+.die i{width:13px;height:13px;border-radius:50%;background:#23302a;align-self:center;justify-self:center}
+.die i.off{background:transparent}
+.predict{background:var(--ochre-soft);border:1px solid var(--ochre-line);border-radius:var(--r);padding:12px 13px}
+.predict .q{font-size:12.4px;color:#6f4a10;font-weight:650;line-height:1.45}
+.stepper{display:flex;align-items:center;gap:9px;margin-top:9px}
+.stepper button{width:32px;height:32px;border-radius:9px;border:1px solid var(--ochre-line);background:#fff;color:#6f4a10;font-weight:800;font-size:15px}
+.stepper .val{flex:1;text-align:center;background:#fff;border:1px solid var(--ochre-line);border-radius:9px;height:32px;display:grid;place-items:center;font-weight:750;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;box-shadow:var(--sh)}
+.stat span{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat b{display:block;font-size:1.12rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.stat.accent{background:var(--accent-soft);border-color:var(--accent-line)}
+.stat.accent b{color:#2c5340}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px;box-shadow:var(--sh)}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px}
+.panel-head b{font-size:12.4px;letter-spacing:-.01em}
+.panel-head span{font-size:10.5px;color:var(--muted)}
+svg{display:block;width:100%;height:auto}
+.axis{stroke:#cfd5c7;stroke-width:1}
+.grid-line{stroke:#eef0e9;stroke-width:1}
+.tick{fill:#8d978a;font-size:9px}
+.val{fill:#3d4a40;font-size:9.5px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:11.3px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:5px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px 6px;border-bottom:1px solid #f4f6f0;color:var(--ink-2)}
+td.n{text-align:right}
+.code-card{display:flex;align-items:center;gap:10px;background:#fbfcf8;border:1px dashed var(--accent-line);border-radius:var(--r-sm);padding:10px 12px}
+.code-card .lab{font-size:10.5px;color:var(--muted);line-height:1.3}
+.code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;font-weight:700;letter-spacing:.06em;color:#2c5340}
+.copy{margin-left:auto;font-size:11px;font-weight:700;color:var(--accent)}
+.mini-btn{height:38px;border-radius:11px;border:1px solid var(--line-2);background:#fff;color:var(--ink-2);font-size:12px;font-weight:650;display:grid;place-items:center;flex:1}
+.toast{display:flex;gap:8px;align-items:flex-start;background:var(--ok-soft);border:1px solid var(--ok-line);border-radius:var(--r-sm);padding:9px 11px;font-size:11.5px;color:#245f40;line-height:1.45}
+.tabs{display:flex;gap:4px;background:#f0f2ea;border-radius:11px;padding:4px}
+.tabs div{flex:1;text-align:center;font-size:11px;font-weight:650;padding:6px 0;border-radius:8px;color:var(--muted)}
+
+/* --- desktop frame --- */
+.desk-wrap{max-width:1290px;margin:40px auto 0}
+.desk{width:1180px;max-width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(27,33,28,.10);overflow:hidden}
+.dbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:#fcfdfa}
+.dbar .crumb{font-size:12px;color:var(--muted)}
+.dbar .crumb b{color:var(--ink);font-weight:650}
+.dbar .grow{flex:1}
+.dbar .prog{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted)}
+.dbar .prog .seg{width:120px}
+.desk-body{display:grid;grid-template-columns:1.02fr 1fr;gap:18px;padding:20px 22px 24px}
+.desk-left,.desk-right{display:flex;flex-direction:column;gap:13px}
+.desk h3{font-size:1.1rem;margin:0;letter-spacing:-.02em}
+.desk .hint{font-size:11.5px;color:var(--muted);margin:0}
+
+/* --- legenda aturan --- */
+.rules{max-width:1290px;margin:38px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rule{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.rule h4{margin:0 0 8px;font-size:13px;letter-spacing:-.01em}
+.rule p{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.55}
+.rule ol,.rule ul{margin:0;padding-left:18px;font-size:12px;color:var(--ink-2);line-height:1.7}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--sh-pop);width:300px}
+.sheet h5{margin:0 0 4px;font-size:12.5px}
+.sheet p{margin:0 0 10px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.sheet .acts{display:flex;gap:7px}
+.sheet .b1{flex:1;height:34px;border-radius:9px;background:var(--bad);color:#fff;font-size:11.5px;font-weight:700;display:grid;place-items:center}
+.sheet .b2{flex:1;height:34px;border-radius:9px;border:1px solid var(--line-2);background:#fff;font-size:11.5px;font-weight:700;display:grid;place-items:center;color:var(--ink-2)}
+@media(max-width:900px){.rules{grid-template-columns:1fr}.desk{width:100%}}
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <div class="kicker">Ruang Bernoulli: Misi Dadu · konsep UI v2</div>
+  <h1>Hijau sage yang kalem, progres tanpa login, dan layout yang melebar di laptop</h1>
+  <p>Warna aksen diganti dari indigo ke hijau sage tua (<b>#3f6c51</b>, kontras 6:1 di atas putih).
+     Saturasi rendah supaya tidak menyilaukan di proyektor dan tidak terasa "aplikasi keuangan".
+     Kartu misi dipadatkan agar reset &amp; pulihkan progres punya tempat di beranda.</p>
+  <div class="tokens">
+    <span><i class="sw" style="background:#1b211c"></i>ink #1b211c</span>
+    <span><i class="sw" style="background:#3f6c51"></i>accent #3f6c51</span>
+    <span><i class="sw" style="background:#eef3ec"></i>accent-soft #eef3ec</span>
+    <span><i class="sw" style="background:#8a5e15"></i>prediksi #8a5e15</span>
+    <span><i class="sw" style="background:#2e7d53"></i>selesai #2e7d53</span>
+    <span><i class="sw" style="background:#a6403a"></i>hapus #a6403a</span>
+    <span><i class="sw" style="background:#f6f7f2"></i>kanvas #f6f7f2</span>
+  </div>
+</header>
+
+<div class="stage">
+
+  <!-- ============ LAYAR 1: BERANDA (sudah pernah mulai) ============ -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="brand">
+          <div class="mark">⚄</div>
+          <div>
+            <div class="brand-name">Ruang Bernoulli</div>
+            <div class="brand-sub">Misi Dadu</div>
+          </div>
+        </div>
+        <div class="chip">2 / 5 selesai</div>
+      </div>
+
+      <div class="body">
+        <div>
+          <div class="eyebrow">Distribusi Bernoulli</div>
+          <h2 class="title">Lanjutkan dari<br>Misi 3</h2>
+          <p class="sub" style="margin-top:6px">Kamu sudah menyelesaikan 2 misi. Sisa 3 misi, sekitar 15 menit.</p>
+        </div>
+
+        <div class="seg"><i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i></div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="mission done">
+            <div class="m-num">✓</div>
+            <div class="m-txt"><div class="m-title">Variabel indikator</div><div class="m-note">5 lemparan</div></div>
+          </div>
+          <div class="mission done">
+            <div class="m-num">✓</div>
+            <div class="m-txt"><div class="m-title">Frekuensi &amp; proporsi</div><div class="m-note">10 lemparan</div></div>
+          </div>
+          <div class="mission active">
+            <div class="m-num">3</div>
+            <div class="m-txt"><div class="m-title">Konvergensi &amp; LLN</div><div class="m-note">100 lemparan · belum dimulai</div></div>
+            <div class="m-go">›</div>
+          </div>
+          <div class="mission locked">
+            <div class="m-num">4</div>
+            <div class="m-txt"><div class="m-title">Parameter p &amp; MLE</div><div class="m-note">3 × 60 lemparan</div></div>
+          </div>
+        </div>
+
+        <div class="panel" style="background:#fbfcf8;border-color:var(--accent-line);padding:11px 13px">
+          <div class="eyebrow" style="color:#2c5340;font-size:9px">Target misi ini</div>
+          <div style="font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:4px">
+            LKPD bagian C — tabel 100 lemparan, grafik p̂ terhadap n, satu paragraf mengapa p̂ → p.
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="btn btn-primary">Lanjutkan Misi 3 &nbsp;→</div>
+        <div class="linkrow">
+          <a href="#">↻ Mulai ulang</a>
+          <a href="#">⇩ Pulihkan dari kode</a>
+        </div>
+        <div class="devicenote"><i class="dot-ok"></i> Progres tersimpan di perangkat ini</div>
+      </div>
+    </div>
+    <figcaption><b>Layar 1 — Beranda (sudah mulai)</b>Judul berubah dari "Mulai" menjadi "Lanjutkan dari Misi 3". Dua aksi sekunder (reset, pulihkan) dibuat teks kecil supaya tidak bersaing dengan tombol utama.</figcaption>
+  </figure>
+
+  <!-- ============ LAYAR 2: ARENA ============ -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="back">←</div>
+        <div style="min-width:0">
+          <div class="eyebrow" style="font-size:9px">Misi 3 · Arena</div>
+          <div style="font-weight:700;font-size:13px;letter-spacing:-.01em">Konvergensi &amp; LLN</div>
+        </div>
+        <div class="chip" style="background:#fff;color:var(--ink-2);border-color:var(--line)">n = 100</div>
+      </div>
+
+      <div class="body">
+        <div class="die-stage">
+          <div class="die" role="img" aria-label="Dadu menunjukkan 6">
+            <i></i><i class="off"></i><i></i>
+            <i></i><i class="off"></i><i></i>
+            <i></i><i class="off"></i><i></i>
+          </div>
+        </div>
+
+        <div class="predict">
+          <div class="q">Tebak dulu: berapa kali angka 6 muncul dari 100 lemparan?</div>
+          <div class="stepper">
+            <button aria-label="kurangi">−</button>
+            <div class="val">17</div>
+            <button aria-label="tambah">+</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>n</span><b>100</b></div>
+          <div class="stat"><span>k</span><b>17</b></div>
+          <div class="stat accent"><span>p̂</span><b>0,170</b></div>
+        </div>
+
+        <div class="panel" style="padding:11px">
+          <div class="panel-head"><b>p̂ terhadap n</b><span>p = 0,167</span></div>
+          <svg viewBox="0 0 300 92" role="img" aria-label="Grafik konvergensi">
+            <line x1="18" y1="10" x2="18" y2="74" class="axis"/>
+            <line x1="18" y1="74" x2="292" y2="74" class="axis"/>
+            <line x1="18" y1="26" x2="292" y2="26" stroke="#c9dccb" stroke-width="1.4" stroke-dasharray="5 4"/>
+            <text x="22" y="22" class="tick">p = 0,167</text>
+            <polyline points="18,44 55,30 95,56 135,34 175,42 215,30 255,36 292,30" fill="none" stroke="#3f6c51" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="292" cy="30" r="3.2" fill="#3f6c51"/>
+            <text x="18" y="88" class="tick">1</text><text x="155" y="88" class="tick" text-anchor="middle">50</text><text x="292" y="88" class="tick" text-anchor="end">100</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="btn btn-primary">Lempar 100×</div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="mini-btn">Lempar 1×</button>
+          <button class="mini-btn">Reset</button>
+        </div>
+      </div>
+    </div>
+    <figcaption><b>Layar 2 — Arena</b>Panah kembali hanya satu: keluar misi ke Beranda. Progres misi otomatis tersimpan, jadi keluar di tengah jalan tidak menghapus lemparan.</figcaption>
+  </figure>
+
+  <!-- ============ LAYAR 3: PAPAN DATA ============ -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="back">←</div>
+        <div style="font-weight:700;font-size:13.5px;letter-spacing:-.01em">Papan Data</div>
+        <div class="chip" style="background:var(--ok-soft);color:#245f40;border-color:var(--ok-line)">✓ Misi 3</div>
+      </div>
+
+      <div class="body">
+        <div class="tabs"><div style="background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(27,33,28,.08)">Ringkasan</div><div>Tabel</div><div>Grafik</div></div>
+
+        <div class="stats">
+          <div class="stat"><span>Σn</span><b>100</b></div>
+          <div class="stat"><span>Σk</span><b>17</b></div>
+          <div class="stat accent"><span>p̂ = k/n</span><b>0,170</b></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><b>PMF: teoretis vs empiris</b><span>|p̂ − p| = 0,003</span></div>
+          <svg viewBox="0 0 300 100" role="img" aria-label="Batang PMF">
+            <line x1="26" y1="78" x2="288" y2="78" class="axis"/>
+            <line x1="26" y1="14" x2="26" y2="78" class="axis"/>
+            <line x1="26" y1="46" x2="288" y2="46" class="grid-line"/>
+            <line x1="26" y1="22" x2="288" y2="22" class="grid-line"/>
+            <rect x="66" y="34" width="30" height="44" rx="5" fill="#3f6c51"/>
+            <rect x="100" y="35" width="30" height="43" rx="5" fill="#c9dccb"/>
+            <text x="81" y="29" text-anchor="middle" class="val">0,83</text>
+            <text x="115" y="29" text-anchor="middle" class="val">0,83</text>
+            <rect x="196" y="69" width="30" height="9" rx="4" fill="#3f6c51"/>
+            <rect x="230" y="68" width="30" height="10" rx="4" fill="#c9dccb"/>
+            <text x="211" y="64" text-anchor="middle" class="val">0,17</text>
+            <text x="245" y="64" text-anchor="middle" class="val">0,17</text>
+            <text x="98" y="92" text-anchor="middle" class="tick">X = 0</text>
+            <text x="228" y="92" text-anchor="middle" class="tick">X = 1</text>
+          </svg>
+        </div>
+
+        <div class="panel" style="padding:11px 12px">
+          <div class="panel-head"><b>5 lemparan terakhir</b><span>dari 100</span></div>
+          <table>
+            <thead><tr><th>i</th><th>Dadu</th><th style="text-align:right">X</th><th style="text-align:right">k</th><th style="text-align:right">p̂</th></tr></thead>
+            <tbody>
+              <tr><td>96</td><td>3</td><td class="n">0</td><td class="n">17</td><td class="n">0,177</td></tr>
+              <tr><td>97</td><td>6</td><td class="n">1</td><td class="n">18</td><td class="n">0,186</td></tr>
+              <tr><td>98</td><td>4</td><td class="n">0</td><td class="n">18</td><td class="n">0,184</td></tr>
+              <tr><td>99</td><td>6</td><td class="n">1</td><td class="n">19</td><td class="n">0,192</td></tr>
+              <tr><td>100</td><td>2</td><td class="n">0</td><td class="n">19</td><td class="n">0,190</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="toast"><span>✓</span><div><b>LKPD bagian C:</b> |p̂ − p| = 0,023 ≤ 2·SE = 0,075 → hasil wajar.</div></div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="code-card">
+          <div><div class="lab">Kode laporan</div><div class="code">P8S0-48T</div></div>
+          <div class="copy">Salin</div>
+        </div>
+        <div class="btn btn-primary" style="margin-top:9px">Selesai &amp; lanjut Misi 4 &nbsp;→</div>
+      </div>
+    </div>
+    <figcaption><b>Layar 3 — Papan Data</b>Status misi di kanan atas memakai ikon ✓ + teks, bukan hanya warna hijau, supaya tetap terbaca oleh buta warna.</figcaption>
+  </figure>
+</div>
+
+<!-- ============ DESKTOP ============ -->
+<div class="desk-wrap">
+  <figure style="width:100%">
+    <div class="desk">
+      <div class="dbar">
+        <div class="brand">
+          <div class="mark">⚄</div>
+          <div><div class="brand-name">Ruang Bernoulli: Misi Dadu</div><div class="brand-sub">Distribusi Bernoulli</div></div>
+        </div>
+        <div class="crumb">Misi 3 · <b>Arena</b></div>
+        <div class="grow"></div>
+        <div class="prog"><div class="seg"><i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i></div> 2/5</div>
+        <div class="btn btn-ghost" style="height:36px;padding:0 14px;font-size:12.5px">Peta Misi</div>
+      </div>
+
+      <div class="desk-body">
+        <div class="desk-left">
+          <div>
+            <div class="eyebrow">Misi 3 · n = 100 · p = 1/6</div>
+            <h3 style="margin-top:4px">Berapa kali angka 6 muncul?</h3>
+          </div>
+          <div class="panel" style="display:grid;grid-template-columns:190px 1fr;gap:16px;align-items:center">
+            <div class="die-stage" style="padding:0">
+              <div class="die" role="img" aria-label="Dadu menunjukkan 6">
+                <i></i><i class="off"></i><i></i>
+                <i></i><i class="off"></i><i></i>
+                <i></i><i class="off"></i><i></i>
+              </div>
+            </div>
+            <div>
+              <div class="predict" style="margin:0">
+                <div class="q">Tebak dulu: berapa kali angka 6 muncul dari 100 lemparan?</div>
+                <div class="stepper">
+                  <button>−</button><div class="val">17</div><button>+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="btn btn-primary">Lempar 100×</div>
+          <div class="btn-row">
+            <button class="mini-btn">Lempar 1×</button>
+            <button class="mini-btn">Ulangi misi</button>
+            <button class="mini-btn">Salin kode</button>
+          </div>
+          <p class="hint">Animasi penuh hanya untuk lempar manual. Batch 100 dijalankan cepat lalu grafik digambar sekali.</p>
+        </div>
+
+        <div class="desk-right">
+          <div class="stats">
+            <div class="stat"><span>n</span><b>100</b></div>
+            <div class="stat"><span>k</span><b>17</b></div>
+            <div class="stat accent"><span>p̂</span><b>0,170</b></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><b>p̂ terhadap n</b><span>p = 0,167</span></div>
+            <svg viewBox="0 0 320 100" role="img" aria-label="Grafik konvergensi">
+              <line x1="20" y1="10" x2="20" y2="80" class="axis"/>
+              <line x1="20" y1="80" x2="312" y2="80" class="axis"/>
+              <line x1="20" y1="28" x2="312" y2="28" stroke="#c9dccb" stroke-width="1.4" stroke-dasharray="5 4"/>
+              <text x="24" y="24" class="tick">p = 0,167</text>
+              <polyline points="20,48 62,32 104,60 146,36 188,44 230,30 272,38 312,30" fill="none" stroke="#3f6c51" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="312" cy="30" r="3.2" fill="#3f6c51"/>
+            </svg>
+          </div>
+          <div class="panel" style="padding:12px">
+            <div class="panel-head"><b>5 lemparan terakhir</b><span>dari 100</span></div>
+            <table>
+              <thead><tr><th>i</th><th>Dadu</th><th style="text-align:right">X</th><th style="text-align:right">k</th><th style="text-align:right">p̂</th></tr></thead>
+              <tbody>
+                <tr><td>96</td><td>3</td><td class="n">0</td><td class="n">17</td><td class="n">0,177</td></tr>
+                <tr><td>97</td><td>6</td><td class="n">1</td><td class="n">18</td><td class="n">0,186</td></tr>
+                <tr><td>98</td><td>4</td><td class="n">0</td><td class="n">18</td><td class="n">0,184</td></tr>
+                <tr><td>99</td><td>6</td><td class="n">1</td><td class="n">19</td><td class="n">0,192</td></tr>
+                <tr><td>100</td><td>2</td><td class="n">0</td><td class="n">19</td><td class="n">0,190</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-card">
+            <div><div class="lab">Kode laporan</div><div class="code">P8S0-48T</div></div>
+            <div class="copy">Salin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption style="max-width:900px"><b>Layar lebar (≥ 1024 px) — dua kolom</b>Kiri: instrumen (dadu + prediksi + aksi). Kanan: data (statistik, grafik, tabel, kode laporan). Lebar maksimum 1180 px supaya tidak melebar di monitor besar; di 768–1023 px kembali satu kolom dengan lebar maksimum 720 px.</figcaption>
+  </figure>
+</div>
+
+<!-- ============ LEGENDA ATURAN ============ -->
+<div class="rules">
+  <div class="rule">
+    <h4>Navigasi: satu panah, satu tujuan</h4>
+    <p>Brilliant memakai panah kembali eksplisit, bukan mengandalkan tombol back browser.</p>
+    <ul>
+      <li><b>Arena / Papan Data</b> → panah kiri = kembali ke Beranda</li>
+      <li><b>Beranda</b> → tidak ada panah; logo tidak bisa diklik</li>
+      <li>URL ber-hash <code>#/misi/3</code> supaya tombol back HP tetap wajar</li>
+      <li>Progres tersimpan otomatis: keluar kapan pun tidak menghapus data</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h4>Progres: tanpa login</h4>
+    <p>Tidak ada akun, tidak ada email-OTP. Progres = <code>localStorage</code> per perangkat.</p>
+    <ul>
+      <li>Setiap misi punya status: terkunci / tersedia / berjalan / selesai</li>
+      <li>Misi berikutnya terbuka setelah misi sebelumnya selesai</li>
+      <li>Pindah HP: tombol <b>Pulihkan dari kode</b> / berkas JSON kecil (± 2 KB)</li>
+      <li>Email hanya dipakai sebagai label di laporan, bukan autentikasi</li>
+    </ul>
+  </div>
+
+  <div class="rule">
+    <h4>Mulai ulang: dua langkah, bukan <code>alert()</code></h4>
+    <p>Reset hanya muncul di Beranda, dan hanya kalau sudah ada progres.</p>
+    <div class="sheet">
+      <h5>Mulai ulang dari awal?</h5>
+      <p>Semua lemparan &amp; progres 5 misi di perangkat ini akan dihapus. Kode laporan yang sudah kamu tulis tidak terpengaruh.</p>
+      <div class="acts"><div class="b1">Ya, hapus</div><div class="b2">Batal</div></div>
+    </div>
+    <p style="margin-top:10px">Pilihan kedua (di dalam sheet): <b>hapus termasuk nama/email</b>, untuk perangkat yang dipakai bergantian.</p>
+  </div>
+</div>
+
+</body>
+</html>

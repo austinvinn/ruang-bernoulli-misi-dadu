@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruang Bernoulli: Misi Dadu — Mockup UI (light)</title>
+<style>
+/* =========================================================
+   DESIGN TOKENS — light mode, bergaya Brilliant
+   Kanvas putih, tipografi tebal, kartu chunky, satu aksen indigo,
+   status pakai hijau/merah lembut. Tanpa bayangan gelap berat.
+   ========================================================= */
+:root{
+  --bg:#ffffff;
+  --canvas:#f4f5f7;
+  --ink:#101828;          /* teks utama */
+  --ink-2:#344054;        /* teks sekunder */
+  --muted:#667085;
+  --line:#e4e7ec;
+  --line-strong:#d0d5dd;
+  --accent:#4f46e5;       /* indigo: aksi utama */
+  --accent-ink:#ffffff;
+  --accent-soft:#eef2ff;
+  --accent-line:#c7d2fe;
+  --success:#12b76a;
+  --success-soft:#ecfdf3;
+  --danger:#f04438;
+  --danger-soft:#fef3f2;
+  --warn:#f79009;
+  --warn-soft:#fffaeb;
+  --radius-lg:20px;
+  --radius:16px;
+  --radius-sm:12px;
+  --shadow-card:0 1px 2px rgba(16,24,40,.04),0 4px 12px rgba(16,24,40,.05);
+  --shadow-pop:0 8px 24px rgba(16,24,40,.10),0 2px 6px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:34px 26px 60px;
+  background:
+    radial-gradient(1200px 500px at 15% -10%, #eef2ff 0%, transparent 60%),
+    radial-gradient(900px 420px at 95% 0%, #ecfdf3 0%, transparent 55%),
+    var(--canvas);
+  color:var(--ink);
+  font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.doc-head{max-width:1290px;margin:0 auto 26px}
+.doc-kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px}
+.doc-head h1{font-size:1.5rem;margin:0 0 8px;letter-spacing:-.02em}
+.doc-head p{margin:0;color:var(--muted);font-size:14px;max-width:820px}
+.tokens{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tokens span{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:11.5px;color:var(--ink-2);box-shadow:var(--shadow-card)}
+.sw{width:11px;height:11px;border-radius:3px}
+
+.stage{display:flex;gap:34px;justify-content:center;align-items:flex-start;flex-wrap:wrap;max-width:1290px;margin:0 auto}
+figure{margin:0;width:390px}
+.phone{
+  width:390px;height:844px;background:var(--bg);border-radius:30px;overflow:hidden;
+  border:1px solid var(--line);box-shadow:0 18px 50px rgba(16,24,40,.12),0 2px 8px rgba(16,24,40,.05);
+  display:flex;flex-direction:column;position:relative;
+}
+figcaption{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.55}
+figcaption b{color:var(--ink-2);display:block;font-size:13px;margin-bottom:3px}
+
+/* ---------- komponen bersama ---------- */
+.topbar{display:flex;align-items:center;gap:10px;padding:16px 20px 10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand-mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#6366f1,#4338ca);display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;box-shadow:0 4px 10px rgba(79,70,229,.30);flex:0 0 auto}
+.brand-name{font-weight:700;font-size:14px;letter-spacing:-.01em;line-height:1.15}
+.brand-sub{font-size:10.5px;color:var(--muted);letter-spacing:.03em}
+.chip{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:#3730a3;border:1px solid var(--accent-line);border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:650;white-space:nowrap}
+.back{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink-2);font-size:15px}
+.eyebrow{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.body{padding:0 20px;display:flex;flex-direction:column;gap:14px;flex:1;overflow:hidden}
+h2.title{font-size:1.62rem;line-height:1.18;letter-spacing:-.025em;margin:2px 0 0}
+.sub{font-size:13.2px;line-height:1.55;color:var(--muted);margin:0}
+
+/* progress 5 misi */
+.seg{display:flex;gap:6px}
+.seg i{height:6px;border-radius:99px;background:#e9eaee;flex:1}
+.seg i.on{background:var(--accent)}
+.seg i.cur{background:linear-gradient(90deg,var(--accent) 55%,#e9eaee 55%)}
+
+/* kartu misi */
+.mission{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow-card)}
+.mission.active{border-color:var(--accent-line);background:linear-gradient(180deg,#fbfbff,#f7f7ff);box-shadow:var(--shadow-pop)}
+.mission.locked{background:#fbfbfc;border-style:dashed;color:var(--muted)}
+.m-num{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:13.5px;background:#f2f4f7;color:var(--ink-2);flex:0 0 auto}
+.mission.active .m-num{background:var(--accent);color:#fff;box-shadow:0 4px 10px rgba(79,70,229,.28)}
+.mission.done .m-num{background:var(--success-soft);color:#027a48}
+.m-txt{min-width:0;flex:1}
+.m-title{font-weight:680;font-size:13.8px;letter-spacing:-.01em;line-height:1.25}
+.m-note{font-size:11.5px;color:var(--muted);margin-top:2px}
+.m-go{font-size:16px;color:var(--accent);font-weight:700}
+
+/* CTA bawah */
+.cta-wrap{margin-top:auto;padding:14px 20px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 38%)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:14px;font-weight:700;font-size:14.5px;border:1px solid transparent;letter-spacing:-.01em}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 20px rgba(79,70,229,.28)}
+.btn-ghost{background:#fff;border-color:var(--line-strong);color:var(--ink)}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+.hintline{text-align:center;font-size:11.5px;color:var(--muted);margin-top:10px}
+
+/* dadu */
+.die-stage{display:flex;align-items:center;justify-content:center;padding:8px 0 4px;position:relative}
+.die-stage:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#eef2ff 0%,#f7f8ff 55%,transparent 72%)}
+.die{width:118px;height:118px;border-radius:26px;background:#fff;border:2px solid #e3e6ec;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:15px;gap:3px;box-shadow:0 16px 34px rgba(16,24,40,.14),0 3px 8px rgba(16,24,40,.07);transform:rotate(-7deg);position:relative;z-index:1}
+.die i{width:14px;height:14px;border-radius:50%;background:var(--ink);align-self:center;justify-self:center}
+.die i.off{background:transparent}
+
+/* kartu prediksi */
+.predict{background:var(--warn-soft);border:1px solid #fedf89;border-radius:var(--radius);padding:13px 14px}
+.predict .q{font-size:12.8px;color:#93370d;font-weight:650;line-height:1.4}
+.stepper{display:flex;align-items:center;gap:10px;margin-top:10px}
+.stepper button{width:34px;height:34px;border-radius:10px;border:1px solid #fedf89;background:#fff;color:#93370d;font-weight:800;font-size:16px}
+.stepper .val{flex:1;text-align:center;background:#fff;border:1px solid #fedf89;border-radius:10px;height:34px;display:grid;place-items:center;font-weight:750;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* stat chips */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 11px;box-shadow:var(--shadow-card)}
+.stat span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat b{display:block;font-size:1.16rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.stat.accent{background:var(--accent-soft);border-color:var(--accent-line)}
+.stat.accent b{color:#3730a3}
+
+/* panel & grafik */
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow-card)}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.panel-head b{font-size:12.8px;letter-spacing:-.01em}
+.panel-head span{font-size:11px;color:var(--muted)}
+svg{display:block;width:100%;height:auto}
+.grid-line{stroke:#eef0f4;stroke-width:1}
+.axis{stroke:#d0d5dd;stroke-width:1}
+.tick{fill:#98a2b3;font-size:9px}
+.val{fill:#344054;font-size:9.5px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* tabel */
+table{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:7px 6px;border-bottom:1px solid #f2f4f7;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td.n{text-align:right}
+.badge-ok{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--success-soft);color:#027a48;font-size:10px;font-weight:800}
+
+/* kode laporan */
+.code-card{display:flex;align-items:center;gap:10px;background:#fbfbff;border:1px dashed var(--accent-line);border-radius:var(--radius-sm);padding:11px 13px}
+.code-card .lab{font-size:11px;color:var(--muted);line-height:1.3}
+.code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;font-weight:700;letter-spacing:.06em;color:#3730a3}
+.copy{margin-left:auto;font-size:11px;font-weight:700;color:var(--accent)}
+.mini-btn{height:38px;border-radius:11px;border:1px solid var(--line-strong);background:#fff;color:var(--ink-2);font-size:12px;font-weight:650;display:grid;place-items:center;flex:1}
+
+/* toast sukses */
+.toast{display:flex;gap:9px;align-items:flex-start;background:var(--success-soft);border:1px solid #a6f4c5;border-radius:var(--radius-sm);padding:10px 12px;font-size:11.8px;color:#027a48;line-height:1.45}
+.toast b{color:#05603a}
+.tabs{display:flex;gap:4px;background:#f2f4f7;border-radius:12px;padding:4px}
+.tabs div{flex:1;text-align:center;font-size:11.5px;font-weight:650;padding:7px 0;border-radius:9px;color:var(--muted)}
+.tabs div.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.10)}
+@media print{body{background:#fff}}
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <div class="doc-kicker">Ruang Bernoulli: Misi Dadu · mockup UI</div>
+  <h1>Light mode, bergaya Brilliant — 3 layar</h1>
+  <p>Kanvas putih, tipografi tebal, kartu chunky bersudut 16–20px, satu aksen indigo untuk aksi
+     utama, hijau/merah lembut hanya untuk status. Tidak ada menu, tidak ada sidebar: satu jalur
+     misi, satu tombol besar di bawah layar.</p>
+  <div class="tokens">
+    <span><i class="sw" style="background:#101828"></i>ink #101828</span>
+    <span><i class="sw" style="background:#4f46e5"></i>accent #4f46e5</span>
+    <span><i class="sw" style="background:#eef2ff"></i>accent-soft #eef2ff</span>
+    <span><i class="sw" style="background:#12b76a"></i>success #12b76a</span>
+    <span><i class="sw" style="background:#f79009"></i>warn #f79009</span>
+    <span><i class="sw" style="background:#e4e7ec"></i>line #e4e7ec</span>
+    <span>radius 16–20 px</span>
+    <span>tinggi tombol 52 px</span>
+  </div>
+</header>
+
+<div class="stage">
+
+  <!-- ================= LAYAR 1 : PETA MISI ================= -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">⚄</div>
+          <div>
+            <div class="brand-name">Ruang Bernoulli</div>
+            <div class="brand-sub">Misi Dadu</div>
+          </div>
+        </div>
+        <div class="chip">2 / 5 misi</div>
+      </div>
+
+      <div class="body">
+        <div>
+          <div class="eyebrow">Eksperimen Bernoulli</div>
+          <h2 class="title">Berapa kali angka 6<br>muncul dari 100 lemparan?</h2>
+          <p class="sub" style="margin-top:8px">Tebak dulu, lempar, lalu buktikan. Hasilnya kamu tulis di LKPD.</p>
+        </div>
+
+        <div class="seg" aria-label="progres misi">
+          <i class="on"></i><i class="on"></i><i class="cur"></i><i></i><i></i>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div class="mission done">
+            <div class="m-num">✓</div>
+            <div class="m-txt">
+              <div class="m-title">Konstruksi variabel indikator</div>
+              <div class="m-note">5 lemparan · selesai</div>
+            </div>
+          </div>
+          <div class="mission done">
+            <div class="m-num">✓</div>
+            <div class="m-txt">
+              <div class="m-title">Frekuensi &amp; proporsi</div>
+              <div class="m-note">10 lemparan · selesai</div>
+            </div>
+          </div>
+          <div class="mission active">
+            <div class="m-num">3</div>
+            <div class="m-txt">
+              <div class="m-title">Konvergensi &amp; LLN</div>
+              <div class="m-note">100 lemparan · sedang berjalan</div>
+            </div>
+            <div class="m-go">›</div>
+          </div>
+          <div class="mission locked">
+            <div class="m-num">4</div>
+            <div class="m-txt">
+              <div class="m-title">Parameter p &amp; aturan sukses</div>
+              <div class="m-note">3 × 60 lemparan</div>
+            </div>
+            <div style="font-size:13px">🔒</div>
+          </div>
+          <div class="mission locked">
+            <div class="m-num">5</div>
+            <div class="m-txt">
+              <div class="m-title">Estimasi gabungan &amp; MLE</div>
+              <div class="m-note">data 3 teman</div>
+            </div>
+            <div style="font-size:13px">🔒</div>
+          </div>
+        </div>
+
+        <div class="panel" style="background:#fbfbff;border-color:var(--accent-line);padding:12px 13px">
+          <div class="eyebrow" style="color:#3730a3;font-size:9.5px">Target pertemuan ini</div>
+          <div style="font-size:12.4px;color:var(--ink-2);line-height:1.5;margin-top:5px">
+            LKPD bagian C — tabel 100 lemparan, grafik p̂ terhadap n, dan satu paragraf
+            mengapa p̂ mendekati p.
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="btn btn-primary">Lanjutkan Misi 3 &nbsp;→</div>
+        <div class="hintline">p = 1/6 ≈ 0,167 · dadu adil, 6 sisi</div>
+      </div>
+    </div>
+    <figcaption><b>Layar 1 — Peta Misi</b>Pengganti 15 halaman draft lama. Status misi terbaca sekali lihat; misi terkunci pakai garis putus-putus, bukan ikon gembok besar.</figcaption>
+  </figure>
+
+  <!-- ================= LAYAR 2 : ARENA DADU ================= -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="back">←</div>
+        <div style="min-width:0">
+          <div class="eyebrow" style="font-size:9.5px">Misi 3 dari 5</div>
+          <div style="font-weight:700;font-size:13px;letter-spacing:-.01em">Konvergensi &amp; LLN</div>
+        </div>
+        <div class="chip" style="background:#fff;color:var(--ink-2);border-color:var(--line)">n = 100</div>
+      </div>
+
+      <div class="body">
+        <div class="die-stage">
+          <div class="die" role="img" aria-label="Dadu menunjukkan 6">
+            <i></i><i class="off"></i><i></i>
+            <i></i><i class="off"></i><i></i>
+            <i></i><i class="off"></i><i></i>
+          </div>
+        </div>
+
+        <div class="predict">
+          <div class="q">Sebelum melempar: kira-kira berapa kali angka 6 muncul dari 100 lemparan?</div>
+          <div class="stepper">
+            <button aria-label="kurangi">−</button>
+            <div class="val">17</div>
+            <button aria-label="tambah">+</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>n</span><b>100</b></div>
+          <div class="stat"><span>k</span><b>17</b></div>
+          <div class="stat accent"><span>p̂</span><b>0,170</b></div>
+        </div>
+
+        <div class="panel" style="padding:12px">
+          <div class="panel-head"><b>p̂ terhadap n</b><span>p = 0,167</span></div>
+          <svg viewBox="0 0 300 96" role="img" aria-label="Grafik konvergensi p̂">
+            <line x1="18" y1="10" x2="18" y2="78" class="axis"/>
+            <line x1="18" y1="78" x2="292" y2="78" class="axis"/>
+            <line x1="18" y1="26" x2="292" y2="26" stroke="#c7d2fe" stroke-width="1.4" stroke-dasharray="5 4"/>
+            <text x="22" y="22" class="tick">p = 0,167</text>
+            <polyline points="18,44 55,30 95,58 135,34 175,42 215,30 255,36 292,30"
+                      fill="none" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="292" cy="30" r="3.4" fill="#4f46e5"/>
+            <text x="18" y="91" class="tick">1</text>
+            <text x="155" y="91" class="tick" text-anchor="middle">50</text>
+            <text x="292" y="91" class="tick" text-anchor="end">100</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="btn btn-primary">Lempar 100× &nbsp;🎲</div>
+        <div class="btn-row" style="margin-top:9px">
+          <button class="mini-btn">Lempar 1×</button>
+          <button class="mini-btn">Reset</button>
+        </div>
+      </div>
+    </div>
+    <figcaption><b>Layar 2 — Arena Dadu</b>Dadu besar di tengah, kartu prediksi kuning di atas statistik, dan satu tombol utama. Prediksi wajib diisi sebelum tombol besar aktif (gate ringan).</figcaption>
+  </figure>
+
+  <!-- ================= LAYAR 3 : PAPAN DATA ================= -->
+  <figure>
+    <div class="phone">
+      <div class="topbar">
+        <div class="back">←</div>
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:13.5px;letter-spacing:-.01em">Papan Data</div>
+        </div>
+        <div class="chip" style="background:var(--success-soft);color:#027a48;border-color:#a6f4c5">Misi 3 selesai</div>
+      </div>
+
+      <div class="body">
+        <div class="tabs">
+          <div class="on">Ringkasan</div>
+          <div>Tabel</div>
+          <div>Grafik</div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>Σn</span><b>100</b></div>
+          <div class="stat"><span>Σk</span><b>17</b></div>
+          <div class="stat accent"><span>p̂ = k/n</span><b>0,170</b></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><b>PMF: teoretis vs empiris</b><span>|p̂ − p| = 0,003</span></div>
+          <svg viewBox="0 0 300 104" role="img" aria-label="Batang PMF teoretis dan empiris">
+            <line x1="26" y1="82" x2="288" y2="82" class="axis"/>
+            <line x1="26" y1="14" x2="26" y2="82" class="axis"/>
+            <line x1="26" y1="49" x2="288" y2="49" class="grid-line"/>
+            <line x1="26" y1="23" x2="288" y2="23" class="grid-line"/>
+            <rect x="66" y="34" width="30" height="48" rx="5" fill="#4f46e5"/>
+            <rect x="100" y="35" width="30" height="47" rx="5" fill="#c7d2fe"/>
+            <text x="81" y="29" text-anchor="middle" class="val">0,83</text>
+            <text x="115" y="29" text-anchor="middle" class="val">0,83</text>
+            <rect x="196" y="72" width="30" height="10" rx="5" fill="#4f46e5"/>
+            <rect x="230" y="71" width="30" height="11" rx="5" fill="#c7d2fe"/>
+            <text x="211" y="67" text-anchor="middle" class="val">0,17</text>
+            <text x="245" y="67" text-anchor="middle" class="val">0,17</text>
+            <text x="98" y="96" text-anchor="middle" class="tick">X = 0</text>
+            <text x="228" y="96" text-anchor="middle" class="tick">X = 1</text>
+            <rect x="30" y="4" width="9" height="9" rx="2" fill="#4f46e5"/>
+            <text x="44" y="12" class="tick">teoretis</text>
+            <rect x="96" y="4" width="9" height="9" rx="2" fill="#c7d2fe"/>
+            <text x="110" y="12" class="tick">empiris</text>
+          </svg>
+        </div>
+
+        <div class="panel" style="padding:12px 13px">
+          <div class="panel-head"><b>10 lemparan terakhir</b><span>dari 100</span></div>
+          <table>
+            <thead><tr><th>i</th><th>Dadu</th><th style="text-align:right">X</th><th style="text-align:right">k</th><th style="text-align:right">p̂</th></tr></thead>
+            <tbody>
+              <tr><td>91</td><td>2</td><td class="n">0</td><td class="n">16</td><td class="n">0,176</td></tr>
+              <tr><td>92</td><td>6</td><td class="n">1</td><td class="n">17</td><td class="n">0,185</td></tr>
+              <tr><td>93</td><td>4</td><td class="n">0</td><td class="n">17</td><td class="n">0,183</td></tr>
+              <tr><td>94</td><td>1</td><td class="n">0</td><td class="n">17</td><td class="n">0,181</td></tr>
+              <tr><td>95</td><td>6</td><td class="n">1</td><td class="n">18</td><td class="n">0,189</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="toast">
+          <span>✓</span>
+          <div><b>Tulis di LKPD bagian C:</b> |p̂ − p| = 0,003 ≤ 2·SE = 0,075, jadi hasil ini wajar.</div>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="code-card">
+          <div>
+            <div class="lab">Kode laporan</div>
+            <div class="code">P8S0-48T</div>
+          </div>
+          <div class="copy">Salin</div>
+        </div>
+        <div class="btn btn-primary" style="margin-top:10px">Lanjut ke Misi 4 &nbsp;→</div>
+      </div>
+    </div>
+    <figcaption><b>Layar 3 — Papan Data</b>Rumus tidak dijelaskan ulang di sini; yang muncul cuma instruksi "tulis di LKPD bagian C". Kode laporan selalu terlihat, bukan disembunyikan di menu.</figcaption>
+  </figure>
+
+</div>
+</body>
+</html>

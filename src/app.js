@@ -590,6 +590,7 @@
     return header({ back: true, title: "Papan Data", sub: "Misi " + id + " · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
       '<main class="body wide">' +
       (S.status(state, id) === "selesai" ? selesaiCard(id, r) : "") +
+      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> salin angka dari panel di halaman ini ke tabel LKPD, lalu salin <b>kode laporan</b> dari kotak di bagian bawah ke kotak kode.</div></div>" +
       '<div class="colstack">' +
       statsHTML(h) +
       '<div class="panel"><div class="panel-head"><b>PMF: teoretis vs empiris</b><span>|p̂ − p| = ' +
@@ -603,7 +604,6 @@
       (rows ? '<table><thead><tr><th>i</th><th>dadu</th><th class="rt">X</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' + rows + "</tbody></table>"
         : '<p class="note">Belum ada lemparan.</p>') + "</div>" +
       "</div>" +
-      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> salin angka di atas, lalu tulis kode laporan di kotak yang tersedia.</div></div>" +
       "</main>" +
       '<footer class="cta">' +
       '<div class="code-card"><div><div class="lab">Kode laporan</div><div class="code" id="kodeTeks">' + kodeUntuk(id) + "</div></div>" +
@@ -630,6 +630,7 @@
     return header({ back: true, title: "Papan Data", sub: "Misi 4 · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
       '<main class="body wide">' +
       (S.status(state, 4) === "selesai" ? selesaiCard(4, r) : "") +
+      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> isi tabel p, E[X], Var(X) dan turunkan MLE, lalu salin <b>kode laporan</b> dari kotak di bagian bawah.</div></div>" +
       '<div class="colstack">' +
       '<div class="panel"><div class="panel-head"><b>Tiga aturan sukses</b><span>60 lemparan per aturan</span></div>' +
       '<table><thead><tr><th>aturan</th><th class="rt">p = E[X]</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
@@ -646,7 +647,6 @@
       }).join("") + "</tbody></table>" +
       '<p class="note">Ragam terbesar ada pada p = 0,5 (aturan ≥ 4), karena hasil paling tidak pasti.</p></div>' +
       "</div>" +
-      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> isi tabel p, E[X], Var(X), lalu tulis penurunan MLE.</div></div>" +
       "</main>" +
       '<footer class="cta">' +
       '<div class="code-card"><div><div class="lab">Kode laporan (aturan 6 saja)</div><div class="code" id="kodeTeks">' + kodeUntuk(4) + "</div></div>" +
@@ -670,6 +670,7 @@
     return header({ back: true, title: "Papan Data", sub: "Misi 5 · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
       '<main class="body wide">' +
       (S.status(state, 5) === "selesai" ? selesaiCard(5, r) : "") +
+      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> tulis tabel data kelas, Σk/Σn, lalu kesimpulan tiga poin.</div></div>" +
       '<div class="colstack">' +
       '<div class="stats">' + m5Stats(r) + "</div>" +
       '<div class="panel" id="m5notes">' + m5Notes(r) + "</div>" +
@@ -681,7 +682,6 @@
       '</td><td class="n">' + (d.mineN ? dec(d.mineK / d.mineN, 3) : "—") + "</td></tr>" +
       baris + "</tbody></table></div>" +
       "</div>" +
-      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> tulis tabel data kelas, Σk/Σn, lalu kesimpulan tiga poin.</div></div>" +
       "</main>" +
       '<footer class="cta">' +
       '<button class="btn btn-primary" data-act="' + (S.status(state, 5) === "selesai" ? "home" : "back") + '">' +

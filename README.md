@@ -7,7 +7,7 @@ Satu alat peraga (dadu), lima misi, lima bagian LKPD. Light mode, tanpa backend.
 
 | Bagian | Status |
 |---|---|
-| Beranda (peta 5 misi, lanjutkan, reset, unduh/pulihkan progres) | ✅ jalan |
+| Beranda (identitas opsional, peta 5 misi, lanjutkan, reset, unduh/pulihkan progres) | ✅ jalan |
 | Misi 1 — variabel indikator (5 lemparan) | ✅ jalan |
 | Misi 2 — frekuensi & proporsi (10 lemparan + tabel p̂) | ✅ jalan |
 | Misi 3 — konvergensi & LLN (tebak dulu → 100 lemparan + grafik) | ✅ jalan |
@@ -15,6 +15,11 @@ Satu alat peraga (dadu), lima misi, lima bagian LKPD. Light mode, tanpa backend.
 | Misi 5 — estimasi gabungan (Σk/Σn vs rata-rata p̂ + SE) | ✅ jalan |
 | Papan Data (PMF, konvergensi, tabel, kode laporan) | ✅ jalan |
 | Alat pengembang `rekap.html` (tempel kode → tabel + CSV) | ✅ jalan |
+| Deploy | ✅ https://misi-dadu.pages.dev |
+| Dokumen serah terima LKPD | ✅ `docs/handover-lkpd.tex` |
+
+**Alamat:** aplikasi https://misi-dadu.pages.dev · rekap https://misi-dadu.pages.dev/rekap.html
+· mirror https://austinvinn.github.io/ruang-bernoulli-misi-dadu/
 
 ## Cara menjalankan
 

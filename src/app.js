@@ -124,6 +124,13 @@
       "<div>LKPD " + esc(S.def(aktif).lkpd) + " — " + esc(S.def(aktif).sub) +
       ". Tulis hasilnya di kertas, lalu kembali ke sini.</div></div>";
 
+    var kredit = '<div class="kredit">' +
+      '<div class="eyebrow">Tim pengembang · Kelompok 9</div>' +
+      '<div class="kredit-judul">Statistika Matematika 2026</div>' +
+      '<div class="kredit-sub">Pendidikan Matematika · FKIP · Universitas Sriwijaya</div>' +
+      '<button class="link kredit-link" data-act="tentang">Lihat kredit lengkap →</button>' +
+      "</div>";
+
     var ident = '<div class="panel" id="identCard"><div class="panel-head"><b>Identitas laporan</b><span>opsional</span></div>' +
       '<div class="idrow">' +
       '<input class="inp" data-ident="nama" value="' + esc(state.peserta.nama) + '" placeholder="Nama" aria-label="Nama untuk laporan">' +
@@ -141,6 +148,7 @@
       ident +
       '<div class="mlist">' + list + "</div>" +
       target +
+      kredit +
       (ui.pesan ? '<div class="toast">✓ <div>' + ui.pesan + "</div></div>" : "") +
       "</main>" +
       '<footer class="cta">' +
@@ -153,8 +161,44 @@
       "</div>" +
       '<div class="devicenote"><i class="dot-ok"></i> Progres tersimpan di perangkat ini</div>' +
       "</footer>" +
-      (ui.sheet === "reset" ? sheetReset() : "") +
+      sheetHTML() +
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
+  }
+
+  var TIM = [
+    ["Ahmad As Siddiq", "06081282429062"],
+    ["Annisa Putri S.", "06081282429036"],
+    ["Fathia Aiva", "06081382429083"],
+    ["Sherin Az Zahra", "06081382429085"]
+  ];
+
+  function sheetTentang() {
+    var tim = TIM.map(function (t, i) {
+      return '<li><span class="nm">' + esc(t[0]) + '</span><span class="nim">' + esc(t[1]) + "</span></li>";
+    }).join("");
+    return '<div class="overlay" data-act="sheet-close">' +
+      '<div class="sheet tentang" data-stop="1">' +
+      '<div class="eyebrow">Tentang media</div>' +
+      '<h4>Ruang Bernoulli: Misi Dadu</h4>' +
+      '<p>Media pembelajaran interaktif Distribusi Bernoulli untuk mahasiswa statistika matematika. ' +
+      "Satu percobaan (dadu), lima misi, lima bagian LKPD. Berjalan tanpa server dan tanpa akun.</p>" +
+      '<div class="divider"></div>' +
+      '<div class="eyebrow">Tim pengembang · Kelompok 9</div>' +
+      '<ol class="tim">' + tim + "</ol>" +
+      '<div class="inst">' +
+      "PROGRAM STUDI PENDIDIKAN MATEMATIKA<br>" +
+      "FAKULTAS KEGURUAN DAN ILMU PENDIDIKAN<br>" +
+      "UNIVERSITAS SRIWIJAYA<br>" +
+      '<span class="tahun">2026</span>' +
+      "</div>" +
+      '<button class="b2" data-act="sheet-close" style="margin-top:12px;width:100%">Tutup</button>' +
+      "</div></div>";
+  }
+
+  function sheetHTML() {
+    if (ui.sheet === "reset") return sheetReset();
+    if (ui.sheet === "tentang") return sheetTentang();
+    return "";
   }
 
   function sheetReset() {
@@ -200,7 +244,7 @@
     }) +
       '<main class="body ' + (id === 3 ? "wide" : "") + '">' + isi + "</main>" +
       footerArena(id) +
-      (ui.sheet === "reset" ? sheetReset() : "") +
+      sheetHTML() +
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
   }
 
@@ -546,6 +590,7 @@
         break;
       }
       case "reset-open": ui.sheet = "reset"; force(); break;
+      case "tentang": ui.sheet = "tentang"; force(); break;
       case "reset-confirm": state = S.resetProgres(); ui.sheet = null; ui.pesan = "Progres dihapus. Mulai lagi dari Misi 1."; go("#/"); break;
       case "reset-all": state = S.resetSemua(); ui.sheet = null; ui.pesan = "Semua data dihapus dari perangkat ini."; go("#/"); break;
       case "sheet-close": ui.sheet = null; force(); break;

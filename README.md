@@ -3,6 +3,14 @@
 Media pembelajaran **Distribusi Bernoulli** untuk mahasiswa statistika matematika.
 Satu alat peraga (dadu), lima misi, lima bagian LKPD. Light mode, tanpa backend.
 
+**Tim pengembang — Kelompok 9, Statistika Matematika 2026**
+1. Ahmad As Siddiq (06081282429062)
+2. Annisa Putri S. (06081282429036)
+3. Fathia Aiva (06081382429083)
+4. Sherin Az Zahra (06081382429085)
+
+Program Studi Pendidikan Matematika · Fakultas Keguruan dan Ilmu Pendidikan · Universitas Sriwijaya
+
 ## Status
 
 | Bagian | Status |

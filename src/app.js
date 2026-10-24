@@ -83,7 +83,9 @@
       left +
       '<div class="brand">' +
       '<div><div class="brand-name">' + (opts.title || "Ruang Bernoulli") + "</div>" +
-      '<div class="brand-sub">' + (opts.sub || "Misi Dadu") + "</div></div>" +
+      '<div class="brand-sub"><span>' + (opts.sub || "Misi Dadu") + "</span>" +
+      '<button class="whoami" data-act="tentang" aria-label="Kredit tim pengembang">Tim Pengembang</button>' +
+      "</div></div>" +
       "</div>" +
       (opts.right || "") +
       "</header>";
@@ -124,12 +126,6 @@
       "<div>LKPD " + esc(S.def(aktif).lkpd) + " — " + esc(S.def(aktif).sub) +
       ". Tulis hasilnya di kertas, lalu kembali ke sini.</div></div>";
 
-    var kredit = '<button class="creditbar" data-act="tentang" aria-label="Kredit tim pengembang">' +
-      '<span class="cb-line"><b>Tim Pengembang: Kelompok 9 Statistika Matematika 2026</b></span>' +
-      '<span class="cb-line">Ahmad As Siddiq · Annisa Putri S. · Fathia Aiva · Sherin Az Zahra</span>' +
-      '<span class="cb-line cb-inst">Program Studi Pendidikan Matematika · FKIP · Universitas Sriwijaya</span>' +
-      "</button>";
-
     var ident = '<div class="panel" id="identCard"><div class="panel-head"><b>Identitas laporan</b><span>opsional</span></div>' +
       '<div class="idrow">' +
       '<input class="inp" data-ident="nama" value="' + esc(state.peserta.nama) + '" placeholder="Nama" aria-label="Nama untuk laporan">' +
@@ -142,11 +138,10 @@
       right: chip(selesai + " / 5 selesai")
     }) +
       '<main class="body">' +
-      kredit +
-      target +
       '<div class="hero"><div class="eyebrow">Distribusi Bernoulli</div>' + judul + sub + "</div>" +
       segbar() +
       ident +
+      target +
       '<div class="mlist">' + list + "</div>" +
       (ui.pesan ? '<div class="toast">✓ <div>' + ui.pesan + "</div></div>" : "") +
       "</main>" +

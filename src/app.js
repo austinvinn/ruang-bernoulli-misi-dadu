@@ -554,23 +554,20 @@
       (kedua ? '<div class="btn-row">' + kedua + "</div>" : "") + "</footer>";
   }
 
-  /* ---------------- PAPAN DATA ---------------- */  /* ---------------- PAPAN DATA ---------------- */
-  function renderData(id) {
-    var m = S.def(id);
-    var r = S.rek(state, id);
-    var h = id === 4 ? S.hitung(r.rules[1] || [], 1) : S.hitung(r.rolls, r.aturan);
-    var p = id === 4 ? 1 / 6 : S.pAturan(r.aturan);
-    var rows = r.rolls.slice(-8).reverse().map(function (v, i) {
-      var idx = r.rolls.length - i;
+  /* ---------------- PAPAN DATA ---------------- */
+  function dataUmum(id, m, r) {
+    var h = S.hitung(r.rolls, r.aturan);
+    var p = S.pAturan(r.aturan);
+    var rows = r.rolls.slice(-8).reverse().map(function (v, k) {
+      var idx = r.rolls.length - k;
       var kk = S.hitung(r.rolls.slice(0, idx), r.aturan);
       return "<tr><td>" + idx + "</td><td>" + v + "</td><td class=\"n\">" + (S.sukses(v, r.aturan) ? 1 : 0) +
         "</td><td class=\"n\">" + kk.k + "</td><td class=\"n\">" + dec(kk.phat, 3) + "</td></tr>";
     }).join("");
-    var kode = kodeUntuk(id);
 
     return header({ back: true, title: "Papan Data", sub: "Misi " + id + " · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
       '<main class="body wide">' +
-      (S.status(state, id) === "selesai" ? selesaiCard(id, r) : '') +
+      (S.status(state, id) === "selesai" ? selesaiCard(id, r) : "") +
       '<div class="colstack">' +
       statsHTML(h) +
       '<div class="panel"><div class="panel-head"><b>PMF: teoretis vs empiris</b><span>|p̂ − p| = ' +
@@ -587,7 +584,7 @@
       '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> salin angka di atas, lalu tulis kode laporan di kotak yang tersedia.</div></div>" +
       "</main>" +
       '<footer class="cta">' +
-      '<div class="code-card"><div><div class="lab">Kode laporan</div><div class="code" id="kodeTeks">' + kode + '</div></div>' +
+      '<div class="code-card"><div><div class="lab">Kode laporan</div><div class="code" id="kodeTeks">' + kodeUntuk(id) + "</div></div>" +
       '<button class="copy" data-act="copy">Salin</button></div>' +
       (S.status(state, id) === "selesai" && id < 5
         ? '<button class="btn btn-primary" data-act="open" data-id="' + (id + 1) + '" style="margin-top:9px">Lanjut ke Misi ' + (id + 1) + " &nbsp;→</button>" +
@@ -595,6 +592,89 @@
         : '<button class="btn btn-primary" data-act="back" style="margin-top:9px">Kembali ke Arena</button>') +
       "</footer>" +
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
+  }
+
+  /* Misi 4: tiga aturan sekaligus, bukan satu deret lemparan */
+  function dataM4(m, r) {
+    var baris = [1, 2, 3].map(function (a) {
+      var h = S.hitung(r.rules[a] || [], a);
+      return "<tr><td>" + (a === 1 ? "6 saja" : a === 2 ? "≥ 5" : "≥ 4") + '</td><td class="n">' + dec(a / 6, 3) +
+        '</td><td class="n">' + h.n + '</td><td class="n">' + h.k +
+        '</td><td class="n">' + (h.n ? dec(h.phat, 3) : "—") + "</td></tr>";
+    }).join("");
+    var bars = [1, 2, 3].map(function (a) {
+      return { label: a === 1 ? "6" : a === 2 ? "5–6" : "4–6", p: a / 6 };
+    });
+    return header({ back: true, title: "Papan Data", sub: "Misi 4 · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
+      '<main class="body wide">' +
+      (S.status(state, 4) === "selesai" ? selesaiCard(4, r) : "") +
+      '<div class="colstack">' +
+      '<div class="panel"><div class="panel-head"><b>Tiga aturan sukses</b><span>60 lemparan per aturan</span></div>' +
+      '<table><thead><tr><th>aturan</th><th class="rt">p = E[X]</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
+      baris + "</tbody></table></div>" +
+      '<div class="panel"><div class="panel-head"><b>Peluang tiap aturan</b><span>p = |A|/6</span></div>' +
+      C.aturanBars(bars) + "</div>" +
+      "</div>" +
+      '<div class="colstack">' +
+      '<div class="panel"><div class="panel-head"><b>Ragam teoretis</b><span>Var(X) = p(1 − p)</span></div>' +
+      '<table><thead><tr><th>aturan</th><th class="rt">p(1−p)</th></tr></thead><tbody>' +
+      [1, 2, 3].map(function (a) {
+        var p = a / 6;
+        return "<tr><td>" + (a === 1 ? "6 saja" : a === 2 ? "≥ 5" : "≥ 4") + '</td><td class="n">' + dec(p * (1 - p), 3) + "</td></tr>";
+      }).join("") + "</tbody></table>" +
+      '<p class="note">Ragam terbesar ada pada p = 0,5 (aturan ≥ 4), karena hasil paling tidak pasti.</p></div>' +
+      "</div>" +
+      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> isi tabel p, E[X], Var(X), lalu tulis penurunan MLE.</div></div>" +
+      "</main>" +
+      '<footer class="cta">' +
+      '<div class="code-card"><div><div class="lab">Kode laporan (aturan 6 saja)</div><div class="code" id="kodeTeks">' + kodeUntuk(4) + "</div></div>" +
+      '<button class="copy" data-act="copy">Salin</button></div>' +
+      (S.status(state, 4) === "selesai"
+        ? '<button class="btn btn-primary" data-act="open" data-id="5" style="margin-top:9px">Lanjut ke Misi 5 &nbsp;→</button>' +
+          '<div class="btn-row"><button class="mini-btn" data-act="back">Kembali ke Arena</button></div>'
+        : '<button class="btn btn-primary" data-act="back" style="margin-top:9px">Kembali ke Arena</button>') +
+      "</footer>" +
+      '<input type="file" id="fileImpor" accept="application/json" hidden>';
+  }
+
+  /* Misi 5: bukan percobaan baru, jadi yang ditampilkan data gabungan */
+  function dataM5(m, r) {
+    var d = m5Data(r);
+    var baris = (r.teman || []).map(function (t, i) {
+      var n = Number(t.n), k = Number(t.k);
+      return "<tr><td>" + (i + 1) + "</td><td>" + esc(t.nama || "—") + '</td><td class="n">' + (t.n || "—") +
+        '</td><td class="n">' + (t.k || "—") + '</td><td class="n">' + (n > 0 ? dec(k / n, 3) : "—") + "</td></tr>";
+    }).join("");
+    return header({ back: true, title: "Papan Data", sub: "Misi 5 · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
+      '<main class="body wide">' +
+      (S.status(state, 5) === "selesai" ? selesaiCard(5, r) : "") +
+      '<div class="colstack">' +
+      '<div class="stats">' + m5Stats(r) + "</div>" +
+      '<div class="panel" id="m5notes">' + m5Notes(r) + "</div>" +
+      "</div>" +
+      '<div class="colstack">' +
+      '<div class="panel"><div class="panel-head"><b>Data yang digabungkan</b><span>Misi 3 kamu + tiga teman</span></div>' +
+      '<table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
+      '<tr><td>—</td><td>kamu (Misi 3)</td><td class="n">' + d.mineN + '</td><td class="n">' + d.mineK +
+      '</td><td class="n">' + (d.mineN ? dec(d.mineK / d.mineN, 3) : "—") + "</td></tr>" +
+      baris + "</tbody></table></div>" +
+      "</div>" +
+      '<div class="toast">✓ <div><b>LKPD ' + m.lkpd + ":</b> tulis tabel data kelas, Σk/Σn, lalu kesimpulan tiga poin.</div></div>" +
+      "</main>" +
+      '<footer class="cta">' +
+      '<button class="btn btn-primary" data-act="' + (S.status(state, 5) === "selesai" ? "home" : "back") + '">' +
+      (S.status(state, 5) === "selesai" ? "Selesai · ke Beranda" : "Kembali ke Arena") + "</button>" +
+      '<div class="btn-row"><button class="mini-btn" data-act="back">Kembali ke Arena</button></div>' +
+      "</footer>" +
+      '<input type="file" id="fileImpor" accept="application/json" hidden>';
+  }
+
+  function renderData(id) {
+    var m = S.def(id);
+    var r = S.rek(state, id);
+    if (id === 5) return dataM5(m, r);
+    if (id === 4) return dataM4(m, r);
+    return dataUmum(id, m, r);
   }
 
   /* ---------------- render ---------------- */

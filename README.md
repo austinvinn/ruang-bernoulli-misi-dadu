@@ -20,7 +20,7 @@ Program Studi Pendidikan Matematika · Fakultas Keguruan dan Ilmu Pendidikan · 
 | Misi 2 — frekuensi & proporsi (10 lemparan + tabel p̂) | ✅ jalan |
 | Misi 3 — konvergensi & LLN (tebak dulu → 100 lemparan + grafik) | ✅ jalan |
 | Misi 4 — parameter p (3 aturan × 60 lemparan) | ✅ jalan (MLE di LKPD) |
-| Misi 5 — estimasi gabungan (Σk/Σn vs rata-rata p̂ + SE) | ✅ jalan |
+| Misi 5 — estimasi gabungan (Σk/Σn vs rata-rata p̂ + SE) | ✅ jalan (data teman **atau** Simulasi kelas untuk yang mengerjakan sendiri) |
 | Papan Data (PMF, konvergensi, tabel, kode laporan) | ✅ jalan |
 | Alat pengembang `rekap.html` (tempel kode → tabel + CSV) | ✅ jalan |
 | Deploy | ✅ https://misi-dadu.pages.dev |

@@ -15,7 +15,7 @@
     { id: 2, judul: "Frekuensi & proporsi", sub: "10 lemparan", aturan: 1, target: 10, lkpd: "Bagian B" },
     { id: 3, judul: "Konvergensi & LLN", sub: "100 lemparan", aturan: 1, target: 100, lkpd: "Bagian C" },
     { id: 4, judul: "Parameter p & MLE", sub: "3 aturan × 60 lemparan", aturan: 1, target: 180, lkpd: "Bagian D" },
-    { id: 5, judul: "Estimasi gabungan", sub: "data 3 teman", aturan: 1, target: 3, lkpd: "Bagian E" }
+    { id: 5, judul: "Estimasi gabungan", sub: "gabungan data kelas", aturan: 1, target: 3, lkpd: "Bagian E" }
   ];
 
   function def(id) {
@@ -70,13 +70,17 @@
         rolls: [],
         prediksi: null,
         rules: {},     /* khusus misi 4: { "1": [rolls...] } */
-        teman: [],      /* khusus misi 5 */
+        teman: [],      /* khusus misi 5: data teman yang diisi manual */
+        sim: [],        /* khusus misi 5: data simulasi kelas */
+        mode: "teman",  /* khusus misi 5: "teman" | "simulasi" */
         ts: null
       };
     }
     if (!s.misi[id].rolls) s.misi[id].rolls = [];
     if (!s.misi[id].rules) s.misi[id].rules = {};
     if (!s.misi[id].teman) s.misi[id].teman = [];
+    if (!s.misi[id].sim) s.misi[id].sim = [];
+    if (s.misi[id].mode !== "simulasi") s.misi[id].mode = "teman";
     return s.misi[id];
   }
 
@@ -108,7 +112,9 @@
       return semua;
     }
     if (id === 5) {
-      return (r.teman || []).filter(function (t) {
+      /* data teman maupun simulasi sama-sama sah; yang dinilai = tiga baris terisi */
+      var rows = r.mode === "simulasi" ? (r.sim || []) : (r.teman || []);
+      return rows.filter(function (t) {
         return Number(t.n) > 0 && Number(t.k) >= 0 && Number(t.k) <= Number(t.n);
       }).length >= 3;
     }
@@ -151,7 +157,7 @@
     /* identitas saja bukan "sudah mulai" — hanya progres yang dihitung */
     for (var i = 1; i <= 5; i++) {
       var r = s.misi[i];
-      if (r && ((r.rolls && r.rolls.length) || (r.teman && r.teman.length))) return true;
+      if (r && ((r.rolls && r.rolls.length) || (r.teman && r.teman.length) || (r.sim && r.sim.length))) return true;
     }
     return false;
   }

@@ -10,7 +10,7 @@
   var L = window.Laporan;
 
   var state = S.baca();
-  var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "", m5offer: false };
+  var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "" };
 
   var $app = document.getElementById("app");
 
@@ -203,6 +203,9 @@
   }
 
   function tawarkanPapan(id) {
+    /* jangan munculkan popup misi lama kalau siswa sudah pindah layar */
+    var r = route();
+    if (r.view !== "arena" || r.id !== id) return;
     ui.sheet = "papan";
     ui.sheetMisi = id;
     force();
@@ -308,6 +311,7 @@
         "Minta tiga teman membuka <b>Papan Data Misi 3</b> masing-masing dan menyebutkan <b>kode laporan</b> mereka.",
         "Isi nama, <b>n</b> dan <b>k</b> mereka pada tabel di bawah. Data misimu sendiri (n dan k dari Misi 3) otomatis ikut dihitung.",
         "Bandingkan <b>Σk/Σn</b> (gabungan) dengan <b>rata-rata p̂</b> keempat orang; keduanya bisa berbeda.",
+        "Mengerjakan sendiri tanpa teman? Pilih <b>Simulasi kelas</b> di atas tabel, baca penjelasannya, lalu tekan <b>Isi data simulasi</b> — isinya data simulasi, bukan teman sungguhan, dan asal datanya wajib kamu tulis di LKPD.",
         "Tulis tabel data kelas dan kesimpulan tiga poin di <b>LKPD bagian E</b>."
       ]
     }
@@ -350,6 +354,9 @@
       poin.push("Rata-rata p̂ tanpa pembobotan = <b>" + dec(d.rata, 4) +
         "</b>. Selisih keduanya = <b>" + dec(Math.abs(d.pGab - d.rata), 4) + "</b> — jelaskan mengapa berbeda.");
       poin.push("Tulis kesimpulan tiga poin: hubungan p dan p̂, peran n, dan mengapa Bernoulli menjadi dasar Binomial.");
+      if (r.mode === "simulasi") {
+        poin.push("Tiga baris data pada tabel ini adalah <b>data simulasi</b>, bukan teman sekelas — tulis keterangan itu di LKPD bagian E supaya sumber datanya jelas.");
+      }
     }
     var li = poin.map(function (t) { return "<li>" + t + "</li>"; }).join("");
     var nextHint = id < 5
@@ -455,27 +462,102 @@
       (semuaPenuh ? selesaiCard(4, r) : "");
   }
 
+  /* ---- Misi 5: data teman (manual) atau simulasi kelas ---- */
+  /* n sengaja berbeda supaya Σk/Σn ≠ rata-rata p̂ — kalau semua n sama,
+     poin inti misi (pembobotan ukuran sampel) hilang. */
+  var SIM_N = [60, 80, 120];
+
+  function binomialK(n, p) {
+    var k = 0;
+    for (var i = 0; i < n; i++) if (Math.random() < p) k++;
+    return k;
+  }
+  function buatSimulasi() {
+    return SIM_N.map(function (n) { return { n: n, k: binomialK(n, 1 / 6) }; });
+  }
+  function m5Baris(r) { return r.mode === "simulasi" ? (r.sim || []) : (r.teman || []); }
+  function m5Simulasi(r) { return r.mode === "simulasi"; }
+  /* simulasi hanya diisi setelah siswa menekan "Isi data simulasi" —
+     jangan pernah mengisi otomatis saat mode diganti, siswa harus sempat
+     membaca dulu apa itu data simulasi. */
+  function m5SimSiap(r) { return m5Simulasi(r) && (r.sim || []).length > 0; }
+
+  function m5ModeBar(r) {
+    var sim = m5Simulasi(r);
+    return '<div class="segc" role="group" aria-label="Sumber data Misi 5">' +
+      '<button data-act="m5mode" data-mode="teman" class="' + (sim ? "" : "on") + '" aria-pressed="' + (!sim) + '">Data teman</button>' +
+      '<button data-act="m5mode" data-mode="simulasi" class="' + (sim ? "on" : "") + '" aria-pressed="' + sim + '">Simulasi kelas</button>' +
+      "</div>";
+  }
+
   function arenaM5(r) {
-    var teman = r.teman || [];
+    var d = m5Data(r);
+    var sim = m5Simulasi(r);
+    var simSiap = m5SimSiap(r);
     var baris = "";
-    for (var i = 0; i < 3; i++) {
-      var t = teman[i] || { nama: "", n: "", k: "" };
-      baris += '<tr><td>' + (i + 1) + "</td>" +
-        '<td><input class="inp" data-m5="nama" data-i="' + i + '" value="' + esc(t.nama) + '" placeholder="nama" aria-label="Nama teman ' + (i + 1) + '"></td>' +
-        '<td><input class="inp num" data-m5="n" data-i="' + i + '" inputmode="numeric" value="' + esc(t.n) + '" placeholder="n" aria-label="n teman ' + (i + 1) + '"></td>' +
-        '<td><input class="inp num" data-m5="k" data-i="' + i + '" inputmode="numeric" value="' + esc(t.k) + '" placeholder="k" aria-label="k teman ' + (i + 1) + '"></td></tr>';
+
+    if (sim && !simSiap) {
+      /* mode simulasi dipilih tapi belum diisi: beri ruang baca dulu,
+         data baru dibuat setelah tombol di panel ini ditekan. */
+      return instruksiBox(5) +
+        '<div class="panel"><div class="panel-head"><b>Data tiga teman</b><span>belum diisi</span></div>' +
+        m5ModeBar(r) +
+        '<p class="note">Mode <b>Simulasi kelas</b> mengisi tabel dengan hasil pengacakan <b>60, 80, dan 120 lemparan dadu</b> (peluang sukses 1/6). n-nya sengaja berbeda supaya Σk/Σn dan rata-rata p̂ tidak sama — itu poin inti misi ini.</p>' +
+        '<p class="note">Angka ini <b>bukan teman sekelas</b>. Pakai kalau kamu mengerjakan sendiri, dan tulis asal datanya di <b>LKPD bagian E</b>.</p>' +
+        '<div class="btn-row"><button class="mini-btn" data-act="m5isi">Isi data simulasi</button></div>' +
+        '<p class="note">Belum yakin? Kembali ke <b>Data teman</b> di atas kalau kamu punya kode laporan Misi 3 temanmu.</p></div>';
     }
+
+    if (sim) {
+      (r.sim || []).forEach(function (t, i) {
+        baris += '<tr><td>' + (i + 1) + "</td>" +
+          '<td><span class="simp">simulasi</span></td>' +
+          '<td class="n">' + t.n + "</td>" +
+          '<td class="n">' + t.k + "</td></tr>";
+      });
+    } else {
+      for (var i = 0; i < 3; i++) {
+        var t = (r.teman || [])[i] || { nama: "", n: "", k: "" };
+        baris += '<tr><td>' + (i + 1) + "</td>" +
+          '<td><input class="inp" data-m5="nama" data-i="' + i + '" value="' + esc(t.nama) + '" placeholder="nama" aria-label="Nama teman ' + (i + 1) + '"></td>' +
+          '<td><input class="inp num" data-m5="n" data-i="' + i + '" inputmode="numeric" value="' + esc(t.n) + '" placeholder="n" aria-label="n teman ' + (i + 1) + '"></td>' +
+          '<td><input class="inp num" data-m5="k" data-i="' + i + '" inputmode="numeric" value="' + esc(t.k) + '" placeholder="k" aria-label="k teman ' + (i + 1) + '"></td></tr>';
+      }
+    }
+
     return instruksiBox(5) +
-      '<div class="panel"><div class="panel-head"><b>Data tiga teman</b><span>isi n dan k dari kode laporan Misi 3 mereka</span></div>' +
-      '<table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>' + baris + "</tbody></table>" +
-      '<p class="note">Data kamu sendiri: n = ' + m5Data(r).mineN + ", k = " + m5Data(r).mineK + " — otomatis ikut dihitung.</p></div>" +
+      '<div class="panel"><div class="panel-head"><b>Data tiga teman</b><span>' +
+      (sim ? "data simulasi · n berbeda" : "isi n dan k dari kode laporan Misi 3 mereka") + "</span></div>" +
+      m5ModeBar(r) +
+      '<p class="note">' + (sim
+        ? "Baris ini <b>data simulasi</b>, bukan teman sungguhan — dipakai kalau kamu mengerjakan sendiri. Tulis asal datanya di LKPD bagian E."
+        : "Isi <b>n</b> dan <b>k</b> dari Papan Data Misi 3 temanmu. Mengisi sendiri? Pilih <b>Simulasi kelas</b> di atas.") + "</p>" +
+      '<table><thead><tr><th>#</th><th>' + (sim ? "sumber" : "nama") + '</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>' +
+      baris + "</tbody></table>" +
+      (sim ? '<div class="btn-row"><button class="mini-btn" data-act="m5acak">Acak ulang data simulasi</button></div>' +
+        '<p class="note">Angka berubah setiap kali diacak — kalau tabelnya sudah kamu salin ke LKPD bagian E, perbarui salinannya.</p>' : "") +
+      '<p class="note">Data kamu sendiri: n = ' + d.mineN + ", k = " + d.mineK + " — otomatis ikut dihitung.</p></div>" +
       '<div class="stats" id="m5stats">' + m5Stats(r) + "</div>" +
       '<div class="panel" id="m5notes">' + m5Notes(r) + "</div>" +
-      (m5Lengkap(r) ? selesaiCard(5, r) : '<p class="note center">Isi ketiga baris untuk menyelesaikan misi ini.</p>');
+      '<div id="m5tutup">' + m5Tutup(r) + "</div>";
+  }
+
+  /* kartu penutup misi 5: ikut berubah saat baris diisi (tanpa render ulang) */
+  function m5Tutup(r) {
+    if (m5Lengkap(r)) {
+      /* tanpa popup otomatis: tombol papan data muncul di sini, jadi siswa
+         sempat membaca catatan data simulasi sebelum pindah halaman */
+      return selesaiCard(5, r) +
+        '<div class="btn-row"><button class="mini-btn" data-act="data">Buka Papan Data Misi 5 →</button></div>';
+    }
+    if (S.status(state, 5) === "selesai") {
+      return '<div class="toast">✓ <div><b>Misi 5 sudah selesai.</b> Mode yang aktif sekarang masih kosong — mengisinya akan mengganti angka pada laporan.</div></div>';
+    }
+    return '<p class="note center">Isi ketiga baris untuk menyelesaikan misi ini.</p>';
   }
 
   function m5Data(r) {
-    var teman = r.teman || [];
+    var teman = m5Baris(r);
     var valid = teman.filter(function (t) { return Number(t.n) > 0 && Number(t.k) >= 0 && Number(t.k) <= Number(t.n); });
     var sn = valid.reduce(function (a, t) { return a + Number(t.n); }, 0);
     var sk = valid.reduce(function (a, t) { return a + Number(t.k); }, 0);
@@ -492,7 +574,8 @@
       pGab: totalN ? totalK / totalN : 0,
       rata: rata,
       se: totalN ? Math.sqrt((1 / 6) * (5 / 6) / totalN) : 0,
-      nTeman: valid.length
+      nTeman: valid.length,
+      simulasi: m5Simulasi(r)
     };
   }
   function m5Lengkap(r) { return m5Data(r).valid.length >= 3; }
@@ -512,7 +595,8 @@
       "</b> (tidak tertimbang). Selisih: <b>" + dec(Math.abs(d.pGab - d.rata), 4) + "</b>.</p>" +
       '<p class="note">SE gabungan = √(p(1−p)/Σn) = <b>' + dec(d.se, 4) + "</b> · |p̂ − p| = <b>" + dec(gap, 4) +
       "</b> → " + (gap <= 2 * d.se ? "konsisten dengan teori" : "menyimpang, periksa data") + ".</p>" +
-      '<p class="note">' + d.valid.length + " dari 3 data teman terisi.</p>";
+      '<p class="note">' + d.valid.length + " dari 3 baris terisi" +
+      (d.simulasi ? " · <b>data simulasi</b>, bukan teman" : "") + ".</p>";
   }
 
   /* perbarui angka tanpa merender ulang (fokus input tidak hilang) */
@@ -520,10 +604,14 @@
     var r = S.rek(state, 5);
     var st = document.getElementById("m5stats");
     var no = document.getElementById("m5notes");
+    var tu = document.getElementById("m5tutup");
     var to = document.getElementById("m5toast");
     if (st) st.innerHTML = m5Stats(r);
     if (no) no.innerHTML = m5Notes(r);
+    if (tu) tu.innerHTML = m5Tutup(r);
     if (to) to.hidden = !m5Lengkap(r);
+    var ft = document.querySelector("footer.cta");
+    if (ft) ft.outerHTML = footerArena(5);   /* tombol bawah ikut berubah tanpa render ulang */
     }
 
   function footerArena(id) {
@@ -568,11 +656,22 @@
         (s4 > 0 ? "Lempar 60× · aturan ini (" + n4 + "/60)" : "Aturan ini sudah 60/60") + "</button>";
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     } else {
-      utama = '<button class="btn btn-primary" data-act="home" disabled>Isi 3 data teman dulu</button>';
-      kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+      /* misi 5: aksi mengisi data simulasi hanya ada satu tempat — tombol di
+         dalam panel ("Isi data simulasi" / "Acak ulang data simulasi") */
+      if (r.mode === "simulasi" && !m5SimSiap(r)) {
+        utama = "";
+        kedua = '<button class="mini-btn" data-act="m5mode" data-mode="teman">Data teman</button>' +
+                '<button class="mini-btn" data-act="data">Papan data</button>';
+      } else if (m5SimSiap(r)) {
+        utama = '<button class="btn btn-primary" data-act="data">Buka Papan Data</button>';
+        kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+      } else {
+        utama = '<button class="btn btn-primary" data-act="m5mode" data-mode="simulasi">Simulasi kelas · tanpa teman</button>';
+        kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+      }
     }
 
-    return '<footer class="cta"><div class="stack">' + utama + "</div>" +
+    return '<footer class="cta">' + (utama ? '<div class="stack">' + utama + "</div>" : "") +
       (kedua ? '<div class="btn-row">' + kedua + "</div>" : "") + "</footer>";
   }
 
@@ -662,9 +761,11 @@
   /* Misi 5: bukan percobaan baru, jadi yang ditampilkan data gabungan */
   function dataM5(m, r) {
     var d = m5Data(r);
-    var baris = (r.teman || []).map(function (t, i) {
+    var sim = m5Simulasi(r);
+    var baris = m5Baris(r).map(function (t, i) {
       var n = Number(t.n), k = Number(t.k);
-      return "<tr><td>" + (i + 1) + "</td><td>" + esc(t.nama || "—") + '</td><td class="n">' + (t.n || "—") +
+      var nama = sim ? '<span class="simp">simulasi</span>' : esc(t.nama || "—");
+      return "<tr><td>" + (i + 1) + "</td><td>" + nama + '</td><td class="n">' + (t.n || "—") +
         '</td><td class="n">' + (t.k || "—") + '</td><td class="n">' + (n > 0 ? dec(k / n, 3) : "—") + "</td></tr>";
     }).join("");
     return header({ back: true, title: "Papan Data", sub: "Misi 5 · " + m.lkpd, right: chip("✓ " + m.lkpd) }) +
@@ -676,8 +777,9 @@
       '<div class="panel" id="m5notes">' + m5Notes(r) + "</div>" +
       "</div>" +
       '<div class="colstack">' +
-      '<div class="panel"><div class="panel-head"><b>Data yang digabungkan</b><span>Misi 3 kamu + tiga teman</span></div>' +
-      '<table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
+      '<div class="panel"><div class="panel-head"><b>Data yang digabungkan</b><span>' +
+      (sim ? "Misi 3 kamu + tiga baris simulasi" : "Misi 3 kamu + tiga teman") + "</span></div>" +
+      '<table><thead><tr><th>#</th><th>' + (sim ? "sumber" : "nama") + '</th><th class="rt">n</th><th class="rt">k</th><th class="rt">p̂</th></tr></thead><tbody>' +
       '<tr><td>—</td><td>kamu (Misi 3)</td><td class="n">' + d.mineN + '</td><td class="n">' + d.mineK +
       '</td><td class="n">' + (d.mineN ? dec(d.mineK / d.mineN, 3) : "—") + "</td></tr>" +
       baris + "</tbody></table></div>" +
@@ -718,10 +820,6 @@
     r.teman[i][field] = val;
     S.sinkron(state);
     S.simpan(state);
-    if (!ui.m5offer && S.status(state, 5) === "selesai") {
-      ui.m5offer = true;
-      setTimeout(function () { tawarkanPapan(5); }, 350);
-    }
   }
 
   document.addEventListener("click", function (e) {
@@ -793,6 +891,39 @@
       case "rule-reset": {
         var r4 = S.rek(state, 4);
         r4.rules[ui.rule || 1] = [];
+        S.simpan(state);
+        force();
+        break;
+      }
+      case "m5mode": {
+        var mode5 = el.getAttribute("data-mode") === "simulasi" ? "simulasi" : "teman";
+        var r5 = S.rek(state, 5);
+        r5.mode = mode5;
+        /* mode diganti ≠ data dibuat: biarkan tabel kosong supaya siswa
+           sempat membaca penjelasan dan menekan "Isi data simulasi" */
+        S.sinkron(state);
+        S.simpan(state);
+        var sc5 = (document.querySelector(".body") || {}).scrollTop || 0;
+        force();
+        var b5 = document.querySelector(".body");
+        if (b5) b5.scrollTop = sc5;
+        break;
+      }
+      case "m5isi": {
+        var ri = S.rek(state, 5);
+        ri.mode = "simulasi";
+        ri.sim = buatSimulasi();
+        S.sinkron(state);
+        S.simpan(state);
+        var sc6 = (document.querySelector(".body") || {}).scrollTop || 0;
+        force();
+        var b6 = document.querySelector(".body");
+        if (b6) b6.scrollTop = sc6;
+        break;
+      }
+      case "m5acak": {
+        var ra = S.rek(state, 5);
+        ra.sim = buatSimulasi();
         S.simpan(state);
         force();
         break;

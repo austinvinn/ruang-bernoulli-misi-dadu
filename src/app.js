@@ -497,13 +497,20 @@
     var baris = "";
 
     if (sim && !simSiap) {
-      /* mode simulasi dipilih tapi belum diisi: beri ruang baca dulu,
-         data baru dibuat setelah tombol di panel ini ditekan. */
+      /* mode simulasi dipilih tapi belum diisi: tabel tetap ditampilkan
+         sebagai pratinjau kosong, isinya baru muncul setelah tombol ditekan. */
+      var kosong = [0, 1, 2].map(function (i) {
+        return '<tr><td>' + (i + 1) + "</td>" +
+          '<td><span class="simp">simulasi</span></td>' +
+          '<td class="n">—</td><td class="n">—</td></tr>';
+      }).join("");
       return instruksiBox(5) +
         '<div class="panel"><div class="panel-head"><b>Data tiga teman</b><span>belum diisi</span></div>' +
         m5ModeBar(r) +
         '<p class="note">Mode <b>Simulasi kelas</b> mengisi tabel dengan hasil pengacakan <b>60, 80, dan 120 lemparan dadu</b> (peluang sukses 1/6). n-nya sengaja berbeda supaya Σk/Σn dan rata-rata p̂ tidak sama — itu poin inti misi ini.</p>' +
         '<p class="note">Angka ini <b>bukan teman sekelas</b>. Pakai kalau kamu mengerjakan sendiri, dan tulis asal datanya di <b>LKPD bagian E</b>.</p>' +
+        '<table><thead><tr><th>#</th><th>sumber</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>' +
+        kosong + "</tbody></table>" +
         '<div class="btn-row"><button class="mini-btn" data-act="m5isi">Isi data simulasi</button></div>' +
         '<p class="note">Belum yakin? Kembali ke <b>Data teman</b> di atas kalau kamu punya kode laporan Misi 3 temanmu.</p></div>';
     }

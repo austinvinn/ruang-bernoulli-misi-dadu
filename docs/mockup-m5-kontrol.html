@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — kontrol sumber data Misi 5</title>
+<style>
+:root{
+  --paper:#f6f7f2;--bg:#fff;--ink:#1b211c;--ink-2:#3d4a40;--muted:#6b7568;
+  --line:#e3e6dc;--line-2:#cfd5c7;--accent:#3f6c51;--accent-soft:#eef3ec;--accent-line:#c9dccb;
+  --ochre:#8a5e15;--ochre-soft:#fbf3e2;--ochre-line:#ead9b6;
+  --ok:#2e7d53;--ok-soft:#e9f5ee;--ok-line:#bfe3cd;--bad:#a6403a;--bad-soft:#fbeceb;
+  --r:16px;--r-sm:12px;
+  --sh:0 1px 2px rgba(27,33,28,.05),0 4px 12px rgba(27,33,28,.05);
+  --sh-pop:0 10px 28px rgba(27,33,28,.10),0 2px 6px rgba(27,33,28,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef0e8;color:var(--ink);padding:28px 24px 40px;
+  font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.45}
+.page-head{max-width:840px;margin:0 auto 22px}
+.page-head h1{font-size:20px;letter-spacing:-.02em;margin:0 0 4px}
+.page-head p{margin:0;font-size:13px;color:var(--muted)}
+.row{display:grid;grid-template-columns:repeat(2,390px);gap:20px 22px;align-items:start;justify-content:center;max-width:840px;margin:0 auto}
+.frame{width:390px;flex:0 0 auto;background:var(--bg);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--sh-pop);overflow:hidden;display:flex;flex-direction:column}
+.f-head{padding:11px 14px;border-bottom:1px solid var(--line);background:#fcfdfa;display:flex;align-items:center;gap:8px}
+.f-tag{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;
+  background:var(--ink);border-radius:6px;padding:3px 7px}
+.f-tag.rec{background:var(--accent)}
+.f-name{font-size:12.5px;font-weight:700}
+.f-body{padding:14px;display:flex;flex-direction:column;gap:11px;min-height:392px}
+.foot{padding:10px 14px;border-top:1px solid var(--line);background:#fcfdfa;font-size:11.5px;color:var(--muted)}
+.foot b{color:var(--ink-2)}
+
+.card{border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--sh);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.card-head b{font-size:13px}
+.card-head span{font-size:11px;color:var(--muted)}
+.card-in{padding:11px 12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;
+  padding:6px 6px;border-bottom:1px solid var(--line);font-weight:700}
+th.rt,td.rt{text-align:right}
+td{padding:6px 6px;border-bottom:1px solid #f0f2eb}
+tr:last-child td{border-bottom:0}
+.inp{width:100%;border:1px solid var(--line-2);border-radius:9px;padding:8px 8px;font:inherit;font-size:12px;background:#fff}
+.inp.num{text-align:right}
+.inp.ro{background:#f7f8f4;color:var(--ink-2)}
+.note{margin:8px 0 0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:700}
+.chip.sim{background:var(--ochre-soft);color:var(--ochre);border:1px solid var(--ochre-line)}
+.chip.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+
+/* A. toggle switch */
+.tgl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0}
+.tgl-lab{font-size:12px;font-weight:700;line-height:1.3}
+.tgl-lab em{display:block;font-style:normal;font-weight:400;font-size:10.5px;color:var(--muted)}
+.switch{width:48px;height:28px;border-radius:999px;background:var(--line-2);position:relative;flex:0 0 auto;transition:.18s}
+.switch.on{background:var(--accent)}
+.switch i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.18s}
+.switch.on i{left:23px}
+
+/* B. segmented */
+.segc{display:flex;background:#f1f3ec;border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.segc button{flex:1;border:0;background:transparent;border-radius:9px;padding:10px 8px;font-size:12px;font-weight:700;color:var(--muted)}
+.segc button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+/* C. segmented 3 */
+.segc.three button{font-size:11px;padding:9px 4px}
+
+/* dropdown */
+.selwrap{position:relative}
+.selwrap select{width:100%;appearance:none;border:1px solid var(--line-2);border-radius:11px;background:#fff;
+  padding:11px 34px 11px 12px;font:inherit;font-size:12.5px;font-weight:650;color:var(--ink)}
+.selwrap:after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;pointer-events:none}
+.cta{background:var(--accent);color:#fff;border-radius:12px;padding:13px;text-align:center;font-weight:800;font-size:13px}
+.cta.off{background:#e9ece3;color:#9aa294}
+.legend{max-width:840px;margin:22px auto 0;font-size:12px;color:var(--ink-2);line-height:1.6}
+.legend b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="page-head">
+  <h1>Misi 5 — pilihan bentuk kontrol sumber data</h1>
+  <p>Frame 390 px, memakai token warna &amp; tipe yang sudah ada di index.html. Yang berubah hanya cara memilih sumber data.</p>
+</div>
+
+<div class="row">
+
+  <!-- A. TOGGLE -->
+  <div class="frame">
+    <div class="f-head"><span class="f-tag">A</span><span class="f-name">Toggle 2 keadaan</span></div>
+    <div class="f-body">
+      <div class="card">
+        <div class="card-head"><b>Data tiga teman</b><span>n dan k mereka</span></div>
+        <div class="card-in">
+          <div class="tgl-row">
+            <div class="tgl-lab">Pakai data simulasi<em>bukan teman — aktifkan kalau kamu buka sendiri</em></div>
+            <div class="switch"><i></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-in">
+          <table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>
+            <tr><td>1</td><td><input class="inp" value="Rani"></td><td class="rt"><input class="inp num" value="100"></td><td class="rt"><input class="inp num" value="17"></td></tr>
+            <tr><td>2</td><td><input class="inp" value="Bagas"></td><td class="rt"><input class="inp num" value="100"></td><td class="rt"><input class="inp num" value="14"></td></tr>
+            <tr><td>3</td><td><input class="inp" placeholder="nama"></td><td class="rt"><input class="inp num" placeholder="n"></td><td class="rt"><input class="inp num" placeholder="k"></td></tr>
+          </tbody></table>
+          <p class="note">Pilih "simulasi" → tiga baris terisi otomatis dan nama berganti chip <b>simulasi</b>.</p>
+        </div>
+      </div>
+      <div class="cta off">Isi 3 data teman dulu</div>
+    </div>
+    <div class="foot"><b>Kekuatan:</b> terlihat jelas, satu ketuk.<br><b>Kelemahan:</b> hanya dua keadaan — mode "tempel kode laporan" tidak punya tempat.</div>
+  </div>
+
+  <!-- B. SEGMENTED 2 -->
+  <div class="frame">
+    <div class="f-head"><span class="f-tag rec">B</span><span class="f-name">Segmented · 2 pilihan</span><span class="chip ok" style="margin-left:auto">usulan</span></div>
+    <div class="f-body">
+      <div class="card">
+        <div class="card-head"><b>Data tiga teman</b><span>n dan k mereka</span></div>
+        <div class="card-in">
+          <div class="segc">
+            <button class="on">Data teman</button>
+            <button>Tanpa teman</button>
+          </div>
+          <p class="note">Tanpa teman? Isi otomatis dengan data simulasi kelas.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-in">
+          <table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>
+            <tr><td>1</td><td><input class="inp" value="Rani"></td><td class="rt"><input class="inp num" value="100"></td><td class="rt"><input class="inp num" value="17"></td></tr>
+            <tr><td>2</td><td><input class="inp" value="Bagas"></td><td class="rt"><input class="inp num" value="80"></td><td class="rt"><input class="inp num" value="11"></td></tr>
+            <tr><td>3</td><td><input class="inp" placeholder="nama"></td><td class="rt"><input class="inp num" placeholder="n"></td><td class="rt"><input class="inp num" placeholder="k"></td></tr>
+          </tbody></table>
+          <p class="note">Cara lain: <b>tempel kode laporan</b> teman → (tautan kecil di bawah tabel)</p>
+        </div>
+      </div>
+      <div class="cta off">Isi 3 data teman dulu</div>
+    </div>
+    <div class="foot"><b>Kekuatan:</b> dua opsi terbaca sekaligus, target ketuk besar, tanpa menu tersembunyi.<br><b>Kelemahan:</b> mode kode laporan harus jadi aksi sekunder.</div>
+  </div>
+
+  <!-- C. SEGMENTED 3 -->
+  <div class="frame">
+    <div class="f-head"><span class="f-tag">C</span><span class="f-name">Segmented · 3 pilihan</span></div>
+    <div class="f-body">
+      <div class="card">
+        <div class="card-head"><b>Data tiga teman</b><span>pilih sumber</span></div>
+        <div class="card-in">
+          <div class="segc three">
+            <button class="on">Isi manual</button>
+            <button>Tempel kode</button>
+            <button>Simulasi</button>
+          </div>
+          <p class="note">Isi n dan k dari Papan Data Misi 3 temanmu.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-in">
+          <table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>
+            <tr><td>1</td><td><input class="inp" value="Rani"></td><td class="rt"><input class="inp num" value="100"></td><td class="rt"><input class="inp num" value="17"></td></tr>
+            <tr><td>2</td><td><input class="inp" value="Bagas"></td><td class="rt"><input class="inp num" value="80"></td><td class="rt"><input class="inp num" value="11"></td></tr>
+            <tr><td>3</td><td><input class="inp" placeholder="nama"></td><td class="rt"><input class="inp num" placeholder="n"></td><td class="rt"><input class="inp num" placeholder="k"></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="cta off">Isi 3 data teman dulu</div>
+    </div>
+    <div class="foot"><b>Kekuatan:</b> ketiga jalan setara &amp; kelihatan.<br><b>Kelemahan:</b> label menyempit di 390 px; "isi manual" vs "tempel kode" terasa teknis bagi siswa.</div>
+  </div>
+
+  <!-- D. DROPDOWN -->
+  <div class="frame">
+    <div class="f-head"><span class="f-tag">D</span><span class="f-name">Dropdown</span></div>
+    <div class="f-body">
+      <div class="card">
+        <div class="card-head"><b>Data tiga teman</b><span>cara isi</span></div>
+        <div class="card-in">
+          <div class="selwrap">
+            <select>
+              <option>Teman sekelas · isi manual</option>
+              <option>Tempel kode laporan teman</option>
+              <option>Simulasi kelas · tanpa teman</option>
+            </select>
+          </div>
+          <p class="note">Isi n dan k dari Papan Data Misi 3 temanmu.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-in">
+          <table><thead><tr><th>#</th><th>nama</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>
+            <tr><td>1</td><td><input class="inp" value="Rani"></td><td class="rt"><input class="inp num" value="100"></td><td class="rt"><input class="inp num" value="17"></td></tr>
+            <tr><td>2</td><td><input class="inp" value="Bagas"></td><td class="rt"><input class="inp num" value="80"></td><td class="rt"><input class="inp num" value="11"></td></tr>
+            <tr><td>3</td><td><input class="inp" placeholder="nama"></td><td class="rt"><input class="inp num" placeholder="n"></td><td class="rt"><input class="inp num" placeholder="k"></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="cta off">Isi 3 data teman dulu</div>
+    </div>
+    <div class="foot"><b>Kekuatan:</b> paling ringkas, tiga opsi tanpa label sempit.<br><b>Kelemahan:</b> opsi simulasi tersembunyi di balik satu ketukan — justru siswa yang butuh yang paling jarang menemukannya.</div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>Catatan yang berlaku untuk semua varian:</b> begitu mode simulasi aktif, kolom nama berisi chip <b>simulasi</b>
+  (bukan nama orang), n-nya 60/80/120 supaya Σk/Σn ≠ rata-rata p̂, dan ada tombol sekunder <b>Acak ulang</b>.
+  Papan Data menandai sumber tiap baris, dan format kode laporan 7 karakter tidak berubah.
+</div>
+</body>
+</html>

@@ -694,10 +694,13 @@
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 3) {
       var siap = r.prediksi !== null && r.prediksi !== undefined;
+      var s3 = S.sisa(state, 3);
       utama = siap
-        ? '<button class="btn btn-primary" data-act="roll100">Lempar 100×</button>'
+        ? (s3 > 0
+          ? '<button class="btn btn-primary" data-act="roll100">Lempar 100×</button>'
+          : '<button class="btn btn-primary" disabled>seratus lemparan selesai</button>')
         : '<button class="btn btn-primary" disabled>Isi butir prediksi dulu</button>';
-      kedua = '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' +
+      kedua = (s3 > 0 ? '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' : "") +
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 4) {
       var a4 = ui.rule || 1;

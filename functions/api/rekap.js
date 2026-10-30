@@ -98,14 +98,13 @@ export async function onRequestGet({ request, env }) {
     const nama = "rekap-misi-dadu" + (kelas ? "-" + kelas : "") + "-" + new Date().toISOString().slice(0, 10) + ".csv";
     /* bom=0 dipakai formula IMPORTDATA di Google Sheets (BOM membuat nama kolom kotor) */
     const tanpaBom = url.searchParams.get("bom") === "0";
-    return new Response((tanpaBom ? "" : "\ufeff") + isi, {
-      status: 200,
-      headers: {
-        "content-type": "text/csv; charset=utf-8",
-        "content-disposition": 'attachment; filename="' + nama + '"',
-        "cache-control": "no-store"
-      }
-    });
+    const kepala = {
+      "content-type": "text/csv; charset=utf-8",
+      "cache-control": "no-store"
+    };
+    /* mode umpan (IMPORTDATA) tanpa header attachment: Google menolak unduhan bertanda attachment */
+    if (!tanpaBom) kepala["content-disposition"] = 'attachment; filename="' + nama + '"';
+    return new Response((tanpaBom ? "" : "\ufeff") + isi, { status: 200, headers: kepala });
   }
 
   return json({

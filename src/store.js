@@ -7,7 +7,7 @@
   "use strict";
 
   var KEY = "rb-misi-dadu-v2";
-  var VERSI = 2;
+  var VERSI = 3;
 
   /* Definisi misi: satu misi = satu bagian LKPD */
   var MISI = [
@@ -27,7 +27,9 @@
   function kosong() {
     return {
       versi: VERSI,
-      peserta: { nama: "", email: "" },
+      peserta: { nama: "", nim: "", kelas: "" },
+      jawaban: {},     /* jawaban butir LKM: { "A1": { v: nilai, ts: iso } } */
+      kirim: {},       /* status kirim ke server per butir: { "A1": { ts, ok } } */
       misi: {},
       terakhir: 1,
       dibuat: now(),
@@ -39,7 +41,12 @@
   function migrasi(s) {
     if (!s || typeof s !== "object") return kosong();
     if (!s.misi || typeof s.misi !== "object") s.misi = {};
-    if (!s.peserta) s.peserta = { nama: "", email: "" };
+    if (!s.peserta) s.peserta = {};
+    if (typeof s.peserta.nama !== "string") s.peserta.nama = "";
+    if (typeof s.peserta.nim !== "string") s.peserta.nim = "";
+    if (typeof s.peserta.kelas !== "string") s.peserta.kelas = "";
+    if (!s.jawaban || typeof s.jawaban !== "object") s.jawaban = {};
+    if (!s.kirim || typeof s.kirim !== "object") s.kirim = {};
     if (!s.terakhir) s.terakhir = 1;
     s.versi = VERSI;
     return s;
@@ -101,25 +108,62 @@
     return { n: rolls.length, k: k, phat: rolls.length ? k / rolls.length : 0 };
   }
 
+  /* ---------- jawaban butir LKM ---------- */
+  function jawab(s, id, nilai) {
+    if (!s.jawaban) s.jawaban = {};
+    s.jawaban[id] = { v: nilai, ts: now() };
+    if (s.kirim) delete s.kirim[id];
+    return simpan(s);
+  }
+  function jawabNilai(s, id) {
+    var j = s.jawaban && s.jawaban[id];
+    return j ? j.v : null;
+  }
+  function adaJawaban(s, id) {
+    if (!root.LKM || typeof root.LKM.butirTerisi !== "function") {
+      var v = jawabNilai(s, id);
+      return v !== null && String(v).trim() !== "";
+    }
+    return root.LKM.butirTerisi(id, jawabNilai(s, id));
+  }
+  function jumlahJawaban(s, kode) {
+    if (!root.LKM || typeof root.LKM.bagian !== "function") return { terisi: 0, total: 0 };
+    var b = root.LKM.bagian(kode);
+    if (!b) return { terisi: 0, total: 0 };
+    var terisi = 0;
+    b.butir.forEach(function (bt) { if (adaJawaban(s, bt.id)) terisi++; });
+    return { terisi: terisi, total: b.butir.length };
+  }
+
   function misiSelesai(s, id) {
     var r = rek(s, id);
+    var dasar;
     if (id === 4) {
-      var semua = true;
+      dasar = true;
       [1, 2, 3].forEach(function (a) {
         var arr = r.rules[a] || [];
-        if (arr.length < 60) semua = false;
+        if (arr.length < 60) dasar = false;
       });
-      return semua;
+      return dasar && lkmLengkap(s, id);
     }
     if (id === 5) {
       /* data teman maupun simulasi sama-sama sah; yang dinilai = tiga baris terisi */
       var rows = r.mode === "simulasi" ? (r.sim || []) : (r.teman || []);
-      return rows.filter(function (t) {
+      dasar = rows.filter(function (t) {
         return Number(t.n) > 0 && Number(t.k) >= 0 && Number(t.k) <= Number(t.n);
       }).length >= 3;
+      return dasar && lkmLengkap(s, id);
     }
-    if (id === 3) return r.rolls.length >= 100 && r.prediksi !== null;
-    return r.rolls.length >= def(id).target;
+    if (id === 3) dasar = r.rolls.length >= 100 && r.prediksi !== null;
+    else dasar = r.rolls.length >= def(id).target;
+    return dasar && lkmLengkap(s, id);
+  }
+
+  /* semua butir LKM bagian ini sudah terjawab? (LKM dimuat setelah store) */
+  function lkmLengkap(s, id) {
+    var L = root.LKM;
+    if (!L || typeof L.jawabanLengkapMisi !== "function") return true;
+    return L.jawabanLengkapMisi(s, id);
   }
 
   /* tandai selesai + buka misi berikutnya */
@@ -241,6 +285,10 @@
     pAturan: pAturan,
     hitung: hitung,
     misiSelesai: misiSelesai,
+    jawab: jawab,
+    jawabNilai: jawabNilai,
+    adaJawaban: adaJawaban,
+    jumlahJawaban: jumlahJawaban,
     batas: batas,
     sisa: sisa,
     sinkron: sinkron,

@@ -337,6 +337,16 @@ table.t-lkm .inp.sel{font-size:16px;padding:7px 5px;min-height:42px;border-radiu
 .alat{margin:0;padding-left:20px;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
 .alat li{margin-bottom:3px}
 .tujuan-list{font-size:13.5px}
+/* ---------- gerbang kode akses ---------- */
+.who{font-size:11.5px;color:var(--muted);font-weight:650;max-width:180px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.lab-kode{display:block;font-size:12px;font-weight:750;color:var(--ink-2);margin-bottom:7px;letter-spacing:.02em}
+.inp.inp-kode{width:100%;font-size:19px;font-weight:800;letter-spacing:.09em;text-align:center;
+  text-transform:uppercase;height:56px;font-variant-numeric:tabular-nums}
+.note.bad{color:var(--bad);font-weight:600}
+.dot-wait{width:6px;height:6px;border-radius:50%;background:var(--ochre);display:inline-block}
+.devicenote.bad{color:var(--ochre)}
+@media(max-width:430px){.who{max-width:120px}}
 .cta-hint{margin:8px 0 0;text-align:center;font-size:11.5px;color:var(--muted)}
 .cta{max-width:760px}
 .body.wide ~ .cta{max-width:760px}
@@ -353,6 +363,8 @@ table.t-lkm .inp.sel{font-size:16px;padding:7px 5px;min-height:42px;border-radiu
 <script src="vendor/katex/katex.min.js"></script>
 <script src="src/laporan.js"></script>
 <script src="src/store.js"></script>
+<script src="src/auth.js"></script>
+<script src="src/sinkron.js"></script>
 <script src="src/charts.js"></script>
 <script src="src/lkm-data.js"></script>
 <script src="src/lkm.js"></script>

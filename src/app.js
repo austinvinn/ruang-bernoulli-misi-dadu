@@ -9,6 +9,11 @@
   var C = window.Charts;
   var L = window.Laporan;
   var K = window.LKM;
+  var A = window.Auth;
+  var SN = window.Sinkron;
+
+  function masukServer() { return !!(A && A.aktif()); }
+  function labelSesi() { return A && A.label ? A.label() : ""; }
 
   var state = S.baca();
   var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "" };
@@ -88,6 +93,7 @@
       '<div class="brand">' +
       '<div><div class="brand-name">' + (opts.title || "Ruang Bernoulli") + "</div>" +
       '<div class="brand-sub"><span>' + (opts.sub || "Misi Dadu") + "</span>" +
+      (labelSesi() ? '<span class="who">' + esc(labelSesi()) + "</span>" : "") +
       '<button class="whoami" data-act="tentang" aria-label="Kredit tim pengembang">Tim Pengembang</button>' +
       "</div></div>" +
       "</div>" +
@@ -132,14 +138,21 @@
         "</button>";
     });
 
+    var sesiKelas = masukServer() ? A.data().kelas : state.peserta.kelas;
+    var namaAwal = state.peserta.nama || (masukServer() ? A.data().nama : "");
+    var nimAwal = state.peserta.nim || (masukServer() ? A.data().nim : "");
     var ident = '<div class="panel" id="identCard">' +
-      '<div class="panel-head"><b>Identitas</b><span>isi sebelum mengumpulkan</span></div>' +
+      '<div class="panel-head"><b>Identitas</b><span>' +
+      (masukServer() ? "kelas mengikuti kode akses" : "isi sebelum mengumpulkan") + "</span></div>" +
       '<div class="idrow idrow-3">' +
-      '<input class="inp" data-ident="nama" value="' + esc(state.peserta.nama) + '" placeholder="Nama lengkap" aria-label="Nama lengkap">' +
-      '<input class="inp" data-ident="nim" value="' + esc(state.peserta.nim) + '" inputmode="numeric" placeholder="NIM" aria-label="NIM">' +
-      '<input class="inp" data-ident="kelas" value="' + esc(state.peserta.kelas) + '" placeholder="Kelas" aria-label="Kelas">' +
+      '<input class="inp" data-ident="nama" value="' + esc(namaAwal) + '" placeholder="Nama lengkap" aria-label="Nama lengkap">' +
+      '<input class="inp" data-ident="nim" value="' + esc(nimAwal) + '" inputmode="numeric" placeholder="NIM" aria-label="NIM">' +
+      '<input class="inp" data-ident="kelas" value="' + esc(sesiKelas) + '" placeholder="Kelas" aria-label="Kelas"' +
+      (masukServer() ? " readonly" : "") + ">" +
       "</div>" +
-      '<p class="note">Dipakai sebagai label lembar kerja dan kode laporan. Tersimpan di perangkat ini.</p></div>';
+      '<p class="note">' + (masukServer()
+        ? "Kelas dikunci oleh kode akses. Nama &amp; NIM dipakai pada rekap pengembang."
+        : "Dipakai sebagai label lembar kerja dan kode laporan. Tersimpan di perangkat ini.") + "</p></div>";
 
     var tujuan = '<div class="panel"><div class="panel-head"><b>Tujuan pembelajaran</b></div>' +
       '<ol class="steps tujuan-list">' +
@@ -186,8 +199,11 @@
       (mulai ? '<button class="link warn" data-act="reset-open">↻ Mulai ulang</button>' : "") +
       '<button class="link" data-act="import">⇩ Pulihkan</button>' +
       (mulai ? '<button class="link" data-act="export">⇧ Unduh progres</button>' : "") +
+      (masukServer() ? '<button class="link" data-act="sinkron">⇅ Kirim sekarang</button>' : "") +
+      (masukServer() ? '<button class="link warn" data-act="hapus-open">Hapus data saya</button>' : "") +
       "</div>" +
-      '<div class="devicenote"><i class="dot-ok"></i> Jawaban tersimpan di perangkat ini</div>' +
+      '<div class="devicenote" id="statusSimpan"><i class="dot-ok"></i> ' +
+      (masukServer() ? "Tersambung ke server pengumpulan" : "Jawaban tersimpan di perangkat ini") + "</div>" +
       "</footer>" +
       sheetHTML() +
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
@@ -217,6 +233,9 @@
       "UNIVERSITAS SRIWIJAYA<br>" +
       '<span class="tahun">2026</span>' +
       "</div>" +
+      (masukServer()
+      ? '<div class="acts" style="margin-top:12px"><button class="b2" data-act="keluar">Keluar dari sesi</button></div>'
+      : "") +
       '<button class="b2" data-act="sheet-close" style="margin-top:12px;width:100%">Tutup</button>' +
       "</div></div>";
   }
@@ -224,7 +243,28 @@
   function sheetHTML() {
     if (ui.sheet === "reset") return sheetReset();
     if (ui.sheet === "tentang") return sheetTentang();
+    if (ui.sheet === "hapus") return sheetHapus();
     return "";
+  }
+
+  /* hapus data: dua langkah, dan server benar-benar menghapus barisnya */
+  function sheetHapus() {
+    if (ui.hapusLangkah === 2) {
+      return '<div class="overlay" data-act="sheet-close"><div class="sheet" data-stop="1">' +
+        "<h4>Hapus permanen?</h4>" +
+        "<p>Jawaban, lemparan, dan identitasmu akan dihapus dari <b>perangkat ini dan server</b>. " +
+        "Pengembang tidak bisa memulihkannya. Kode laporan yang sudah kamu salin tetap berlaku sebagai angka, " +
+        "tetapi tidak lagi terhubung ke namamu.</p>" +
+        '<div class="acts"><button class="b1" data-act="hapus-konfirm">Ya, hapus permanen</button>' +
+        '<button class="b2" data-act="sheet-close">Batal</button></div>' +
+        "</div></div>";
+    }
+    return '<div class="overlay" data-act="sheet-close"><div class="sheet" data-stop="1">' +
+      "<h4>Hapus data saya</h4>" +
+      "<p>Semua jawaban dan progres di perangkat ini akan dihapus. Kalau kamu masuk dengan kode akses, " +
+      "data yang sudah terkirim ke server juga ikut dihapus.</p>" +
+      '<div class="acts"><button class="b1" data-act="hapus-siap">Lanjut</button>' +
+      '<button class="b2" data-act="sheet-close">Batal</button></div></div></div>';
   }
 
   function sheetReset() {
@@ -680,7 +720,9 @@
       (kedua ? '<div class="btn-row">' + kedua + "</div>" : "") +
       '<p class="cta-hint">Bagian ' + b.kode + " · " + (selesai ? "selesai" :
         (S.jumlahJawaban(state, b.kode).terisi + "/" + S.jumlahJawaban(state, b.kode).total + " butir terjawab")) +
-      "</p></footer>";
+      "</p>" +
+      (masukServer() ? '<div class="devicenote" id="statusSimpan"><i class="dot-ok"></i> Tersambung ke server</div>' : "") +
+      "</footer>";
   }
 
   function refreshFooter() {
@@ -849,6 +891,7 @@
     S.sinkron(state);
     S.simpan(state);
 
+    if (bt && SN) SN.tandai(bt.id);
     var rt = route();
     var b = K.forMisi(rt.id);
     if (b) K.refresh(b.kode, state);
@@ -867,6 +910,7 @@
   }
 
   document.addEventListener("click", function (e) {
+    if (A && A.pakaiGerbang() && !A.aktif()) return;
     var pil = e.target.closest("[data-pilih]");
     if (pil) {
       K.simpanInput(pil, state);
@@ -1003,6 +1047,11 @@
       }
       case "reset-open": ui.sheet = "reset"; force(); break;
       case "tentang": ui.sheet = "tentang"; force(); break;
+      case "keluar": ui.sheet = null; A.keluar(); break;
+      case "hapus-open": ui.sheet = "hapus"; ui.hapusLangkah = 1; force(); break;
+      case "hapus-siap": ui.hapusLangkah = 2; force(); break;
+      case "hapus-konfirm": hapusDataSaya(); break;
+      case "sinkron": if (SN) { SN.kirim(); ui.pesan = "Mengirim jawaban yang tertunda…"; force(); } break;
       case "reset-confirm": state = S.resetProgres(); ui.sheet = null; ui.pesan = "Progres dihapus. Mulai lagi dari Misi 1."; go("#/"); break;
       case "reset-all": state = S.resetSemua(); ui.sheet = null; ui.pesan = "Semua data dihapus dari perangkat ini."; go("#/"); break;
       case "sheet-close": ui.sheet = null; force(); break;
@@ -1019,6 +1068,7 @@
     if (t.dataset && t.dataset.ident) {
       state.peserta[t.dataset.ident] = t.value;
       S.simpan(state);
+      if (SN && SN.identitas) SN.identitas();
       return;
     }
     if (t.dataset && t.dataset.m5) {
@@ -1058,7 +1108,49 @@
     }
   });
 
-  S.sinkron(state);
-  if (!location.hash) location.replace("#/");
-  render();
+  /* hapus data: server dulu, lalu perangkat */
+  function hapusDataSaya() {
+    var lanjutHapus = function (hasil) {
+      state = S.resetSemua();
+      ui.sheet = null;
+      ui.hapusLangkah = 0;
+      ui.pesan = "Data dihapus." + (hasil && hasil.deleted ? " Server melaporkan " +
+        ((hasil.jumlah && (hasil.jumlah.jawaban + hasil.jumlah.lemparan + hasil.jumlah.peserta)) || 0) +
+        " baris terhapus." : "");
+      go("#/");
+      if (A && A.aktif()) { A.keluar(); }
+    };
+    if (!(A && A.aktif())) { lanjutHapus(null); return; }
+    A.api("/api/peserta", { method: "DELETE" }).then(function (r) {
+      lanjutHapus(r.ok && r.data ? r.data : null);
+    }).catch(function () { lanjutHapus(null); });
+  }
+
+  /* jawaban server digabung kalau perangkat ini belum punya (ganti perangkat) */
+  function gabungJawabanServer(sesi) {
+    var srv = (sesi && sesi.jawabanServer) || {};
+    var ubah = false;
+    Object.keys(srv).forEach(function (id) {
+      var lokal = state.jawaban[id];
+      var jauh = srv[id];
+      if (!jauh) return;
+      if (!lokal || String(jauh.ts || "") > String(lokal.ts || "")) {
+        state.jawaban[id] = { v: jauh.v, ts: jauh.ts };
+        ubah = true;
+      }
+    });
+    if (sesi && sesi.nama && !state.peserta.nama) { state.peserta.nama = sesi.nama; ubah = true; }
+    if (sesi && sesi.nim && !state.peserta.nim) { state.peserta.nim = sesi.nim; ubah = true; }
+    if (sesi && sesi.kelas) { state.peserta.kelas = sesi.kelas; ubah = true; }
+    if (ubah) S.simpan(state);
+    return ubah;
+  }
+
+  A.mulai(function (sesi) {
+    if (sesi && sesi.mode === "server") gabungJawabanServer(sesi);
+    S.sinkron(state);
+    if (!location.hash) location.replace("#/");
+    render();
+    if (SN) SN.mulai();
+  });
 })();

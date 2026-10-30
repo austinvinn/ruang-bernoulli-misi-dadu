@@ -3,276 +3,374 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rekap Kelas — Misi Dadu</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Rekap jawaban · Ruang Bernoulli</title>
 <style>
-:root{--bg:#0a0c10;--panel:#11151d;--panel2:#151b25;--line:#232936;--text:#f4f6fb;--muted:#a0a9b9;--gold:#fbbf24;--cyan:#22d3ee;--red:#fb7185;--green:#4ade80}
+:root{
+  --paper:#f6f7f2;--bg:#fff;--ink:#1b211c;--ink-2:#3d4a40;--muted:#6b7568;
+  --line:#e3e6dc;--line-2:#cfd5c7;--accent:#3f6c51;--accent-soft:#eef3ec;--accent-line:#c9dccb;
+  --ochre:#8a5e15;--ochre-soft:#fbf3e2;--ochre-line:#ead9b6;--ok:#2e7d53;--ok-soft:#e9f5ee;
+  --bad:#a6403a;--bad-soft:#fbeceb;--r:14px;
+  --sh:0 1px 2px rgba(27,33,28,.05),0 4px 12px rgba(27,33,28,.05);
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;padding:26px 18px 60px}
-.wrap{max-width:1080px;margin:0 auto}
-h1{font-size:1.7rem;margin:0 0 6px}
-h2{font-size:1.15rem;margin:0 0 12px}
-.eyebrow{font:11px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.13em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
-p{margin:0 0 12px;color:#c8d0dc}
-.muted{color:var(--muted)}
-.small{font-size:.86rem}
-.card{background:linear-gradient(145deg,#131923,#10141b);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
-textarea,input,select{width:100%;background:#090d13;border:1px solid #303a49;color:var(--text);border-radius:9px;padding:10px;font:inherit}
-textarea{min-height:190px;font:13px/1.7 ui-monospace,Consolas,monospace;resize:vertical}
-.row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-button{cursor:pointer;border:1px solid var(--line);background:#171d27;color:var(--text);font:inherit;font-weight:600;padding:10px 14px;border-radius:10px}
-button.primary{background:var(--gold);border-color:var(--gold);color:#12161c}
-button.ghost{background:transparent}
-button:hover{border-color:#52607a}
-.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 14px}
-.stat{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#090d13}
-.stat b{display:block;font:600 1.25rem/1.3 ui-monospace,Consolas,monospace}
-.stat span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-.verdict{border-radius:10px;padding:12px 14px;font-size:.92rem;border:1px solid var(--line);margin-bottom:14px}
-.verdict.ok{border-color:#4ade8055;background:#4ade800c;color:#bbf7d0}
-.verdict.warn{border-color:#fbbf2455;background:#fbbf240b;color:#fde68a}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:7px 8px;text-align:left;border-bottom:1px solid #1d2431}
-th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
-td.num{font-family:ui-monospace,Consolas,monospace;text-align:right}
-code{font-family:ui-monospace,Consolas,monospace;color:var(--gold);font-size:13px}
-.bad{color:var(--red)}
-svg{display:block;width:100%;height:auto}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
-.tab{padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:600}
-.tab.active{background:#27303d;color:var(--text)}
-@media(max-width:760px){.grid,.row{grid-template-columns:1fr}}
-.credits{text-align:center;font-size:11px;color:var(--muted);line-height:1.7;margin:22px 0 0}
-.credits b{color:var(--text)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;background:var(--bg);min-height:100vh;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+header.bar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.brand-t{font-weight:800;font-size:15px;letter-spacing:-.01em}
+.brand-s{font-size:12px;color:var(--muted)}
+main{padding:18px 20px 60px}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:-.02em}
+p.lead{margin:0 0 18px;color:var(--muted);font-size:13.5px;max-width:70ch}
+.panel{border:1px solid var(--line);border-radius:var(--r);padding:16px;background:#fff;box-shadow:var(--sh);margin-bottom:16px}
+.panel h2{font-size:14px;margin:0 0 10px}
+label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+input,select{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:#fff;width:100%}
+input:focus,select:focus{outline:2px solid var(--accent-line);border-color:var(--accent-line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>div{flex:1 1 160px}
+button{font:inherit;cursor:pointer;border-radius:10px;min-height:44px;padding:10px 16px;font-weight:700;font-size:14px}
+.btn-p{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.btn-g{background:#fff;color:var(--ink);border:1px solid var(--line-2)}
+.btn-s{background:var(--accent-soft);color:#2c5340;border:1px solid var(--accent-line)}
+.btn-t{background:none;border:0;color:var(--accent);font-size:13px;min-height:36px;padding:6px 4px}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.note.bad{color:var(--bad);font-weight:650}
+.note.ok{color:var(--ok);font-weight:650}
+.chip{display:inline-block;font-size:11.5px;font-weight:750;background:var(--accent-soft);color:#2c5340;
+  border:1px solid var(--accent-line);border-radius:999px;padding:3px 9px;margin-right:6px}
+.chip.ochre{background:var(--ochre-soft);border-color:var(--ochre-line);color:var(--ochre)}
+.chip.bad{background:var(--bad-soft);border-color:#e8c4c1;color:var(--bad)}
+.tbl-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:62vh}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:7px 9px;border-bottom:1px solid #eef0e8;text-align:left;white-space:nowrap;vertical-align:top}
+th{background:#f9faf5;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);position:sticky;top:0;z-index:2}
+td.jw{max-width:230px;white-space:normal;font-size:12px;color:var(--ink-2)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:#fcfdfa}
+.kode-baru{background:var(--ok-soft);border:1px dashed #bfe3cd;border-radius:12px;padding:12px;margin-top:12px;display:none}
+.kode-baru b{font-family:ui-monospace,Consolas,monospace;font-size:17px;letter-spacing:.05em}
+.hidden{display:none!important}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}.wrap{border:0}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Pengembang · alat rekap</div>
-  <h1>Rekap Kelas — Misi Dadu</h1>
-  <p>Tempel kode laporan dari LKPD mahasiswa. Semua perhitungan berjalan di browser ini —
-     tidak ada data yang dikirim ke server, jadi halaman ini boleh terbuka tanpa login.</p>
-
-  <div class="grid">
-    <div class="card">
-      <h2>1. Tempel kode</h2>
-      <p class="small muted">Satu baris satu kode. Label nama opsional, dipisah spasi/koma.
-        Contoh: <code>P8S0-48T</code> atau <code>P8S0-48T Rani</code></p>
-      <textarea id="input" placeholder="P8S0-48T Rani&#10;7QK3-2M1 Budi&#10;..."></textarea>
-      <div class="btnrow">
-        <button class="primary" id="btnRekap">Rekap sekarang</button>
-        <button class="ghost" id="btnDemo">Isi 20 kode demo</button>
-        <button class="ghost" id="btnClear">Bersihkan</button>
-      </div>
+  <header class="bar">
+    <div style="flex:1">
+      <div class="brand-t">Rekap jawaban · Ruang Bernoulli: Misi Dadu</div>
+      <div class="brand-s" id="subBar">Halaman pengembang</div>
     </div>
-    <div class="card">
-      <h2>2. Uji / buat kode</h2>
-      <p class="small muted">Untuk verifikasi manual dan pembuatan contoh kode di LKPD.</p>
-      <div class="row">
-        <div><label for="gMisi">Misi</label><select id="gMisi"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
-        <div><label for="gAturan">Sisi sukses</label><select id="gAturan"><option value="0">—</option><option value="1" selected>1 (p=1/6)</option><option value="2">2 (p=1/3)</option><option value="3">3 (p=1/2)</option><option value="4">4</option><option value="5">5</option><option value="6">6 (p=1)</option></select></div>
-        <div><label for="gN">n</label><input id="gN" type="number" value="100" min="0" max="1023"></div>
-        <div><label for="gK">k</label><input id="gK" type="number" value="17" min="0" max="1023"></div>
+    <button class="btn-t hidden" id="btnKeluar">Keluar</button>
+  </header>
+
+  <main>
+    <section id="gerbang">
+      <h1>Masuk sebagai pengembang</h1>
+      <p class="lead">Halaman ini memuat semua jawaban mahasiswa. Butuh kode pengembang (<code>DEV-DADU-…</code>) atau kode baca (<code>BACA-DADU-…</code>). Kode kelas tidak bisa membuka halaman ini.</p>
+      <div class="panel" style="max-width:460px">
+        <label for="kode">Kode akses</label>
+        <input id="kode" placeholder="DEV-DADU-XXXX-XXXX" autocomplete="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:.06em;font-weight:700">
+        <button class="btn-p" id="btnMasuk" style="margin-top:12px;width:100%">Masuk</button>
+        <p class="note" id="pesanGerbang"></p>
       </div>
-      <div class="stat" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Kode</span><b id="gOut" style="color:var(--gold)">—</b>
+      <p class="note">Alat lama untuk membaca kode laporan 7 karakter ada di <a href="rekap-kode.html">rekap-kode.html</a>.</p>
+    </section>
+
+    <section id="isi" class="hidden">
+      <h1>Rekap jawaban</h1>
+      <p class="lead" id="ringkas">—</p>
+
+      <div class="panel">
+        <div class="row">
+          <div style="flex:0 1 190px">
+            <label for="kelasFilter">Kelas</label>
+            <select id="kelasFilter"><option value="">Semua kelas</option></select>
+          </div>
+          <div style="flex:0 0 auto"><button class="btn-g" id="btnMuat">Muat ulang</button></div>
+          <div style="flex:0 0 auto"><button class="btn-s" id="btnCsv">Unduh CSV</button></div>
+          <div style="flex:0 0 auto"><button class="btn-g" id="btnSheet">Sinkron ke Google Sheets</button></div>
+        </div>
+        <p class="note" id="pesanMuat">Belum dimuat.</p>
       </div>
-      <p class="small muted" style="margin-top:10px">Kode memuat: misi, aturan sukses, n, k, dan checksum 8-bit.
-        Salah tulis satu karakter akan ditolak, bukan diterima diam-diam.</p>
-    </div>
-  </div>
 
-  <div class="card" id="hasil" hidden>
-    <h2>Hasil rekap</h2>
-    <div id="verdict"></div>
-    <div class="stats" id="stats"></div>
-    <div id="chart"></div>
-    <div style="overflow:auto;margin-top:16px"><table id="tabel"></table></div>
-    <div class="btnrow">
-      <button class="primary" id="btnCsv">Unduh CSV</button>
-      <button class="ghost" id="btnPrint">Cetak</button>
-    </div>
-  </div>
+      <div class="panel">
+        <h2>Jawaban per mahasiswa</h2>
+        <div class="tbl-wrap"><table id="tabel"><thead></thead><tbody></tbody></table></div>
+        <p class="note">Kolom A1–E4 adalah butir lembar kerja. Sel kosong = belum dijawab. Nilai berbentuk tabel tampil sebagai JSON.</p>
+      </div>
 
-  <div class="card" id="invalidBox" hidden>
-    <h2 class="bad">Baris yang dilewati</h2>
-    <ul id="invalidList" class="small"></ul>
-  </div>
+      <div class="grid2">
+        <div class="panel">
+          <h2>Buat kode akses baru</h2>
+          <div class="row">
+            <div>
+              <label for="peranBaru">Jenis</label>
+              <select id="peranBaru">
+                <option value="siswa">Kelas / mahasiswa</option>
+                <option value="dev">Pengembang (lihat rekap)</option>
+                <option value="baca">Baca saja (untuk Sheets)</option>
+              </select>
+            </div>
+            <div>
+              <label for="kelasBaru">Kelas (khusus kode siswa)</label>
+              <input id="kelasBaru" placeholder="9A" style="text-transform:uppercase">
+            </div>
+            <div>
+              <label for="labelBaru">Keterangan</label>
+              <input id="labelBaru" placeholder="mis. Ahmad / uji coba">
+            </div>
+          </div>
+          <button class="btn-p" id="btnBuat" style="margin-top:12px">Buat kode</button>
+          <div class="kode-baru" id="kodeBaru"><div>Kode baru (hanya tampil sekali):</div><b id="teksKode"></b>
+            <div class="note">Salin sekarang. Jangan simpan di repo.</div></div>
+          <p class="note" id="pesanBuat"></p>
+        </div>
 
-  <p class="credits">
-    Dikembangkan oleh <b>Kelompok 9 Statistika Matematika 2026</b><br>
-    Program Studi Pendidikan Matematika · Fakultas Keguruan dan Ilmu Pendidikan · Universitas Sriwijaya
-  </p>
+        <div class="panel">
+          <h2>Kode yang ada</h2>
+          <div class="tbl-wrap" style="max-height:340px">
+            <table id="tabelKode"><thead><tr><th>jenis</th><th>kelas</th><th>keterangan</th><th>status</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+          <p class="note">Kode disimpan sebagai hash, jadi tidak bisa ditampilkan lagi. Kalau hilang: matikan lalu buat baru.</p>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<script src="src/laporan.js"></script>
 <script>
 (function () {
   "use strict";
-  var $ = function (s) { return document.querySelector(s); };
-  var last = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var data = null;
 
-  function el(tag, cls, html) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (html !== undefined) e.innerHTML = html;
-    return e;
-  }
-  function fmt(x, d) { return Number(x).toFixed(d === undefined ? 3 : d); }
-
-  /* ---------- generator ---------- */
-  function updateGen() {
-    try {
-      var code = Laporan.encode({
-        misi: +$("#gMisi").value,
-        aturan: +$("#gAturan").value,
-        n: +$("#gN").value,
-        k: +$("#gK").value
+  function api(jalur, opsi) {
+    opsi = opsi || {};
+    opsi.credentials = "same-origin";
+    if (opsi.body && !opsi.headers) opsi.headers = { "content-type": "application/json" };
+    return fetch(jalur, opsi).then(function (r) {
+      return r.text().then(function (t) {
+        var d = null;
+        try { d = t ? JSON.parse(t) : null; } catch (e) { d = null; }
+        return { status: r.status, ok: r.ok, data: d };
       });
-      $("#gOut").textContent = code;
-    } catch (err) {
-      $("#gOut").textContent = "⚠ " + err.message;
-    }
-  }
-  ["gMisi", "gAturan", "gN", "gK"].forEach(function (id) {
-    $("#" + id).addEventListener("input", updateGen);
-    $("#" + id).addEventListener("change", updateGen);
-  });
-  updateGen();
-
-  /* ---------- demo 20 mahasiswa (misi 3: n=100, p=1/6) ---------- */
-  function demo() {
-    var names = ["Rani","Budi","Sari","Dimas","Ayu","Fajar","Nisa","Bagas","Tika","Rizky",
-                 "Wulan","Yoga","Intan","Arif","Sinta","Galih","Maya","Hendra","Dewi","Raka"];
-    var lines = names.map(function (nm) {
-      var n = 100, k = 0;
-      for (var i = 0; i < n; i++) if (Math.random() < 1 / 6) k++;
-      return Laporan.encode({ misi: 3, aturan: 1, n: n, k: k }) + " " + nm;
     });
-    $("#input").value = lines.join("\n");
-    rekap();
   }
 
-  /* ---------- rekap ---------- */
-  function rekap() {
-    var parsed = Laporan.parseMany($("#input").value);
-    var entries = parsed.entries;
+  function tampilIsi(sesi) {
+    $("gerbang").classList.add("hidden");
+    $("isi").classList.remove("hidden");
+    $("btnKeluar").classList.remove("hidden");
+    $("subBar").textContent = "Masuk sebagai " + (sesi.peran === "dev" ? "pengembang" : "pembaca") +
+      (sesi.kelas ? " · kelas " + sesi.kelas : "");
+    muat();
+    muatKode();
+  }
 
-    $("#invalidBox").hidden = parsed.invalid.length === 0;
-    $("#invalidList").innerHTML = parsed.invalid
-      .map(function (b) { return "<li>baris " + b.line + ": <code>" + b.raw.replace(/</g, "&lt;") + "</code> — " + b.error + "</li>"; })
-      .join("");
+  function cekSesi() {
+    return api("/api/saya").then(function (r) {
+      if (r.ok && r.data && r.data.ok && (r.data.peran === "dev" || r.data.peran === "baca")) {
+        tampilIsi(r.data);
+        return true;
+      }
+      if (r.ok && r.data && r.data.ok) {
+        $("pesanGerbang").textContent = "Sesi kode kelas sedang aktif dan sudah dikeluarkan. Masuk dengan kode pengembang untuk membuka rekap.";
+        $("pesanGerbang").classList.add("bad");
+        api("/api/keluar", { method: "POST" });
+      }
+      return false;
+    }).catch(function () {
+      $("pesanGerbang").textContent = "Tidak bisa menghubungi server.";
+      $("pesanGerbang").classList.add("bad");
+      return false;
+    });
+  }
 
-    if (!entries.length) {
-      $("#hasil").hidden = true;
+  function masuk() {
+    var kode = $("kode").value.trim();
+    if (kode.length < 4) { $("pesanGerbang").textContent = "Tulis kodenya dulu."; return; }
+    $("pesanGerbang").textContent = "Memeriksa…";
+    $("pesanGerbang").classList.remove("bad");
+    api("/api/masuk", { method: "POST", body: JSON.stringify({ kode: kode }) })
+      .then(function (r) {
+        if (r.ok && r.data && r.data.ok) {
+          if (r.data.peran === "siswa") {
+            $("pesanGerbang").textContent = "Itu kode kelas. Butuh kode pengembang (DEV-…) atau kode baca (BACA-…).";
+            $("pesanGerbang").classList.add("bad");
+            return;
+          }
+          location.reload();
+          return;
+        }
+        $("pesanGerbang").textContent = (r.data && r.data.galat) || "Kode tidak dikenali.";
+        $("pesanGerbang").classList.add("bad");
+      })
+      .catch(function () {
+        $("pesanGerbang").textContent = "Tidak bisa menghubungi server.";
+        $("pesanGerbang").classList.add("bad");
+      });
+  }
+
+  function kelasSekarang() { return $("kelasFilter").value; }
+
+  function muat() {
+    $("pesanMuat").textContent = "Memuat…";
+    $("pesanMuat").classList.remove("bad", "ok");
+    var q = kelasSekarang() ? "?kelas=" + encodeURIComponent(kelasSekarang()) : "";
+    return api("/api/rekap" + q).then(function (r) {
+      if (!r.ok || !r.data || !r.data.ok) {
+        $("pesanMuat").textContent = (r.data && r.data.galat) || "Gagal memuat rekap (" + r.status + ").";
+        $("pesanMuat").classList.add("bad");
+        return;
+      }
+      data = r.data;
+      gambar();
+    }).catch(function () {
+      $("pesanMuat").textContent = "Tidak bisa menghubungi server.";
+      $("pesanMuat").classList.add("bad");
+    });
+  }
+
+  function isiKelas(baris) {
+    var set = {}, sel = $("kelasFilter");
+    Array.prototype.forEach.call(sel.options, function (o) { if (o.value) set[o.value] = 1; });
+    baris.forEach(function (b) {
+      if (b.kelas && !set[b.kelas]) { set[b.kelas] = 1; sel.add(new Option(b.kelas, b.kelas)); }
+    });
+  }
+
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function gambar() {
+    var butir = data.butir || [];
+    var baris = data.baris || [];
+    isiKelas(baris);
+
+    var kepala = "<tr><th>#</th><th>kelas</th><th>nama</th><th>NIM</th><th>butir</th>";
+    butir.forEach(function (b) { kepala += "<th>" + b + "</th>"; });
+    kepala += "<th>diubah</th></tr>";
+    $("tabel").tHead.innerHTML = kepala;
+
+    var isi = "";
+    baris.forEach(function (b, i) {
+      var jml = Object.keys(b.jawaban || {}).length;
+      isi += "<tr><td class=n>" + (i + 1) + "</td><td>" + esc(b.kelas || "—") + "</td><td>" +
+        esc(b.nama || "(tanpa nama)") + "</td><td>" + esc(b.nim || "—") + "</td><td class=n>" +
+        jml + "/" + butir.length + "</td>";
+      butir.forEach(function (id) {
+        var v = (b.jawaban || {})[id];
+        var teks = v === undefined ? "" : (typeof v === "string" ? v : JSON.stringify(v));
+        if (teks.length > 90) teks = teks.slice(0, 90) + "…";
+        isi += '<td class="jw" title="' + esc(teks) + '">' + esc(teks) + "</td>";
+      });
+      isi += "<td>" + (b.diubah ? esc(b.diubah.replace("T", " ").slice(0, 16)) : "—") + "</td></tr>";
+    });
+    if (!baris.length) isi = '<tr><td colspan="' + (butir.length + 6) + '">Belum ada jawaban masuk.</td></tr>';
+    $("tabel").tBodies[0].innerHTML = isi;
+
+    var perKelas = {};
+    baris.forEach(function (b) { perKelas[b.kelas || "—"] = (perKelas[b.kelas || "—"] || 0) + 1; });
+    var ring = Object.keys(perKelas).map(function (k) {
+      return '<span class="chip">' + esc(k) + " · " + perKelas[k] + " peserta</span>";
+    }).join("");
+    $("ringkas").innerHTML = (ring || '<span class="chip ochre">belum ada data</span>') +
+      '<span class="chip ochre">' + baris.length + " peserta · " + butir.length + " butir</span>";
+    $("pesanMuat").textContent = "Terakhir dimuat " + new Date().toLocaleTimeString("id-ID") + ".";
+  }
+
+  function unduhCsv() {
+    var q = "?format=csv" + (kelasSekarang() ? "&kelas=" + encodeURIComponent(kelasSekarang()) : "");
+    location.href = "/api/rekap" + q;
+  }
+
+  function kirimSheet() {
+    $("pesanMuat").classList.remove("bad", "ok");
+    $("pesanMuat").textContent = "Mengirim ke Google Sheets…";
+    api("/api/sheet", { method: "POST" }).then(function (r) {
+      if (r.ok && r.data && r.data.ok) {
+        $("pesanMuat").textContent = "Terkirim: " + r.data.baris + " peserta, " + r.data.jawaban + " jawaban.";
+        $("pesanMuat").classList.add("ok");
+      } else {
+        $("pesanMuat").textContent = (r.data && r.data.galat) || "Gagal mengirim.";
+        $("pesanMuat").classList.add("bad");
+      }
+    }).catch(function () {
+      $("pesanMuat").textContent = "Tidak bisa menghubungi server.";
+      $("pesanMuat").classList.add("bad");
+    });
+  }
+
+  function buatKode() {
+    var peran = $("peranBaru").value, kelas = $("kelasBaru").value.trim(), label = $("labelBaru").value.trim();
+    $("pesanBuat").classList.remove("bad");
+    if (peran === "siswa" && !kelas) {
+      $("pesanBuat").textContent = "Kode siswa butuh nama kelas.";
+      $("pesanBuat").classList.add("bad");
       return;
     }
-    $("#hasil").hidden = false;
-
-    var pool = Laporan.pool(entries);
-    last = { entries: entries, pool: pool };
-
-    /* stats */
-    var stat = [
-      ["Peserta", pool.peserta, ""],
-      ["Σn", pool.n, "total lemparan"],
-      ["Σk", pool.k, "total sukses"],
-      ["p̂ gabungan", fmt(pool.phat, 4), "Σk/Σn"],
-      ["p teoretis", pool.p ? fmt(pool.p, 4) : "—", pool.p ? "aturan aktif" : "bervariasi"],
-      ["SE", pool.se ? fmt(pool.se, 4) : "—", "√(p(1−p)/Σn)"]
-    ];
-    $("#stats").innerHTML = stat.map(function (s) {
-      return '<div class="stat"><span>' + s[0] + "</span><b>" + s[1] + '</b><span style="text-transform:none;letter-spacing:0">' + s[2] + "</span></div>";
-    }).join("");
-
-    /* verdict */
-    var v = $("#verdict");
-    if (pool.p && pool.se) {
-      var gap = Math.abs(pool.phat - pool.p);
-      var ok = gap <= 2 * pool.se;
-      v.className = "verdict " + (ok ? "ok" : "warn");
-      v.innerHTML = "<strong>" + (ok ? "Konsisten dengan teori" : "Menyimpang dari teori") + "</strong> — " +
-        "|p̂ gabungan − p| = " + fmt(gap, 4) + " sedangkan 2·SE = " + fmt(2 * pool.se, 4) + ". " +
-        (ok ? "Data kelas masih wajar untuk p = " + fmt(pool.p, 3) + "."
-            : "Periksa kemungkinan salah aturan sukses, salah tulis kode, atau p yang berbeda antar mahasiswa.");
-    } else {
-      v.className = "verdict";
-      v.innerHTML = "Sebagian entri tidak memuat aturan sukses, jadi pembanding p dilewati.";
-    }
-
-    /* tabel */
-    var rows = entries.map(function (e, i) {
-      var gap = e.p ? fmt(Math.abs(e.phat - e.p), 3) : "—";
-      return "<tr><td>" + (i + 1) + "</td><td>" + (e.label || '<span class="muted">—</span>') +
-        "</td><td class=\"num\">" + e.misi + "</td><td class=\"num\">" + (e.aturan || "—") +
-        "</td><td class=\"num\">" + e.n + "</td><td class=\"num\">" + e.k +
-        "</td><td class=\"num\">" + fmt(e.phat, 3) + "</td><td class=\"num\">" + gap +
-        "</td><td><code>" + e.code + "</code></td></tr>";
-    }).join("");
-    $("#tabel").innerHTML =
-      "<thead><tr><th>#</th><th>Nama</th><th>Misi</th><th>Sisi</th><th>n</th><th>k</th><th>p̂</th><th>|p̂−p|</th><th>Kode</th></tr></thead><tbody>" + rows + "</tbody>";
-
-    /* dot plot p̂ */
-    $("#chart").innerHTML = dotPlot(entries, pool);
+    $("pesanBuat").textContent = "Membuat…";
+    api("/api/kode", { method: "POST", body: JSON.stringify({ aksi: "buat", peran: peran, kelas: kelas, label: label }) })
+      .then(function (r) {
+        if (r.ok && r.data && r.data.ok) {
+          $("teksKode").textContent = r.data.kode;
+          $("kodeBaru").style.display = "block";
+          $("pesanBuat").textContent = "Kode dibuat. Salin sebelum menutup halaman.";
+          muatKode();
+          return;
+        }
+        $("pesanBuat").textContent = (r.data && r.data.galat) || "Gagal membuat kode.";
+        $("pesanBuat").classList.add("bad");
+      })
+      .catch(function () {
+        $("pesanBuat").textContent = "Tidak bisa menghubungi server.";
+        $("pesanBuat").classList.add("bad");
+      });
   }
 
-  function dotPlot(entries, pool) {
-    var W = 760, H = 210, L = 46, R = 22, T = 22, B = 118;
-    var sorted = entries.slice().sort(function (a, b) { return a.phat - b.phat; });
-    var x = function (v) { return L + v * (W - L - R); };
-    var stacks = [];
-    var dots = sorted.map(function (e) {
-      var slot = stacks.findIndex(function (s) { return Math.abs(s - e.phat) > 0.022; });
-      if (slot === -1) { stacks.push(e.phat); slot = stacks.length - 1; }
-      else { stacks[slot] = e.phat; }
-      var y = B - slot * 13;
-      return '<circle cx="' + x(e.phat).toFixed(1) + '" cy="' + y + '" r="5" fill="#fbbf24" opacity=".9"><title>' +
-        (e.label || e.code) + ": p̂ = " + e.phat.toFixed(3) + " (n=" + e.n + ")</title></circle>";
-    }).join("");
-
-    var ticks = [0, .1, 1/6, .25, .5, .75, 1].map(function (v) {
-      return '<line x1="' + x(v) + '" y1="' + T + '" x2="' + x(v) + '" y2="' + B + '" stroke="#ffffff12"/>' +
-        '<text x="' + x(v) + '" y="' + (B + 18) + '" fill="#9aa5b5" font-size="10" text-anchor="middle">' + v.toFixed(2) + "</text>";
-    }).join("");
-
-    var pLine = pool.p ? '<line x1="' + x(pool.p) + '" y1="14" x2="' + x(pool.p) + '" y2="' + (B + 4) +
-      '" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 5"/>' +
-      '<text x="' + x(pool.p) + '" y="11" fill="#22d3ee" font-size="10" text-anchor="middle">p = ' + pool.p.toFixed(3) + "</text>" : "";
-
-    var pooled = '<line x1="' + x(pool.phat) + '" y1="' + (B + 26) + '" x2="' + x(pool.phat) + '" y2="' + (B + 40) +
-      '" stroke="#4ade80" stroke-width="2"/><text x="' + x(pool.phat) + '" y="' + (B + 54) +
-      '" fill="#4ade80" font-size="10" text-anchor="middle">p̂ gabungan ' + pool.phat.toFixed(3) + "</text>";
-
-    return '<p class="small muted" style="margin:0 0 6px">Sebaran p̂ antar mahasiswa — sampel kecil tersebar, data digabung menyempit ke p.</p>' +
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Sebaran p̂ antar mahasiswa">' +
-      ticks + pLine + dots + pooled +
-      '<line x1="' + L + '" y1="' + B + '" x2="' + (W - R) + '" y2="' + B + '" stroke="#7c8798"/></svg>';
+  function muatKode() {
+    api("/api/kode").then(function (r) {
+      if (!r.ok || !r.data || !r.data.ok) return;
+      var isi = "";
+      (r.data.kode || []).forEach(function (k) {
+        isi += "<tr><td>" + esc(k.peran) + "</td><td>" + esc(k.kelas || "—") + "</td><td>" + esc(k.label || "—") +
+          "</td><td>" + (k.aktif ? '<span class="chip">aktif</span>' : '<span class="chip bad">nonaktif</span>') + "</td><td>" +
+          '<button class="btn-t" data-kode="' + esc(k.id) + '" data-aktif="' + (k.aktif ? "1" : "0") + '">' +
+          (k.aktif ? "Matikan" : "Aktifkan") + "</button></td></tr>";
+      });
+      if (!isi) isi = '<tr><td colspan="5">Belum ada kode.</td></tr>';
+      $("tabelKode").tBodies[0].innerHTML = isi;
+    });
   }
 
-  /* ---------- ekspor ---------- */
-  function csv() {
-    if (!last) return;
-    var head = "nama,misi,sisi_sukses,n,k,phat,p_teoretis,kode\n";
-    var body = last.entries.map(function (e) {
-      return [e.label || "", e.misi, e.aturan, e.n, e.k, e.phat.toFixed(6), e.p ? e.p.toFixed(6) : "", e.code].join(",");
-    }).join("\n");
-    var blob = new Blob([head + body], { type: "text/csv;charset=utf-8" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "rekap-misi-dadu.csv";
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-  }
-
-  $("#btnRekap").addEventListener("click", rekap);
-  $("#btnDemo").addEventListener("click", demo);
-  $("#btnClear").addEventListener("click", function () {
-    $("#input").value = ""; $("#hasil").hidden = true; $("#invalidBox").hidden = true;
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-kode]");
+    if (!b) return;
+    var aksi = b.getAttribute("data-aktif") === "1" ? "matikan" : "aktifkan";
+    b.disabled = true;
+    api("/api/kode", { method: "POST", body: JSON.stringify({ aksi: aksi, id: b.getAttribute("data-kode") }) })
+      .then(function () { muatKode(); });
   });
-  $("#btnCsv").addEventListener("click", csv);
-  $("#btnPrint").addEventListener("click", function () { window.print(); });
+
+  $("btnMasuk").addEventListener("click", masuk);
+  $("kode").addEventListener("keydown", function (e) { if (e.key === "Enter") masuk(); });
+  $("btnMuat").addEventListener("click", muat);
+  $("kelasFilter").addEventListener("change", muat);
+  $("btnCsv").addEventListener("click", unduhCsv);
+  $("btnSheet").addEventListener("click", kirimSheet);
+  $("btnBuat").addEventListener("click", buatKode);
+  $("btnKeluar").addEventListener("click", function () {
+    api("/api/keluar", { method: "POST" }).then(function () { location.reload(); });
+  });
+
+  cekSesi();
 })();
 </script>
 </body>

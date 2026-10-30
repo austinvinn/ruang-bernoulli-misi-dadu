@@ -1,0 +1,8 @@
+name = "misi-dadu"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "misi-dadu-db"
+database_id = "9427d3b0-849c-4121-a680-558c11af7199"

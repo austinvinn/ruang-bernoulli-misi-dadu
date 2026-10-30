@@ -223,6 +223,7 @@
 
   /* ---------- lempar ---------- */
   function lempar(s, id, jumlah, aturan) {
+    if (status(s, id) === "terkunci") return simpan(s);   /* jangan menembus kunci */
     var r = rek(s, id);
     var a = aturan || r.aturan || 1;
     var boleh = Math.min(jumlah, sisa(s, id, a));

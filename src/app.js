@@ -297,7 +297,8 @@
       isi = arenaM5(r);
     }
 
-    var lkm = st === "terkunci" ? "" :
+    /* bagian terkunci: tampilkan catatan kunci, bukan halaman kosong */
+    var lkm = st === "terkunci" ? isi :
       K.renderPra(b.kode, state) + isi + K.renderPanel(b.kode, state);
 
     return header({
@@ -662,6 +663,14 @@
     var nextId = id < 5 ? id + 1 : null;
     var utama = "";
     var kedua = "";
+
+    /* bagian terkunci: jangan sediakan tombol lempar (bisa menembus kunci) */
+    if (S.status(state, id) === "terkunci") {
+      return '<footer class="cta">' +
+        '<div class="stack"><button class="btn btn-primary" data-act="home">Kembali ke sampul</button></div>' +
+        '<p class="cta-hint">Bagian ' + b.kode + " terbuka setelah Bagian " + K.forMisi(id - 1).kode + " selesai.</p>" +
+        "</footer>";
+    }
 
     if (selesai && nextId) {
       utama = '<button class="btn btn-primary" data-act="open" data-id="' + nextId + '">Lanjut ke Bagian ' +

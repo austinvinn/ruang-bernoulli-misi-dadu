@@ -96,7 +96,9 @@ export async function onRequestGet({ request, env }) {
       isi = csv(rows);
     }
     const nama = "rekap-misi-dadu" + (kelas ? "-" + kelas : "") + "-" + new Date().toISOString().slice(0, 10) + ".csv";
-    return new Response("\ufeff" + isi, {
+    /* bom=0 dipakai formula IMPORTDATA di Google Sheets (BOM membuat nama kolom kotor) */
+    const tanpaBom = url.searchParams.get("bom") === "0";
+    return new Response((tanpaBom ? "" : "\ufeff") + isi, {
       status: 200,
       headers: {
         "content-type": "text/csv; charset=utf-8",

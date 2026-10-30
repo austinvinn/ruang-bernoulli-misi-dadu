@@ -182,6 +182,11 @@ svg{display:block;width:100%;height:auto}
 .btn-row{display:flex;gap:8px;margin-top:8px}
 .mini-btn{flex:1;height:42px;border-radius:11px;border:1px solid var(--line-2);background:#fff;
   color:var(--ink-2);font-size:12.5px;font-weight:650;display:grid;place-items:center}
+/* tombol wajib ditekan (mis. "Isi data simulasi"): hijau penuh supaya siswa
+   tahu tabel masih kosong dan harus diisi, bukan sekadar tautan kecil */
+.mini-btn.isi-sim{background:var(--accent);border-color:var(--accent);color:#fff;
+  font-weight:800;font-size:13.5px;height:46px;box-shadow:0 6px 14px rgba(63,108,81,.24)}
+.mini-btn.isi-sim:active{transform:translateY(1px)}
 .linkrow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}
 .link{background:none;border:0;padding:0;font-size:12px;font-weight:650;color:var(--muted)}
 .link.warn{color:var(--bad)}

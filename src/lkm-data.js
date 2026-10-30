@@ -21,10 +21,12 @@
           petunjuk: "Isi **satu bilangan bulat dari 0 sampai 5** (0, 1, 2, 3, 4, atau 5). Tidak ada jawaban yang salah di sini."
         },
         {
-          id: "A2", tipe: "tabeldata", misi: 1, baris: 5,
-          soal: "Lempar dadu lima kali dengan tombol **Lempar dadu**. Tabel di bawah terisi sendiri: kolom **Angka dadu** dari hasil lemparanmu, kolom **S / G** berisi **S** kalau muncul 6 dan **G** kalau bukan 6.",
+          id: "A2", tipe: "tabel", misi: 1,
+          soal: "Lempar dadu lima kali dengan tombol **Lempar dadu**, lalu **tulis sendiri** angka yang muncul pada kolom **Angka dadu**. Kolom **S / G** terisi sendiri: **S** kalau angkanya 6 dan **G** kalau bukan 6.",
           kolom: ["Lemparan", "Angka dadu", "S / G"],
-          petunjuk: "Kamu tidak perlu mengetik apa pun di tabel ini. Perhatikan polanya: hanya angka 6 yang menjadi S."
+          baris: [[1], [2], [3], [4], [5]],
+          auto: { kolom: 2, dari: 1, jenis: "sg", min: 1, max: 6 },
+          petunjuk: "Angka setiap lemparan juga bisa kamu lihat di **Papan Data** (tombol di bawah layar). Tulis angka 1 sampai 6 — kolom S / G mengikuti sendiri, jadi kamu bisa melihat pola: hanya angka 6 yang menjadi S."
         },
         {
           id: "A3", tipe: "teks",

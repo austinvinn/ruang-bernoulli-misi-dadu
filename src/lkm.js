@@ -83,11 +83,39 @@
   }
 
   /* sel tabel yang harus diisi siswa */
+  function kolomAuto(bt) {
+    var set = {};
+    if (bt && bt.auto && typeof bt.auto.kolom === "number") set[bt.auto.kolom] = true;
+    return set;
+  }
+
+  /* nilai satu sel tabel: angka dirapikan (hanya digit sesuai rentang) */
+  function rapikanSel(bt, val) {
+    var s = String(val === null || val === undefined ? "" : val).trim();
+    if (!bt || !bt.auto || bt.auto.jenis !== "sg") return s;
+    var min = bt.auto.min === undefined ? 1 : bt.auto.min;
+    var max = bt.auto.max === undefined ? 6 : bt.auto.max;
+    var digit = s.replace(/[^0-9]/g, "");
+    if (!digit) return "";
+    var n = parseInt(digit.charAt(0), 10);
+    return n >= min && n <= max ? String(n) : "";
+  }
+
+  /* S / G otomatis dari angka yang diketik siswa di kolom sumber */
+  function sgHTML(angka) {
+    var s = String(angka === null || angka === undefined ? "" : angka).trim();
+    if (!s) return '<b class="sg">—</b>';
+    return '<b class="sg ' + (s === "6" ? "s" : "g") + '">' + (s === "6" ? "S" : "G") + "</b>";
+  }
+
   function selKosong(bt) {
-    var isi = [];
+    var isi = [], auto = kolomAuto(bt);
     for (var r = 0; r < bt.baris.length; r++) {
       var tetap = bt.baris[r].length;
-      for (var c = tetap; c < bt.kolom.length; c++) isi.push(r + "-" + c);
+      for (var c = tetap; c < bt.kolom.length; c++) {
+        if (auto[c]) continue;
+        isi.push(r + "-" + c);
+      }
     }
     return isi;
   }
@@ -186,6 +214,7 @@
 
   function inputTabel(bt, nilai) {
     var v = nilai && typeof nilai === "object" ? nilai : {};
+    var auto = kolomAuto(bt);
     var head = "", body = "";
     bt.kolom.forEach(function (k) { head += "<th>" + md(k) + "</th>"; });
     for (var r = 0; r < bt.baris.length; r++) {
@@ -193,10 +222,16 @@
       for (var c = 0; c < bt.kolom.length; c++) {
         if (c < bt.baris[r].length) {
           tr += '<td class="t-fix">' + md(bt.baris[r][c]) + "</td>";
+        } else if (auto[c]) {
+          /* kolom otomatis (mis. S / G): tidak diketik siswa, mengikuti
+             kolom sumbernya; diperbarui langsung oleh refresh() */
+          tr += '<td class="t-auto" data-auto-td="' + bt.id + "-" + r + '">' +
+            sgHTML(v[r + "-" + bt.auto.dari]) + "</td>";
         } else {
           var key = r + "-" + c;
           tr += '<td><input class="inp sel" data-jawab="' + bt.id + '" data-r="' + r + '" data-c="' + c +
-            '" inputmode="decimal" autocomplete="off" aria-label="' + bt.id + " baris " + (r + 1) + " kolom " +
+            '" inputmode="' + (bt.auto ? "numeric" : "decimal") + '"' + (bt.auto ? ' maxlength="1"' : "") +
+            ' autocomplete="off" aria-label="' + bt.id + " baris " + (r + 1) + " kolom " +
             bt.kolom[c].replace(/<[^>]+>/g, "") + '" value="' + esc(v[key] || "") + '"></td>';
         }
       }
@@ -335,6 +370,16 @@
       if (!li) return;
       var foot = li.querySelector(".b-foot");
       if (foot) foot.innerHTML = statusButir(bt, state);
+      /* kolom otomatis (S / G) ikut berubah saat angka diketik, tanpa
+         merender ulang seluruh layar (fokus ketik tidak hilang) */
+      if (bt.auto && bt.auto.jenis === "sg") {
+        var nil = S.jawabNilai(state, bt.id);
+        var vo = nil && typeof nil === "object" ? nil : {};
+        for (var r = 0; r < bt.baris.length; r++) {
+          var td = li.querySelector('[data-auto-td="' + bt.id + "-" + r + '"]');
+          if (td) td.innerHTML = sgHTML(vo[r + "-" + bt.auto.dari]);
+        }
+      }
     });
 
     var sisa = document.getElementById("lkm-sisa");
@@ -376,7 +421,9 @@
       if (lama && typeof lama === "object") {
         for (var k in lama) if (Object.prototype.hasOwnProperty.call(lama, k)) obj[k] = lama[k];
       }
-      obj[el.getAttribute("data-r") + "-" + el.getAttribute("data-c")] = el.value;
+      var bersih = rapikanSel(bt, el.value);
+      if (bersih !== el.value) el.value = bersih;
+      obj[el.getAttribute("data-r") + "-" + el.getAttribute("data-c")] = bersih;
       S.jawab(state, id, obj);
     } else if (bt.tipe === "pilihan") {
       S.jawab(state, id, el.getAttribute("data-pilih"));

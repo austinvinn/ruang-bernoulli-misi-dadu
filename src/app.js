@@ -16,7 +16,7 @@
   function labelSesi() { return A && A.label ? A.label() : ""; }
 
   var state = S.baca();
-  var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "" };
+  var ui = { sheet: null, sheetMisi: null, pesan: null, salah: null, m5nama: "", kunciRute: null };
 
   var $app = document.getElementById("app");
 
@@ -531,7 +531,7 @@
         '<p class="note">Angka ini <b>bukan teman sekelas</b>. Pakai kalau kamu mengerjakan sendiri, dan tulis asal datanya di butir E2.</p>' +
         '<table><thead><tr><th>#</th><th>sumber</th><th class="rt">n</th><th class="rt">k</th></tr></thead><tbody>' +
         kosong + "</tbody></table>" +
-        '<div class="btn-row"><button class="mini-btn" data-act="m5isi">Isi data simulasi</button></div>' +
+        '<div class="btn-row"><button class="mini-btn isi-sim" data-act="m5isi">Isi data simulasi</button></div>' +
         '<p class="note">Belum yakin? Kembali ke <b>Data teman</b> di atas kalau kamu punya kode laporan Misi 3 temanmu.</p></div>';
     }
 
@@ -875,13 +875,23 @@
        dulu supaya status butir dan status misi memakai nilai terbaru */
     if (K && K.selaraskan) K.selaraskan(state);
     S.sinkron(state);
+
+    /* Posisi gulir dipertahankan saat layar yang sama dirender ulang
+       (mis. sesudah melempar dadu, mengubah tab aturan, membuka panel).
+       Hanya perpindahan layar yang mengembalikan gulir ke atas. */
+    var kunci = r.view + ":" + r.id;
+    var lama = document.querySelector(".body");
+    var gulir = lama && kunci === ui.kunciRute ? lama.scrollTop : 0;
+
     if (r.view === "home") $app.innerHTML = renderHome();
     else if (r.view === "arena") $app.innerHTML = renderArena(r.id);
     else $app.innerHTML = renderData(r.id);
     K.renderMath($app);
     ui.pesan = null;
+
     var b = document.querySelector(".body");
-    if (b) b.scrollTop = 0;
+    if (b) b.scrollTop = gulir;
+    ui.kunciRute = kunci;
   }
   function force() { render(); }
 
@@ -1004,10 +1014,7 @@
            sempat membaca penjelasan dan menekan "Isi data simulasi" */
         S.sinkron(state);
         S.simpan(state);
-        var sc5 = (document.querySelector(".body") || {}).scrollTop || 0;
         force();
-        var b5 = document.querySelector(".body");
-        if (b5) b5.scrollTop = sc5;
         break;
       }
       case "m5isi": {
@@ -1016,10 +1023,7 @@
         ri.sim = buatSimulasi();
         S.sinkron(state);
         S.simpan(state);
-        var sc6 = (document.querySelector(".body") || {}).scrollTop || 0;
         force();
-        var b6 = document.querySelector(".body");
-        if (b6) b6.scrollTop = sc6;
         break;
       }
       case "m5acak": {

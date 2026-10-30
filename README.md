@@ -2,7 +2,8 @@
 
 **LKM digital** (lembar kerja mahasiswa) untuk topik **Distribusi Bernoulli**.
 Satu dadu bersisi enam, lima bagian lembar kerja, materi yang terbuka setelah siswa
-menemukan sendiri konsepnya. Light mode, tanpa build, tanpa backend pada versi ini.
+menemukan sendiri konsepnya. Light mode, tanpa build, **backend kecil di Cloudflare**
+(Pages Functions + D1) untuk mengumpulkan jawaban lewat kode akses.
 
 **Tim pengembang — Kelompok 9, Statistika Matematika 2026**
 1. Ahmad As Siddiq (06081282429062)
@@ -26,22 +27,61 @@ Program Studi Pendidikan Matematika · Fakultas Keguruan dan Ilmu Pendidikan · 
 | Panel **Materi** terkunci sampai semua butir bagian itu terjawab | ✅ jalan |
 | Rumus KaTeX lokal (tanpa CDN) | ✅ jalan |
 | Papan Data (PMF, konvergensi, tabel, kode laporan) | ✅ jalan |
-| Alat pengembang `rekap.html` (tempel kode → tabel + CSV) | ✅ jalan |
-| Pengumpulan jawaban ke server (Cloudflare D1) | ⏳ belum — jawaban tersimpan di perangkat |
+| Gerbang kode akses (kode kelas / kode pengembang) | ✅ jalan |
+| Pengumpulan jawaban ke D1 + outbox luring | ✅ jalan |
+| Halaman pengembang `/rekap.html` (tabel, filter kelas, unduh CSV, kelola kode) | ✅ jalan |
+| Ekspor ke Google Sheets (IMPORTDATA otomatis + opsi Apps Script) | ✅ jalan |
 | Deploy | ✅ https://misi-dadu.pages.dev |
 
-**Alamat:** aplikasi https://misi-dadu.pages.dev · rekap https://misi-dadu.pages.dev/rekap.html
-· mirror https://austinvinn.github.io/ruang-bernoulli-misi-dadu/
+**Alamat:** aplikasi https://misi-dadu.pages.dev · rekap pengembang
+https://misi-dadu.pages.dev/rekap.html · pembaca kode laporan lama
+https://misi-dadu.pages.dev/rekap-kode.html
 
-## Cara menjalankan
+## Kode akses
 
-Tidak perlu build, tidak perlu server:
+- **Kode kelas** — mis. `DADU-9A-K7QM`. Membuka lembar kerja satu kelas; kelas dikunci oleh kode.
+- **Kode pengembang** — `DEV-DADU-…`. Semua hak kelas + halaman rekap + kelola kode.
+- **Kode baca** — `BACA-DADU-…`. Hanya membaca rekap/CSV (dipakai untuk feed Google Sheets).
 
+Kode disimpan sebagai **hash SHA-256** di tabel `kode`; plaintext hanya tampil sekali saat dibuat.
+Sesi = cookie `HttpOnly` berisi token HMAC (`SESI_SECRET`), berlaku 30 hari. Salah kode 30× dalam
+15 menit per IP → `429`; hitungan direset begitu ada kode yang benar (satu kelas sering berbagi
+satu IP NAT, jadi tidak boleh terkunci gara-gara salah ketik orang lain).
+
+## Rekap & ekspor
+
+- `/rekap.html` (kode pengembang): tabel jawaban semua peserta, filter kelas, **Unduh CSV**,
+  kelola kode (buat/matikan), tombol sinkron ke Google Sheets.
+- `GET /api/rekap?format=csv&token=<kode baca>` — CSV satu baris per peserta, kolom A1–E4;
+  `&bentuk=panjang` satu baris per jawaban; `&bom=0` untuk feed mesin (dipakai `IMPORTDATA`).
+- Dorong instan: `docs/apps-script-sheet.gs` (Apps Script Web App) + secret `SHEET_URL`/`SHEET_TOKEN`.
+
+## Endpoint (Cloudflare Pages Functions)
+
+| Rute | Metode | Akses | Isi |
+|---|---|---|---|
+| `/api/masuk` | POST | publik | `{kode}` → cookie sesi |
+| `/api/keluar` | POST | sesi | hapus cookie |
+| `/api/saya` | GET | sesi | identitas + jawaban tersimpan (pemulihan antar perangkat) |
+| `/api/jawaban` | GET/POST | sesi | ambil / simpan jawaban butir + deret lemparan (upsert) |
+| `/api/peserta` | DELETE | sesi | hapus data sendiri (benar-benar dihapus di D1) |
+| `/api/rekap` | GET | dev/baca | JSON atau CSV, filter `?kelas=` |
+| `/api/kode` | GET/POST | dev | daftar, buat, matikan/aktifkan kode |
+| `/api/sheet` | POST | dev | dorong rekap ke Apps Script Web App |
+
+## Menjalankan lokal
+
+```bash
+# tanpa backend (gerbang kode otomatis dilewati di localhost)
+python -m http.server 8811 --bind 127.0.0.1
+
+# dengan backend + D1 lokal (butuh .dev.vars berisi SESI_SECRET)
+npx wrangler d1 execute misi-dadu-db --local --file=schema.sql
+npx wrangler pages dev . --port 8821 --ip 127.0.0.1
 ```
-buka index.html langsung di browser
-```
 
-Semua aset lokal (tanpa CDN font/KaTeX), jadi tetap jalan offline.
+Jangan menjalankan `wrangler d1 execute --local` saat server dev hidup: dua proses menulis
+berkas SQLite yang sama dan menyebabkan `SQLITE_IOERR`.
 
 ## Struktur
 
@@ -50,22 +90,33 @@ index.html          kerangka + CSS (palet sage)
 src/lkm-data.js     isi soal & materi Bagian A–E (pola discovery)
 src/lkm.js          render butir, simpan jawaban, buka materi, render KaTeX
 src/store.js        progres, status bagian, jawaban, reset, ekspor/impor, lempar dadu
+src/auth.js         gerbang kode akses + sesi server (mode lokal kalau API tidak ada)
+src/sinkron.js      outbox: kirim jawaban ke server, tahan saat luring
 src/charts.js       grafik SVG (PMF, konvergensi, batang aturan)
 src/app.js          router hash, layar sampul/bagian/papan data, interaksi
 src/laporan.js      codec kode laporan 7 karakter (Crockford base32 + CRC-8)
 vendor/katex/       KaTeX 0.16.11 (js + css + font woff2, tanpa CDN)
-rekap.html          alat pengembang: rekap kode kelas
+functions/api/*.js  Pages Functions: masuk, keluar, saya, jawaban, peserta, rekap, kode, sheet
+schema.sql          skema D1 (kode, peserta, jawaban, lemparan, coba)
+wrangler.toml       binding D1 + config Pages
+rekap.html          halaman pengembang (rekap server, CSV, kelola kode)
+rekap-kode.html     pembaca kode laporan 7 karakter (alat lama, tetap ada)
 tests/              uji codec (node tests/laporan.test.cjs)
-docs/               mockup & tangkapan layar
+docs/               mockup, tangkapan layar, apps-script-sheet.gs
 ```
 
 ## Aturan produk
 
-- **Tanpa login.** Progres dan jawaban di `localStorage`; identitas hanya label.
+- **Tanpa akun.** Akses lewat kode; tidak ada email/password, tidak ada data ke pihak ketiga
+  selain Cloudflare (hosting + D1).
 - **Discovery dulu, nama konsep kemudian.** Rumus akhir tidak boleh muncul di teks soal;
   definisi tinggal di panel Materi yang terkunci sampai butir bagian itu terjawab.
-- **Tanpa skor/leaderboard.** Penilaian dilakukan manual oleh dosen.
-- **Kode laporan** `XXXX-EFG` per bagian: disalin sebagai pelengkap, direkap di `rekap.html`.
+- **Tanpa skor/leaderboard.** Penilaian manual dari rekap; situs hanya menyimpan jawaban.
+- **Offline-first.** `localStorage` tetap sumber kebenaran; server hanya cermin. Jawaban yang
+  belum terkirim masuk antrean outbox dan dikirim ulang saat online.
+- **Hapus data sendiri.** Tombol `Hapus data saya` menghapus `localStorage` dan baris D1,
+  dengan bukti jumlah baris yang terhapus.
+- **Kode laporan** `XXXX-EFG` per bagian: pelengkap, bisa dibaca ulang di `rekap-kode.html`.
 - **Navigasi**: Sampul → Bagian A–E → Papan Data; URL ber-hash (`#/misi/3`) supaya tombol back wajar.
 - **Reset** hanya di sampul, dua pilihan: hapus progres (identitas tetap) atau hapus semua.
 - **Data mentah** (nilai dadu tiap lemparan) yang disimpan, bukan agregat.
@@ -78,9 +129,14 @@ docs/               mockup & tangkapan layar
 - `prefers-reduced-motion` mematikan animasi dadu.
 - < 768 px satu kolom; ≥ 1024 px dua kolom (instrumen kiri, data kanan), maksimum 1180 px.
 
-## Deploy (Cloudflare Pages, statis)
+## Deploy (Cloudflare Pages + Functions + D1)
 
-1. Push folder ini ke repo GitHub.
-2. Cloudflare → Workers & Pages → Create → Pages → Connect to Git.
-3. Framework: **None**, build command kosong, output directory `/`.
-4. Hasil: `https://<nama>.pages.dev` · alat pengembang di `/rekap.html`.
+```bash
+git push origin main
+npx wrangler d1 execute misi-dadu-db --remote --file=schema.sql       # sekali / saat skema berubah
+npx wrangler pages secret put SESI_SECRET --project-name=misi-dadu     # sekali
+npx wrangler pages deploy . --project-name=misi-dadu --commit-hash $(git rev-parse HEAD)
+```
+
+Kode akses tidak pernah ditulis di repo. Buat/rotasi lewat `/rekap.html` →
+"Buat kode akses baru". Deploy statis ≠ commit: selalu cek URL produksi sesudah deploy.

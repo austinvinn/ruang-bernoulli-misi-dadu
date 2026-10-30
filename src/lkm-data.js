@@ -18,14 +18,13 @@
         {
           id: "A1", tipe: "angka", fase: "pra",
           soal: "Sebelum melempar apa pun: berapa kali kamu menduga angka 6 muncul dalam lima lemparan?",
-          petunjuk: "Tulis perkiraanmu dulu. Tidak ada jawaban yang salah di sini."
+          petunjuk: "Isi **satu bilangan bulat dari 0 sampai 5** (0, 1, 2, 3, 4, atau 5). Tidak ada jawaban yang salah di sini."
         },
         {
-          id: "A2", tipe: "tabel",
-          soal: "Lempar dadu lima kali dengan tombol **Lempar dadu**. Tulis angka yang muncul, lalu tulis **S** kalau muncul 6 dan **G** kalau bukan 6.",
+          id: "A2", tipe: "tabeldata", misi: 1, baris: 5,
+          soal: "Lempar dadu lima kali dengan tombol **Lempar dadu**. Tabel di bawah terisi sendiri: kolom **Angka dadu** dari hasil lemparanmu, kolom **S / G** berisi **S** kalau muncul 6 dan **G** kalau bukan 6.",
           kolom: ["Lemparan", "Angka dadu", "S / G"],
-          baris: [["1"], ["2"], ["3"], ["4"], ["5"]],
-          petunjuk: "Deret angka dadu yang kamu peroleh juga tampil di panel data tiap bagian."
+          petunjuk: "Kamu tidak perlu mengetik apa pun di tabel ini. Perhatikan polanya: hanya angka 6 yang menjadi S."
         },
         {
           id: "A3", tipe: "teks",
@@ -65,7 +64,7 @@
           soal: "Lempar dadu sepuluh kali. Isi kolom $X_i$ (1 kalau muncul 6, 0 kalau tidak), kolom $k_i$ = jumlah sukses dari lemparan ke-1 sampai ke-$i$, dan kolom $k_i/i$ = hasil pembagiannya.",
           kolom: ["i", "Xᵢ", "kᵢ", "kᵢ ⁄ i"],
           baris: [["1"], ["2"], ["3"], ["4"], ["5"], ["6"], ["7"], ["8"], ["9"], ["10"]],
-          petunjuk: "Deret angka dadu hasil percobaanmu tampil di panel data bagian ini."
+          petunjuk: "Semua angka dadu hasil lemparanmu ada di **Papan Data** (tombol di bawah layar) — urut dari lemparan ke-1 sampai ke-10. Buka halaman itu untuk mengisi kolom $X_i$."
         },
         {
           id: "B2", tipe: "teks",
@@ -96,14 +95,14 @@
         {
           id: "C1", tipe: "angka", fase: "pra", gerbang: "prediksi",
           soal: "Tebak dulu sebelum melempar: berapa kali angka 6 muncul dari 100 lemparan?",
-          petunjuk: "Angka ini mengunci tebakanmu; setelah tersimpan tombol Lempar 100× terbuka."
+          petunjuk: "Isi **satu bilangan bulat dari 0 sampai 100**. Angka ini mengunci tebakanmu; setelah tersimpan, tombol Lempar 100× terbuka."
         },
         {
           id: "C2", tipe: "tabel",
-          soal: "Setelah seratus lemparan selesai, catat nilai $\\hat p$ pada beberapa nilai $n$ dari grafik $\\hat p$ terhadap $n$.",
+          soal: "Setelah seratus lemparan selesai, salin nilai $\\hat p$ dari grafik ke tabel ini. Grafiknya menandai enam titik dengan **garis putus-putus** dan titik bulat pada n = 10, 20, 40, 60, 80, dan 100. Nilai $\\hat p$ di setiap titik itu tertulis di sebelah titiknya.",
           kolom: ["n", "p̂"],
           baris: [["10"], ["20"], ["40"], ["60"], ["80"], ["100"]],
-          petunjuk: "Grafiknya ada di panel kanan (di ponsel: di bawah grafik dadu)."
+          petunjuk: "Grafik ada di panel kanan (di ponsel: di bawah kotak dadu). Sumbu datar = $n$ (jumlah lemparan), sumbu tegak = $\\hat p$. Nilai pada enam titik itu juga muncul di Papan Data Bagian C."
         },
         {
           id: "C3", tipe: "teks",
@@ -112,7 +111,7 @@
         {
           id: "C4", tipe: "angka",
           soal: "Pada $n=100$, berapa jarak $\\hat p$ dengan $p=\\dfrac{1}{6}$? Tulis dengan tiga angka di belakang koma.",
-          petunjuk: "Jarak di sini artinya selisih yang selalu positif: $|\\hat p-p|$."
+          petunjuk: "Jarak = selisih yang selalu positif: $|\\hat p-p|$. **Contoh cara menulis:** kalau $\\hat p=0{,}200$ maka jaraknya $|0{,}200-0{,}167|=0{,}033$ — tulis **0,033** (pakai koma, tiga angka di belakang koma). Kalau hasilmu kurang dari 0,1, awali dengan nol, misalnya **0,041**."
         },
         {
           id: "C5", tipe: "teks",
@@ -138,22 +137,22 @@
       butir: [
         {
           id: "D1", tipe: "tabel",
-          soal: "Lempar 60 kali untuk masing-masing aturan sukses (6 saja, ≥ 5, ≥ 4). Setelah itu isi $p$ dan $\\mathbb{E}[X]$ untuk tiap aturan.",
+          soal: "Lempar 60 kali untuk masing-masing aturan sukses (6 saja, ≥ 5, ≥ 4) memakai tombol di panel atas. Setelah ketiga aturan penuh, isi kolom $p$ dan $\\mathbb{E}[X]$ pada tabel ini — satu baris untuk satu aturan.",
           kolom: ["Aturan sukses", "|A|", "p", "E[X]"],
           baris: [["6 saja", "1"], ["≥ 5", "2"], ["≥ 4", "3"]],
-          petunjuk: "$|A|$ adalah banyaknya sisi yang dihitung sukses. Semua sisi dadu punya peluang sama."
+          petunjuk: "**Cara mengisi.** $|A|$ = banyaknya sisi dadu yang dihitung sukses (sudah diisi: 1, 2, 3 dari enam sisi). $p$ = peluang sukses aturan itu, tulis sebagai desimal tiga angka di belakang koma, contoh **0,167**. $\\mathbb{E}[X]$ dihitung dari definisinya, $\\mathbb{E}[X] = 0\\cdot P(X=0) + 1\\cdot P(X=1)$ — tidak perlu rumus lain. Rekapan lemparan ketiga aturan ada di Papan Data Bagian D."
         },
         {
           id: "D2", tipe: "teks",
           soal: "Ambil satu aturan. Dari 60 lemparan itu kamu memperoleh $k$ sukses dan $n-k$ gagal. Tulis peluang satu barisan hasil seperti itu sebagai perkalian peluang tiap lemparan, memakai $p$.",
-          petunjuk: "Satu barisan berarti urutan hasil yang sudah tetap, bukan sembarang urutan."
+          petunjuk: "Satu barisan berarti urutan hasil yang sudah tetap, bukan sembarang urutan. **Contoh bentuk penulisan:** barisan 3 sukses lalu 2 gagal ditulis $p\\cdot p\\cdot p\\cdot(1-p)\\cdot(1-p)$. Ganti banyaknya $p$ dengan $k$ milikmu dan banyaknya $(1-p)$ dengan $n-k$."
         },
         {
           id: "D3", tipe: "tabel",
           soal: "Sekarang anggap $p$ belum diketahui. Hitung nilai perkalian pada jawaban sebelumnya untuk empat nilai $p$ berikut, memakai $k$ dan $n$ milikmu.",
           kolom: ["p", "nilai perkalian"],
           baris: [["0,1"], ["0,3"], ["0,5"], ["0,7"]],
-          petunjuk: "Pakai kalkulator. Angka hasilnya akan sangat kecil — tulis apa adanya."
+          petunjuk: "Pakai kalkulator. Hasilnya angka sangat kecil, contoh bentuk penulisan: **0,000123** (tulis apa adanya, jangan dibulatkan menjadi 0)."
         },
         {
           id: "D4", tipe: "teks",
@@ -184,17 +183,18 @@
       butir: [
         {
           id: "E1", tipe: "tabel",
-          soal: "Setelah tabel data kelas terisi (tiga teman, atau simulasi), hitung dua cara penggabungan dengan tangan: jumlahkan $k$ lalu bagi jumlah $n$, dan rata-ratakan keempat $\\hat p$.",
+          soal: "Sekarang gabungkan datamu dengan tiga baris pada tabel panel atas. Yang dipakai hanya dua angka per baris: $n$ dan $k$ (baris \"kamu\" ikut dihitung). Isi dua hasil berikut. **(1) Gabungan:** jumlahkan semua $k$, lalu bagi dengan jumlah semua $n$. **(2) Rata-rata:** hitung dulu $\\hat p$ tiap baris, lalu jumlahkan keempat $\\hat p$ itu dan bagi dengan 4.",
           kolom: ["Cara", "Hasil"],
-          baris: [["Gabungan $\\Sigma k/\\Sigma n$"], ["Rata-rata $\\hat p$"]]
+          baris: [["Gabungan: $\\Sigma k \\div \\Sigma n$"], ["Rata-rata: $(\\hat p_1+\\hat p_2+\\hat p_3+\\hat p_4) \\div 4$"]],
+          petunjuk: "**Dari mana angka itu datang?** $\\hat p$ (dibaca \"p topi\") adalah $k \\div n$ untuk satu baris — kolom yang kamu buat sendiri di Bagian B. Contoh: baris dengan $n=80$ dan $k=12$ memberi $\\hat p=12 \\div 80=0{,}150$. Tulis hasil dalam desimal tiga angka, misalnya **0,164**."
         },
         {
           id: "E2", tipe: "teks",
-          soal: "Kapan kedua hasil itu sama? Kapan berbeda? Beri contoh dari tabelmu."
+          soal: "Bandingkan dua angka yang baru kamu isi di E1. Kapan keduanya sama, kapan berbeda? Sebutkan penyebabnya dengan melihat kolom $n$ pada tabel panel atas."
         },
         {
           id: "E3", tipe: "teks",
-          soal: "Kalau $n$ temanmu berbeda-beda, cara mana yang kamu pakai? Mengapa?"
+          soal: "Kalau $n$ tiap orang berbeda-beda, cara mana yang kamu pakai — gabungan atau rata-rata? Mengapa?"
         },
         {
           id: "E4", tipe: "teks",

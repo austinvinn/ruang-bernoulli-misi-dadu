@@ -331,6 +331,24 @@ table.t-lkm .inp.sel{font-size:16px;padding:7px 5px;min-height:42px;border-radiu
 .katex{font-size:1.02em}
 .kx,.kx .katex,.stat .kx,.stat .kx .katex,.panel-head .kx{text-transform:none;letter-spacing:0}
 
+/* ---------- grafik: label sumbu, titik, dan garis putus-putus ---------- */
+.g-lbl{fill:#6b7568;font-size:11px;font-weight:700;letter-spacing:.01em}
+.g-val{fill:#2c5340;font-size:11.5px;font-weight:800;paint-order:stroke;
+  stroke:#fff;stroke-width:2.6;stroke-linejoin:round}
+.g-dot{fill:#3f6c51;stroke:#fff;stroke-width:1.6}
+@media(min-width:1024px){.g-lbl{font-size:12px}.g-val{font-size:12.5px}}
+
+/* ---------- tabel yang terisi otomatis (Bagian A) ---------- */
+table.t-lkm td.t-auto{text-align:center;font-weight:700;color:var(--ink);
+  font-variant-numeric:tabular-nums;background:#fbfdf9}
+.sg{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:8px;
+  font-size:13px;font-weight:800;background:#eff1ea;color:var(--muted)}
+.sg.s{background:var(--accent-soft);color:#2c5340;border:1px solid var(--accent-line)}
+.sg.g{background:#f4f6f0;color:var(--muted);border:1px solid var(--line)}
+.tabel-panjang{max-height:58vh;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+.tabel-panjang table{min-width:0}
+.tabel-panjang thead th{position:sticky;top:0;background:#fff;z-index:1}
+
 /* ---------- sampul ---------- */
 .idrow-3{grid-template-columns:1.4fr 1fr .8fr}
 @media(max-width:430px){.idrow-3{grid-template-columns:1fr}}

@@ -15,7 +15,12 @@
     ochre: "#8a5e15"
   };
 
+  /* n yang ditanyakan di butir C2 — grafik menandai titik-titik ini */
+  var TANDA = [10, 20, 40, 60, 80, 100];
+
   function f(n, d) { return Number(n).toFixed(d === undefined ? 3 : d); }
+  /* angka desimal gaya Indonesia (koma) untuk label grafik */
+  function fc(n, d) { return f(n, d).replace(".", ","); }
 
   /* PMF: batang teoretis (gelap) vs empiris (muda) */
   function pmf(p, phat) {
@@ -53,41 +58,97 @@
       "</svg>";
   }
 
-  /* konvergensi p̂ terhadap n */
+  /* konvergensi p̂ terhadap n.
+     Dilengkapi: label kedua sumbu, garis putus-putus dan titik pada
+     n = 10, 20, 40, 60, 80, 100 beserta nilai p̂ di titik itu —
+     supaya siswa bisa langsung membaca angka yang diminta butir C2.
+     Skala tegak menyesuaikan data (bukan selalu 0–1) agar garis tidak
+     menempel di dasar grafik. */
   function konvergensi(rolls, aturan, p) {
-    var W = 320, H = 116, left = 34, right = W - 8, top = 16, bottom = 92;
+    var W = 400, H = 258, left = 52, right = W - 14, top = 30, bottom = 206;
+
     var n = rolls.length;
-    var pts = [];
-    var k = 0;
-    var step = Math.max(1, Math.ceil(n / 70));
+    /* kumulatif sukses per i supaya titik di n tertentu bisa dihitung */
+    var cum = [0], k = 0, maxPh = 0;
     for (var i = 0; i < n; i++) {
       if (rolls[i] >= 7 - aturan) k++;
-      if ((i + 1) % step === 0 || i === n - 1) {
-        var ph = k / (i + 1);
-        pts.push((left + (i + 1) / Math.max(n, 1) * (right - left)).toFixed(1) + "," +
-                 (bottom - ph * (bottom - top)).toFixed(1));
-      }
+      cum.push(k);
+      if (k / (i + 1) > maxPh) maxPh = k / (i + 1);
     }
-    var y = bottom - p * (bottom - top);
-    var body = n
-      ? '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + C.accent + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
-      : '<text x="' + ((left + right) / 2) + '" y="' + ((top + bottom) / 2) + '" text-anchor="middle" class="tick">belum ada lemparan</text>';
-    var ticks = "";
-    [0, 0.5, 1].forEach(function (v) {
-      var gy = bottom - v * (bottom - top);
-      ticks += '<line x1="' + left + '" y1="' + gy + '" x2="' + right + '" y2="' + gy + '" stroke="' + (v === 0 ? C.axis : C.line) + '"/>' +
-        '<text x="' + (left - 4) + '" y="' + (gy + 3) + '" text-anchor="end" class="tick">' + v.toFixed(1) + "</text>";
+    /* batas atas sumbu tegak dan langkah kisi yang "bulat"
+       (0,05 / 0,10 / 0,20) supaya label y mudah dibaca */
+    var yStep = maxPh <= 0.35 ? 0.05 : (maxPh <= 0.7 ? 0.1 : 0.2);
+    var yMax = Math.min(1, Math.ceil((maxPh + 0.02) / yStep) * yStep);
+    if (yStep === 0.05) yMax = Math.max(0.3, yMax);
+    if (p > yMax) yMax = Math.min(1, Math.ceil((p + 0.02) / yStep) * yStep);
+    var xMax = Math.max(n, 10);
+
+    function X(v) { return left + (v / xMax) * (right - left); }
+    function Y(ph) { return bottom - (ph / yMax) * (bottom - top); }
+    function phatAt(v) { return v > 0 && v <= n ? cum[v] / v : null; }
+
+    /* garis deret p̂ */
+    var pts = [], step = Math.max(1, Math.ceil(n / 120));
+    for (var j = 1; j <= n; j++) {
+      if (j % step === 0 || j === n) pts.push(X(j).toFixed(1) + "," + Y(cum[j] / j).toFixed(1));
+    }
+
+    var out = "";
+
+    /* kisi & label sumbu tegak (p̂) per langkah tetap */
+    (function () {
+      var nTick = Math.round(yMax / yStep);
+      for (var t = 0; t <= nTick; t++) {
+        var v = t * yStep;
+        var gy = Y(v);
+        out += '<line x1="' + left + '" y1="' + gy + '" x2="' + right + '" y2="' + gy + '" stroke="' +
+          (t === 0 ? C.axis : C.line) + '"/>' +
+          '<text x="' + (left - 7) + '" y="' + (gy + 4) + '" text-anchor="end" class="tick">' + fc(v, 2) + "</text>";
+      }
+    })();
+
+    /* sumbu tegak + judulnya */
+    out += '<line x1="' + left + '" y1="' + top + '" x2="' + left + '" y2="' + bottom + '" stroke="' + C.axis + '"/>';
+    out += '<text x="14" y="' + ((top + bottom) / 2) + '" text-anchor="middle" class="g-lbl" ' +
+      'transform="rotate(-90 14 ' + ((top + bottom) / 2) + ')">p\u0302 (proporsi sukses)</text>';
+
+    /* garis p teoretis */
+    var yp = Y(p);
+    out += '<line x1="' + left + '" y1="' + yp + '" x2="' + right + '" y2="' + yp + '" stroke="' +
+      C.soft + '" stroke-width="1.4" stroke-dasharray="5 4"/>' +
+      '<text x="' + (right - 2) + '" y="' + Math.max(top + 9, yp - 6) + '" text-anchor="end" class="g-lbl">p = ' +
+      fc(p, 3) + "</text>";
+
+    /* deret p̂ */
+    out += n
+      ? '<polyline points="' + pts.join(" ") + '" fill="none" stroke="' + C.accent +
+        '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      : '<text x="' + ((left + right) / 2) + '" y="' + ((top + bottom) / 2) +
+        '" text-anchor="middle" class="tick">belum ada lemparan</text>';
+
+    /* tanda di n yang ditanyakan: garis putus-putus tegak + titik + nilainya */
+    var tanda = TANDA.filter(function (v) { return v <= n; });
+    if (!tanda.length && n > 0) tanda = [n];
+    tanda.forEach(function (v, idx) {
+      var ph = phatAt(v);
+      if (ph === null) return;
+      var px = X(v), py = Y(ph);
+      out += '<line x1="' + px.toFixed(1) + '" y1="' + bottom + '" x2="' + px.toFixed(1) + '" y2="' + py.toFixed(1) +
+        '" stroke="' + C.axis + '" stroke-dasharray="3 3"/>' +
+        '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="4.2" class="g-dot"/>' +
+        '<text x="' + px.toFixed(1) + '" y="' + (idx % 2 ? py + 17 : py - 9).toFixed(1) +
+        '" text-anchor="middle" class="g-val">' + fc(ph, 3) + "</text>" +
+        '<text x="' + px.toFixed(1) + '" y="' + (bottom + 16) +
+        '" text-anchor="middle" class="tick">' + v + "</text>";
     });
-    var yLabel = Math.max(top + 8, y - 5);
-    return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Konvergensi proporsi empiris">' +
-      ticks +
-      '<line x1="' + left + '" y1="' + top + '" x2="' + left + '" y2="' + bottom + '" stroke="' + C.axis + '"/>' +
-      '<line x1="' + left + '" y1="' + y + '" x2="' + right + '" y2="' + y + '" stroke="' + C.soft + '" stroke-width="1.4" stroke-dasharray="5 4"/>' +
-      '<text x="' + (right - 2) + '" y="' + yLabel + '" text-anchor="end" class="tick">p = ' + f(p, 3) + "</text>" +
-      body +
-      '<text x="' + left + '" y="' + (bottom + 14) + '" class="tick">1</text>' +
-      '<text x="' + right + '" y="' + (bottom + 14) + '" text-anchor="end" class="tick">' + (n || 0) + "</text>" +
-      "</svg>";
+
+    /* sumbu datar + judulnya */
+    out += '<line x1="' + left + '" y1="' + bottom + '" x2="' + right + '" y2="' + bottom + '" stroke="' + C.axis + '"/>' +
+      '<text x="' + ((left + right) / 2) + '" y="' + (bottom + 34) +
+      '" text-anchor="middle" class="g-lbl">n (jumlah lemparan) \u2192</text>';
+
+    return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Grafik proporsi sukses terhadap jumlah lemparan">' +
+      out + "</svg>";
   }
 
   /* tiga batang p teoretis untuk misi 4 */
@@ -98,7 +159,7 @@
       var x = 46 + i * 92;
       var hh = h.p * scale;
       out += '<rect x="' + x + '" y="' + (base - hh) + '" width="46" height="' + Math.max(hh, 1) + '" rx="5" fill="' + (i === 0 ? C.accent : C.soft) + '"/>' +
-        '<text x="' + (x + 23) + '" y="' + (base - hh - 5) + '" text-anchor="middle" class="val">' + f(h.p, 3) + "</text>" +
+        '<text x="' + (x + 23) + '" y="' + (base - hh - 5) + '" text-anchor="middle" class="val">' + fc(h.p, 3) + "</text>" +
         '<text x="' + (x + 23) + '" y="' + (base + 22) + '" text-anchor="middle" class="tick">' + h.label + "</text>";
     });
     return '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Peluang untuk tiga aturan sukses">' +
@@ -107,5 +168,5 @@
       out + "</svg>";
   }
 
-  root.Charts = { pmf: pmf, konvergensi: konvergensi, aturanBars: aturanBars };
+  root.Charts = { pmf: pmf, konvergensi: konvergensi, aturanBars: aturanBars, TANDA: TANDA };
 })(typeof globalThis !== "undefined" ? globalThis : this);

@@ -92,10 +92,38 @@
     return isi;
   }
 
+  /* ---- butir "tabeldata": tabel yang terisi sendiri dari lemparan ----
+     Dipakai Bagian A: kolom angka dadu dan S/G tidak perlu diketik siswa.
+     Nilainya diselaraskan ke state oleh selaraskan() supaya status butir
+     dan hitungan "sudah terjawab" tetap berjalan seperti butir lain. */
+  function deretData(bt, state) {
+    var arr = deret(bt.misi, state);
+    var r = S.rek(state, bt.misi);
+    var at = r.aturan || 1;
+    return arr.slice(0, bt.baris).map(function (v, i) {
+      return { i: i + 1, v: v, sg: S.sukses(v, at) ? "S" : "G" };
+    });
+  }
+
+  function selaraskan(state) {
+    if (!S) return;
+    DATA.forEach(function (b) {
+      b.butir.forEach(function (bt) {
+        if (bt.tipe !== "tabeldata") return;
+        var siap = deret(bt.misi, state).length >= bt.baris ? "1" : "0";
+        var lama = S.jawabNilai(state, bt.id);
+        if (!lama || typeof lama !== "object" || String(lama.auto) !== siap) {
+          S.jawab(state, bt.id, { auto: siap });
+        }
+      });
+    });
+  }
+
   function butirTerisi(id, v) {
     var bt = butirById(id);
     if (!bt) return v !== null && v !== undefined && String(v).trim() !== "";
     if (v === null || v === undefined) return false;
+    if (bt.tipe === "tabeldata") return !!(v && String(v.auto) === "1");
     if (bt.tipe === "tabel") {
       var sel = selKosong(bt);
       if (!sel.length) return false;
@@ -188,9 +216,29 @@
     return out + "</div>";
   }
 
+  /* tabel yang terisi sendiri dari data lemparan (tanpa kotak isian) */
+  function inputTabelData(bt, state) {
+    var rows = deretData(bt, state);
+    var head = "", body = "";
+    bt.kolom.forEach(function (k) { head += "<th>" + md(k) + "</th>"; });
+    for (var r = 0; r < bt.baris; r++) {
+      var d = rows[r];
+      body += "<tr><td class=\"t-fix\">" + (r + 1) + "</td>" +
+        '<td class="t-auto">' + (d ? d.v : "—") + "</td>" +
+        '<td class="t-auto"><b class="sg ' + (d ? (d.sg === "S" ? "s" : "g") : "") + '">' +
+        (d ? d.sg : "—") + "</b></td></tr>";
+    }
+    return '<div class="tabel-wrap"><table class="t-lkm"><thead><tr>' + head +
+      "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+      (rows.length < bt.baris
+        ? '<p class="b-tip">Menunggu lemparan: ' + rows.length + " dari " + bt.baris + " baris terisi.</p>"
+        : "");
+  }
+
   function renderButir(bt, state, nomor) {
     var nilai = S.jawabNilai(state, bt.id);
     var input =
+      bt.tipe === "tabeldata" ? inputTabelData(bt, state) :
       bt.tipe === "tabel" ? inputTabel(bt, nilai) :
       bt.tipe === "angka" ? inputAngka(bt, nilai) :
       bt.tipe === "pilihan" ? inputPilihan(bt, nilai) :
@@ -351,6 +399,7 @@
     jawabanLengkap: jawabanLengkap,
     jawabanLengkapMisi: jawabanLengkapMisi,
     deret: deret,
+    selaraskan: selaraskan,
     renderPanel: renderPanel,
     renderPra: renderPra,
     renderMateri: renderMateri,

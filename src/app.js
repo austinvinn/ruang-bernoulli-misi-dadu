@@ -162,18 +162,12 @@
       "<li>" + K.md("Menurunkan penduga $p$ dari fungsi likelihood dan mengaitkannya ke sebaran Binomial.") + "</li>" +
       "</ol></div>";
 
-    var alat = '<div class="panel"><div class="panel-head"><b>Alat &amp; bahan</b></div>' +
-      '<ul class="alat">' +
-      "<li>Satu dadu bersisi enam (boleh dadu fisik atau dadu di halaman ini).</li>" +
-      "<li>Ponsel atau laptop yang membuka halaman ini.</li>" +
-      "<li>Alat tulis untuk hitungan di butir tabel.</li>" +
-      "</ul></div>";
-
     var petunjuk = '<div class="panel"><div class="panel-head"><b>Petunjuk umum</b></div>' +
       '<ol class="steps">' +
       "<li>Kerjakan berurutan dari Bagian A sampai E; setiap bagian terbuka setelah bagian sebelumnya selesai.</li>" +
       "<li>Jawab butir <b>prediksi</b> sebelum menekan tombol lempar — tebakan awal tidak dinilai, tetapi perlu.</li>" +
       "<li>Isi lembar kerja lebih dulu. <b>Materi</b> di akhir bagian baru terbuka setelah semua butir bagian itu terjawab.</li>" +
+      "<li>Setiap kali lemparan pada satu bagian habis, buka <b>Papan Data</b> untuk melihat rekapan seluruh lemparan bagian itu.</li>" +
       "<li>Jumlah lemparan tiap bagian dibatasi supaya hasilnya bukan percobaan tanpa batas.</li>" +
       "</ol></div>";
 
@@ -187,7 +181,7 @@
       '<h2 class="title">' + esc(judul) + "</h2>" +
       '<p class="sub">' + sub + "</p></div>" +
       segbar() +
-      ident + tujuan + alat + petunjuk +
+      ident + tujuan + petunjuk +
       '<div class="mlist">' + list + "</div>" +
       (ui.pesan ? '<div class="toast">✓ <div>' + ui.pesan + "</div></div>" : "") +
       "</main>" +
@@ -326,9 +320,10 @@
       ringkas: "lima lemparan",
       tujuan: "Tujuan: mengubah hasil lemparan dadu menjadi dua angka saja, 1 dan 0.",
       langkah: [
-        "Isi butir <b>prediksi</b> di atas lebih dulu, sebelum melempar.",
+        "Isi butir <b>prediksi</b> lebih dulu, sebelum melempar: tulis satu bilangan bulat <b>0 sampai 5</b> (berapa kali kamu menduga angka 6 muncul).",
         "Tekan <b>Lempar dadu</b> lima kali. Kotak dadu besar menunjukkan hasil terakhir.",
-        "Catat tiap hasil ke tabel lembar kerja, lalu jawab pertanyaan sesudahnya."
+        "Tabel Bagian A terisi otomatis (angka dadu + S/G), lalu jawab pertanyaan sesudahnya.",
+        "Setelah lima lemparan habis, buka <b>Papan Data</b> untuk melihat rekapan seluruh lemparan bagian ini."
       ]
     },
     2: {
@@ -336,7 +331,7 @@
       tujuan: "Tujuan: membuat sendiri kolom jumlah sukses dan kolom pembagiannya dari data lemparanmu.",
       langkah: [
         "Tekan <b>Lempar dadu</b> sepuluh kali; kamu boleh berhenti di tengah dan melanjutkan nanti.",
-        "Isi tabel lembar kerja satu baris setiap kali selesai melempar.",
+        "Buka <b>Papan Data</b>: di sana ada seluruh sepuluh angka dadu urut dari lemparan ke-1. Pakai halaman itu untuk mengisi kolom $X_i$, $k_i$, dan $k_i/i$.",
         "Bandingkan kolom terakhir dengan peluang yang kamu temukan di Bagian A."
       ]
     },
@@ -344,41 +339,48 @@
       ringkas: "seratus lemparan",
       tujuan: "Tujuan: melihat apa yang terjadi pada proporsi sukses ketika jumlah lemparan bertambah.",
       langkah: [
-        "Isi butir <b>prediksi</b> dulu; angka itu membuka tombol Lempar 100×.",
-        "Setelah seratus lemparan selesai, grafik proporsi terhadap n muncul di panel kanan.",
-        "Catat beberapa nilai dari grafik ke tabel lembar kerja, lalu jawab pertanyaannya."
+        "Isi butir <b>prediksi</b> dulu: satu bilangan bulat <b>0 sampai 100</b> (berapa kali angka 6 muncul dari seratus lemparan). Angka itu membuka tombol Lempar 100×.",
+        "Setelah seratus lemparan selesai, grafik $\\hat p$ terhadap $n$ muncul di panel kanan: sumbu datar = $n$, sumbu tegak = $\\hat p$.",
+        "Grafik menandai enam titik dengan garis putus-putus (n = 10, 20, 40, 60, 80, 100) dan nilai $\\hat p$ di tiap titik. Salin keenam nilai itu ke butir C2.",
+        "Buka <b>Papan Data</b> Bagian C untuk rekapan seluruh lemparan bila perlu memeriksa."
       ]
     },
     4: {
       ringkas: "tiga aturan · 180 lemparan",
       tujuan: "Tujuan: mencari nilai p yang paling masuk akal untuk data yang sudah kamu kumpulkan.",
       langkah: [
-        "Pilih aturan sukses di atas: <b>6 saja</b>, <b>≥ 5</b>, atau <b>≥ 4</b>.",
-        "Tekan <b>Lempar 60×</b> untuk aturan itu, ganti aturan, ulangi sampai ketiganya penuh.",
-        "Isi tabel p dan E[X] di lembar kerja, lalu lanjut ke pertanyaan berikutnya."
+        "Pilih aturan sukses di atas — <b>6 saja</b> (|A| = 1), <b>≥ 5</b> (|A| = 2), atau <b>≥ 4</b> (|A| = 3) — lalu tekan <b>Lempar 60×</b>. Ulangi sampai ketiga aturan penuh 60 lemparan.",
+        "Isi tabel butir D1 (<b>p</b> dan <b>E[X]</b>) untuk ketiga aturan: p dalam desimal tiga angka (contoh <b>0,167</b>).",
+        "Buka <b>Papan Data</b> Bagian D untuk rekapan n, k, dan $\\hat p$ tiap aturan."
       ]
     },
     5: {
       ringkas: "gabungan data kelas",
       tujuan: "Tujuan: membandingkan dua cara menggabungkan data beberapa orang.",
       langkah: [
-        "Isi tabel data teman dengan n dan k dari kode laporan mereka. Tidak punya teman? Pilih <b>Simulasi kelas</b>.",
-        "Hitung dengan tangan dua cara penggabungan di lembar kerja.",
-        "Jawab pertanyaan kapan keduanya sama dan kapan berbeda."
+        "Isi tabel data di panel atas: <b>n</b> dan <b>k</b> dari Papan Data Bagian C temanmu. Tidak punya teman di sekitar? Pilih <b>Simulasi kelas</b> lalu tekan tombol isi.",
+        "Datamu sendiri (n dan k dari Bagian C) sudah otomatis ikut, jadi ada empat baris data.",
+        "Kerjakan butir E1: <b>gabungan</b> = semua k dijumlah lalu dibagi semua n; <b>rata-rata</b> = $\\hat p$ tiap baris ($k \\div n$) dijumlah lalu dibagi empat.",
+        "Buka <b>Papan Data</b> Bagian E untuk melihat data yang digabungkan."
       ]
     }
   };
 
   function instruksiBox(id) {
     var d = INSTRUKSI[id];
-    var li = d.langkah.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+    /* langkah boleh memuat **tebal** dan $rumus$; tag <b> lama diubah dulu
+       supaya lolos md() tanpa ikut ter-escape */
+    var li = d.langkah.map(function (t) {
+      return "<li>" + K.md(String(t).replace(/<\/?b>/g, "**")) + "</li>";
+    }).join("");
     return '<div class="panel instruksi" data-stop="1">' +
       '<div class="panel-head"><b>Bagian ' + K.forMisi(id).kode + " · Misi " + id + "</b><span>" + d.ringkas + "</span></div>" +
       '<p class="tujuan">' + d.tujuan + "</p>" +
       '<ol class="steps">' + li + "</ol></div>";
   }
 
-  function selesaiCard(id, r) {
+  function selesaiCard(id, r, opts) {
+    opts = opts || {};
     var b = K.forMisi(id);
     var j = K.jumlahTerisi(b.kode, state);
     var nextHint = id < 5
@@ -389,8 +391,12 @@
       '<ol class="steps">' +
       "<li>Percobaan pada bagian ini sudah memenuhi batas lemparan.</li>" +
       "<li>Semua " + j.total + " butir lembar kerja sudah terjawab.</li>" +
+      "<li><b>Buka Papan Data Bagian " + b.kode + "</b> untuk melihat rekapan seluruh lemparan" +
+      (id === 4 ? " ketiga aturan" : "") + " dan kode laporan.</li>" +
       "<li>Materi Bagian " + b.kode + " ada di halaman bagian itu — bacalah untuk memeriksa jawabanmu.</li>" +
       "</ol>" +
+      (opts.papan ? "" : '<div class="btn-row"><button class="mini-btn" data-act="data" data-id="' + id +
+        '">Buka Papan Data Bagian ' + b.kode + " →</button></div>") +
       '<p class="next-hint">' + nextHint + "</p></div>";
   }
 
@@ -413,18 +419,11 @@
     var h = S.hitung(r.rolls, r.aturan);
     var last = r.rolls.length ? r.rolls[r.rolls.length - 1] : 6;
     var penuh = h.n >= 10;
-    var rows = r.rolls.slice(-5).reverse().map(function (v, i) {
-      var idx = r.rolls.length - i;
-      var kk = S.hitung(r.rolls.slice(0, idx), r.aturan);
-      return "<tr><td>" + idx + "</td><td>" + v + "</td><td class=\"n\">" + (S.sukses(v, r.aturan) ? 1 : 0) +
-        "</td><td class=\"n\">" + kk.k + "</td><td class=\"n\">" + dec(kk.phat, 3) + "</td></tr>";
-    }).join("");
     return instruksiBox(2) +
       '<div class="die-stage">' + dieHTML(last) + "</div>" +
       statsHTML(h, null, true) +
-      '<div class="panel"><div class="panel-head"><b>Lima lemparan terakhir</b><span>dari ' + h.n + " lemparan</span></div>" +
-      (rows ? '<table><thead><tr><th>i</th><th>dadu</th><th class="rt">X</th><th class="rt">k</th><th class="rt"><span class="kx" data-tex="\\hat p"></span></th></tr></thead><tbody>' + rows + "</tbody></table>"
-        : '<p class="note">Belum ada lemparan.</p>') + "</div>" +
+      '<div class="panel"><div class="panel-head"><b>Rekapan lemparan</b><span>' + h.n + "/10 lemparan</span></div>" +
+      '<p class="note">' + K.md("Tabel hasil percobaan tidak ditampilkan di halaman ini. Buka **Papan Data** (tombol di bawah) untuk melihat seluruh angka dadu beserta kolom $X_i$, $k_i$, dan $k_i/i$.") + "</p></div>" +
       (penuh ? selesaiCard(2, r) : "");
   }
 
@@ -443,8 +442,10 @@
       "</div>" +
       '<div class="colstack">' +
       statsHTML(h) +
-      '<div class="panel"><div class="panel-head"><b>Proporsi terhadap n</b></div>' +
-      C.konvergensi(r.rolls, r.aturan, 1 / 6) + "</div>" +
+      '<div class="panel"><div class="panel-head"><b>Proporsi terhadap jumlah lemparan</b><span>' +
+      K.md("$\\hat p$ terhadap $n$") + "</span></div>" +
+      C.konvergensi(r.rolls, r.aturan, 1 / 6) +
+      '<p class="note">' + K.md("Titik bulat dengan garis putus-putus menandai n = 10, 20, 40, 60, 80, 100; nilai $\\hat p$ di titik itu tertulis di sebelahnya — itulah yang kamu salin ke butir C2.") + "</p></div>" +
       "</div>" +
       (penuh ? selesaiCard(3, r) : "");
   }
@@ -456,10 +457,6 @@
       var h = S.hitung(arr, a);
       return { a: a, label: a === 1 ? "6" : (a === 2 ? "5–6" : "4–6"), p: a / 6, n: h.n, k: h.k, phat: h.phat };
     });
-    var tabel = baris.map(function (b) {
-      return "<tr><td>" + b.label + "</td><td class=\"n\">" + dec(b.p, 3) + "</td><td class=\"n\">" + b.n +
-        "</td><td class=\"n\">" + b.k + "</td><td class=\"n\">" + (b.n ? dec(b.phat, 3) : "—") + "</td></tr>";
-    }).join("");
     var tabs = [1, 2, 3].map(function (a) {
       return '<button class="tab ' + (a === aturanAktif ? "on" : "") + '" data-act="rule" data-a="' + a + '">' +
         (a === 1 ? "6 saja" : a === 2 ? "≥ 5" : "≥ 4") + "</button>";
@@ -477,10 +474,10 @@
       '<div class="btn-row"><button class="btn btn-primary sm" data-act="roll60"' + (aturanPenuh ? " disabled" : "") + ">" +
       "Lempar 60× · aturan ini</button>" +
       '<button class="btn btn-ghost sm" data-act="rule-reset">Ulangi aturan ini</button></div></div>' +
-      '<div class="panel"><div class="panel-head"><b>Ringkasan tiga aturan</b><span>60 lemparan per aturan</span></div>' +
-      '<table><thead><tr><th>sukses</th><th class="rt">p</th><th class="rt">n</th><th class="rt">k</th><th class="rt"><span class="kx" data-tex="\\hat p"></span></th></tr></thead><tbody>' +
-      tabel + "</tbody></table>" +
-      '<div style="margin-top:10px">' + C.aturanBars(baris.map(function (b) { return { label: b.label, p: b.p }; })) + "</div></div>" +
+      '<div class="panel"><div class="panel-head"><b>Peluang teoretis tiap aturan</b><span>' +
+      K.md("$p = \\dfrac{|A|}{6}$") + "</span></div>" +
+      C.aturanBars(baris.map(function (b) { return { label: b.label, p: b.p }; })) +
+      '<p class="note">' + K.md("Rekapan $n$, $k$, dan $\\hat p$ ketiga aturan ada di **Papan Data Bagian D** — tabelnya sengaja hanya di halaman itu.") + "</p></div>" +
       (semuaPenuh ? selesaiCard(4, r) : "");
   }
 
@@ -736,16 +733,17 @@
   function dataUmum(id, m, r) {
     var h = S.hitung(r.rolls, r.aturan);
     var p = S.pAturan(r.aturan);
-    var rows = r.rolls.slice(-8).reverse().map(function (v, k) {
-      var idx = r.rolls.length - k;
-      var kk = S.hitung(r.rolls.slice(0, idx), r.aturan);
-      return "<tr><td>" + idx + "</td><td>" + v + "</td><td class=\"n\">" + (S.sukses(v, r.aturan) ? 1 : 0) +
+    /* seluruh lemparan ditampilkan (bukan delapan terakhir): Papan Data adalah
+       satu-satunya tempat tabel hasil percobaan */
+    var rows = r.rolls.map(function (v, i) {
+      var kk = S.hitung(r.rolls.slice(0, i + 1), r.aturan);
+      return "<tr><td>" + (i + 1) + "</td><td>" + v + "</td><td class=\"n\">" + (S.sukses(v, r.aturan) ? 1 : 0) +
         "</td><td class=\"n\">" + kk.k + "</td><td class=\"n\">" + dec(kk.phat, 3) + "</td></tr>";
     }).join("");
 
     return header({ back: true, title: "Papan Data", sub: "Bagian " + K.forMisi(id).kode + " · data percobaan", right: chip("✓ Bagian " + K.forMisi(id).kode) }) +
       '<main class="body wide">' +
-      (S.status(state, id) === "selesai" ? selesaiCard(id, r) : "") +
+      (S.status(state, id) === "selesai" ? selesaiCard(id, r, { papan: true }) : "") +
       '<div class="toast">✓ <div><b>Bagian ' + K.forMisi(id).kode + ":</b> angka di halaman ini boleh langsung kamu pakai untuk mengisi tabel lembar kerja. <b>Kode laporan</b> ada di kotak paling bawah.</div></div>" +
       '<div class="colstack">' +
       statsHTML(h) +
@@ -756,8 +754,8 @@
       '<div class="colstack">' +
       '<div class="panel"><div class="panel-head"><b>' + K.md("$\\hat p$ terhadap $n$") + '</b><span>p = ' + dec(p, 3) + "</span></div>" +
       C.konvergensi(r.rolls, r.aturan, p) + "</div>" +
-      '<div class="panel"><div class="panel-head"><b>Lemparan terakhir</b><span>dari ' + h.n + "</span></div>" +
-      (rows ? '<table><thead><tr><th>i</th><th>dadu</th><th class="rt">X</th><th class="rt">k</th><th class="rt"><span class="kx" data-tex="\\hat p"></span></th></tr></thead><tbody>' + rows + "</tbody></table>"
+      '<div class="panel"><div class="panel-head"><b>Seluruh lemparan</b><span>' + h.n + " lemparan · urut dari ke-1</span></div>" +
+      (rows ? '<div class="tabel-wrap' + (r.rolls.length > 30 ? " tabel-panjang" : "") + '"><table><thead><tr><th>i</th><th>dadu</th><th class="rt">X</th><th class="rt">k</th><th class="rt"><span class="kx" data-tex="\\hat p"></span></th></tr></thead><tbody>' + rows + "</tbody></table></div>"
         : '<p class="note">Belum ada lemparan.</p>') + "</div>" +
       "</div>" +
       "</main>" +
@@ -785,7 +783,7 @@
     });
     return header({ back: true, title: "Papan Data", sub: "Bagian D · data percobaan", right: chip("✓ Bagian D") }) +
       '<main class="body wide">' +
-      (S.status(state, 4) === "selesai" ? selesaiCard(4, r) : "") +
+      (S.status(state, 4) === "selesai" ? selesaiCard(4, r, { papan: true }) : "") +
       '<div class="toast">✓ <div><b>Bagian D:</b> tiga aturan dengan 60 lemparan masing-masing. Isi tabel p dan E[X] di lembar kerja, lalu bandingkan dengan kode laporan di bawah.</div></div>' +
       '<div class="colstack">' +
       '<div class="panel"><div class="panel-head"><b>Tiga aturan sukses</b><span>60 lemparan per aturan</span></div>' +
@@ -827,7 +825,7 @@
     }).join("");
     return header({ back: true, title: "Papan Data", sub: "Bagian E · data gabungan", right: chip("✓ Bagian E") }) +
       '<main class="body wide">' +
-      (S.status(state, 5) === "selesai" ? selesaiCard(5, r) : "") +
+      (S.status(state, 5) === "selesai" ? selesaiCard(5, r, { papan: true }) : "") +
       '<div class="toast">✓ <div><b>Bagian E:</b> data yang digabungkan adalah data Bagian C milikmu ditambah tiga baris lain. Kode laporan di bawah merangkum data Bagian C.</div></div>' +
       '<div class="colstack">' +
       '<div class="stats">' + m5Stats(r) + "</div>" +
@@ -861,6 +859,10 @@
   /* ---------------- render ---------------- */
   function render() {
     var r = route();
+    /* butir bertipe tabeldata (Bagian A) mengikuti data lemparan; selaraskan
+       dulu supaya status butir dan status misi memakai nilai terbaru */
+    if (K && K.selaraskan) K.selaraskan(state);
+    S.sinkron(state);
     if (r.view === "home") $app.innerHTML = renderHome();
     else if (r.view === "arena") $app.innerHTML = renderArena(r.id);
     else $app.innerHTML = renderData(r.id);

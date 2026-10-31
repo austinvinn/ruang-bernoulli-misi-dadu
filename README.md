@@ -41,7 +41,8 @@ https://misi-dadu.pages.dev/rekap-kode.html
 
 - **Kode kelas** — mis. `DADU-9A-K7QM`. Membuka lembar kerja satu kelas; kelas dikunci oleh kode.
 - **Kode pengembang** — `DEV-DADU-…`. Semua hak kelas + halaman rekap + kelola kode.
-- **Kode baca** — `BACA-DADU-…`. Hanya membaca rekap/CSV (dipakai untuk feed Google Sheets).
+- **Kode baca** — `BACA-DADU-…`. Hanya membaca rekap/CSV (dipakai untuk feed Google Sheets);
+  tidak bisa membuat kode kelas maupun kode baru.
 
 Kode disimpan sebagai **hash SHA-256** di tabel `kode`; plaintext hanya tampil sekali saat dibuat.
 Sesi = cookie `HttpOnly` berisi token HMAC (`SESI_SECRET`), berlaku 30 hari. Salah kode 30× dalam
@@ -51,7 +52,9 @@ satu IP NAT, jadi tidak boleh terkunci gara-gara salah ketik orang lain).
 ## Rekap & ekspor
 
 - `/rekap.html` (kode pengembang): tabel jawaban semua peserta, filter kelas, **Unduh CSV**,
-  kelola kode (buat/matikan), tombol sinkron ke Google Sheets.
+  kelola kode (buat/matikan), tombol sinkron ke Google Sheets. Dengan **kode baca** halaman yang
+  sama hanya menampilkan rekap + Unduh CSV; panel buat kode, daftar kode, dan sinkron Sheets
+  disembunyikan (dan `/api/kode` tetap menolak dengan `403`).
 - `GET /api/rekap?format=csv&token=<kode baca>` — CSV satu baris per peserta, kolom A1–E4;
   `&bentuk=panjang` satu baris per jawaban; `&bom=0` untuk feed mesin (dipakai `IMPORTDATA`).
 - Dorong instan: `docs/apps-script-sheet.gs` (Apps Script Web App) + secret `SHEET_URL`/`SHEET_TOKEN`.
@@ -123,10 +126,13 @@ docs/               mockup, tangkapan layar, apps-script-sheet.gs
 
 ## Aksesibilitas & responsif
 
-- Tidak ada teks di bawah 11,5 px; teks isi 13,5–14 px.
-- Target sentuh ≥ 44 px; input 16 px supaya Safari iOS tidak memperbesar halaman.
+- Tidak ada teks di bawah 11 px (di ponsel teks pendukung 11 px, teks isi 13,5–14 px).
+- Target sentuh ≥ 44 px di desktop; di ponsel ≤ 520 px tombol utama 46 px, tombol kecil 38–40 px.
+- Input 16 px supaya Safari iOS tidak memperbesar halaman.
 - Kontras teks ≥ 6:1; status memakai ikon + warna (aman buta warna).
 - `prefers-reduced-motion` mematikan animasi dadu.
+- ≤ 520 px: header 53 px dan footer 84–129 px (sebelumnya 78 / 156 px), teks sub judul
+  dipendekkan, supaya isi lembar kerja dapat ± 50 px ruang tambahan.
 - < 768 px satu kolom; ≥ 1024 px dua kolom (instrumen kiri, data kanan), maksimum 1180 px.
 
 ## Deploy (Cloudflare Pages + Functions + D1)
@@ -139,4 +145,5 @@ npx wrangler pages deploy . --project-name=misi-dadu --commit-hash $(git rev-par
 ```
 
 Kode akses tidak pernah ditulis di repo. Buat/rotasi lewat `/rekap.html` →
-"Buat kode akses baru". Deploy statis ≠ commit: selalu cek URL produksi sesudah deploy.
+"Buat kode akses baru" (panel ini hanya muncul untuk sesi **kode pengembang**; kode baca dan kode
+kelas tidak bisa membuat kode). Deploy statis ≠ commit: selalu cek URL produksi sesudah deploy.

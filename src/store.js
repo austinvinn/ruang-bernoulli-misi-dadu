@@ -222,8 +222,18 @@
   }
 
   /* ---------- lempar ---------- */
+  /* Bagian A: tebakan A1 (bilangan bulat 0–5) wajib tersimpan lebih dulu,
+     sejalan dengan penjagaan di app.js (tombol lempar dimatikan). */
+  function prediksiA1(s) {
+    var v = jawabNilai(s, "A1");
+    if (v === null || v === undefined || String(v).trim() === "") return false;
+    var n = Number(String(v).replace(",", ".").trim());
+    return !isNaN(n) && n === Math.floor(n) && n >= 0 && n <= 5;
+  }
+
   function lempar(s, id, jumlah, aturan) {
     if (status(s, id) === "terkunci") return simpan(s);   /* jangan menembus kunci */
+    if (id === 1 && !prediksiA1(s)) return simpan(s);      /* isi tebakan dulu */
     var r = rek(s, id);
     var a = aturan || r.aturan || 1;
     var boleh = Math.min(jumlah, sisa(s, id, a));

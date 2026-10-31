@@ -82,17 +82,39 @@
     } catch (e) { return "—"; }
   }
 
+  /* gerbang prediksi: tebakan wajib diisi sebelum dadu dilempar.
+     Bagian A memakai butir A1 (bilangan bulat 0–5), Bagian C memakai
+     r.prediksi yang diisi dari butir C1. */
+  function angkaBulat(v, min, max) {
+    if (v === null || v === undefined || String(v).trim() === "") return null;
+    var n = Number(String(v).replace(",", ".").trim());
+    if (isNaN(n) || n !== Math.floor(n)) return null;
+    return n < min || n > max ? null : n;
+  }
+  function prediksiSiap(id) {
+    if (id === 1) return angkaBulat(S.jawabNilai(state, "A1"), 0, 5) !== null;
+    if (id === 3) {
+      var r = S.rek(state, 3);
+      return r.prediksi !== null && r.prediksi !== undefined;
+    }
+    return true;
+  }
+
   /* ---------------- header ---------------- */
   function header(opts) {
     opts = opts || {};
     var left = opts.back
       ? '<button class="back" data-act="back" aria-label="Kembali">←</button>'
       : '<div class="mark" aria-hidden="true">⚄</div>';
+    /* di ponsel teks sub dipendekkan (bagian sebelum "·") supaya bar tidak
+       jadi tiga baris dan menyisakan ruang untuk isi lembar kerja */
+    var subTeks = opts.sub || "Misi Dadu";
+    var subPendek = String(subTeks).split("·")[0].trim();
     return '<header class="bar">' +
       left +
       '<div class="brand">' +
       '<div><div class="brand-name">' + (opts.title || "Ruang Bernoulli") + "</div>" +
-      '<div class="brand-sub"><span>' + (opts.sub || "Misi Dadu") + "</span>" +
+      '<div class="brand-sub"><span class="sub-l">' + subTeks + '</span><span class="sub-s">' + subPendek + "</span>" +
       (labelSesi() ? '<span class="who">' + esc(labelSesi()) + "</span>" : "") +
       '<button class="whoami" data-act="tentang" aria-label="Kredit tim pengembang">Tim Pengembang</button>' +
       "</div></div>" +
@@ -405,7 +427,11 @@
     var h = S.hitung(r.rolls, r.aturan);
     var last = r.rolls.length ? r.rolls[r.rolls.length - 1] : 6;
     var penuh = h.n >= 5;
+    var siapA1 = prediksiSiap(1);
     return instruksiBox(1) +
+      (siapA1 ? "" :
+        '<div class="predict"><div class="q">Isi dulu angka tebakanmu di butir <b>A1</b> ' +
+        "(bagian <b>Prediksi dulu, baru melempar</b> di atas). Tombol lempar terbuka setelah tebakan tersimpan.</div></div>") +
       '<div class="die-stage">' + dieHTML(last) + "</div>" +
       statsHTML(h, null, true) +
       '<div class="panel"><div class="panel-head"><b>Aturan pencatatan</b><span>sukses = muncul 6</span></div>' +
@@ -682,8 +708,12 @@
       kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 1) {
       var s1 = S.sisa(state, 1);
-      utama = '<button class="btn btn-primary" data-act="roll1"' + (s1 <= 0 ? " disabled" : "") + ">" +
-        (s1 > 0 ? "Lempar dadu · " + h.n + "/5" : "lima lemparan selesai") + "</button>";
+      if (!prediksiSiap(1)) {
+        utama = '<button class="btn btn-primary" disabled>Isi angka tebakan A1 dulu</button>';
+      } else {
+        utama = '<button class="btn btn-primary" data-act="roll1"' + (s1 <= 0 ? " disabled" : "") + ">" +
+          (s1 > 0 ? "Lempar dadu · " + h.n + "/5" : "lima lemparan selesai") + "</button>";
+      }
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi bagian</button>' +
               '<button class="mini-btn" data-act="data">Papan data</button>';
     } else if (id === 2) {
@@ -921,6 +951,10 @@
     if (b) K.refresh(b.kode, state);
     if (rt.view === "arena" && rt.id === 5) refreshM5();
 
+    if (rt.view === "arena" && rt.id === 1 && prediksiSiap(1)) {
+      var pA = document.querySelector(".predict");
+      if (pA && pA.parentNode) pA.parentNode.removeChild(pA);
+    }
     if (rt.view === "arena" && rt.id === 3) {
       var pc = document.querySelector(".predict");
       var rp = S.rek(state, 3);
@@ -965,6 +999,7 @@
       }
       case "data": go("#/misi/" + id + "/data"); break;
       case "roll1": {
+        if (!prediksiSiap(id)) { force(); break; }   /* Bagian A: A1 wajib diisi dulu */
         S.lempar(state, id, 1);
         var d = document.querySelector(".die");
         if (d) d.classList.add("rolling");
@@ -1120,6 +1155,7 @@
       var r = route();
       if (r.view === "arena" && r.id !== 3 && r.id !== 5) {
         e.preventDefault();
+        if (!prediksiSiap(r.id)) return;
         S.lempar(state, r.id, 1, ui.rule || 1);
         force();
       }

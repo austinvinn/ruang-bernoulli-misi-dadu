@@ -104,8 +104,9 @@ tr:hover td{background:#fcfdfa}
       </div>
 
       <div class="grid2">
-        <div class="panel">
+        <div class="panel" id="panelBuat">
           <h2>Buat kode akses baru</h2>
+          <p class="note" style="margin:0 0 10px">Hanya kode pengembang (<code>DEV-DADU-…</code>) yang bisa membuat kode kelas. Kode baca (<code>BACA-DADU-…</code>) tidak melihat panel ini.</p>
           <div class="row">
             <div>
               <label for="peranBaru">Jenis</label>
@@ -130,12 +131,18 @@ tr:hover td{background:#fcfdfa}
           <p class="note" id="pesanBuat"></p>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="panelKode">
           <h2>Kode yang ada</h2>
           <div class="tbl-wrap" style="max-height:340px">
             <table id="tabelKode"><thead><tr><th>jenis</th><th>kelas</th><th>keterangan</th><th>status</th><th></th></tr></thead><tbody></tbody></table>
           </div>
           <p class="note">Kode disimpan sebagai hash, jadi tidak bisa ditampilkan lagi. Kalau hilang: matikan lalu buat baru.</p>
+        </div>
+
+        <div class="panel hidden" id="panelBaca">
+          <h2>Kode akses</h2>
+          <p class="note">Kamu masuk dengan kode baca. Kode baca hanya untuk melihat rekap dan mengunduh CSV —
+            membuat kode kelas atau kode baru butuh kode pengembang (<code>DEV-DADU-…</code>).</p>
         </div>
       </div>
     </section>
@@ -161,14 +168,24 @@ tr:hover td{background:#fcfdfa}
     });
   }
 
+  var peranSesi = null;
+
   function tampilIsi(sesi) {
+    var dev = sesi.peran === "dev";
+    peranSesi = sesi.peran;
     $("gerbang").classList.add("hidden");
     $("isi").classList.remove("hidden");
     $("btnKeluar").classList.remove("hidden");
-    $("subBar").textContent = "Masuk sebagai " + (sesi.peran === "dev" ? "pengembang" : "pembaca") +
+    $("subBar").textContent = "Masuk sebagai " + (dev ? "pengembang" : "pembaca") +
       (sesi.kelas ? " · kelas " + sesi.kelas : "");
+    /* hanya kode pengembang yang boleh membuat atau mengelola kode akses;
+       kode baca (untuk Sheets) hanya melihat rekap + unduh CSV */
+    $("panelBuat").classList.toggle("hidden", !dev);
+    $("panelKode").classList.toggle("hidden", !dev);
+    $("panelBaca").classList.toggle("hidden", dev);
+    $("btnSheet").classList.toggle("hidden", !dev);
     muat();
-    muatKode();
+    if (dev) muatKode();
   }
 
   function cekSesi() {
@@ -309,6 +326,11 @@ tr:hover td{background:#fcfdfa}
   }
 
   function buatKode() {
+    if (peranSesi !== "dev") {
+      $("pesanBuat").textContent = "Hanya kode pengembang yang bisa membuat kode kelas.";
+      $("pesanBuat").classList.add("bad");
+      return;
+    }
     var peran = $("peranBaru").value, kelas = $("kelasBaru").value.trim(), label = $("labelBaru").value.trim();
     $("pesanBuat").classList.remove("bad");
     if (peran === "siswa" && !kelas) {

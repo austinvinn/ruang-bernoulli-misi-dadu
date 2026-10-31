@@ -76,21 +76,21 @@
     var kelasku = "";
     try { kelasku = (JSON.parse(localStorage.getItem(CACHE) || "{}") || {}).kelas || ""; } catch (e) {}
     app.innerHTML =
-      '<header class="bar"><div class="mark" aria-hidden="true">⚄</div>' +
-      '<div class="brand"><div><div class="brand-name">Ruang Bernoulli</div>' +
-      '<div class="brand-sub"><span>LKM digital · Statistika Matematika</span></div></div></div></header>' +
-      '<main class="body">' +
-      '<div class="hero"><div class="eyebrow">Masuk ke lembar kerja</div>' +
-      '<h2 class="title">Masukkan kode akses</h2>' +
-      '<p class="sub">Kode dibagikan oleh pengembang kelas. Tanpa kode, jawabanmu tidak bisa dikumpulkan ke dosen.</p></div>' +
+      '<main class="body gate">' +
+      '<div class="gate-hero">' +
+      '<h1 class="gate-title">Ruang Bernoulli</h1>' +
+      '<div class="gate-logo" aria-hidden="true">⚄</div>' +
+      '<p class="gate-sub">LKM digital · Statistika Matematika</p>' +
+      "</div>" +
       '<div class="panel">' +
+      '<div class="panel-head"><b>Masukkan kode akses</b><span>satu kode untuk satu kelas</span></div>' +
+      '<p class="note">Untuk mengakses Ruang Bernoulli butuh kode.</p>' +
       '<label class="lab-kode" for="kodeMasuk">Kode akses kelas</label>' +
       '<input class="inp inp-kode" id="kodeMasuk" inputmode="text" autocomplete="off" spellcheck="false" ' +
       'placeholder="DADU-9A-XXXX" aria-label="Kode akses" value="' + (kelasku ? "" : "") + '">' +
       '<p class="note" id="kodeGalat" role="alert">' + (galat || "Huruf besar/kecil dan tanda hubung tidak berpengaruh.") + "</p>" +
       '<button class="btn btn-primary" data-masuk="1"' + (sibuk ? " disabled" : "") + '>Masuk &nbsp;→</button>' +
-      '<p class="note center" style="margin-top:10px">Lupa kode? Hubungi anggota Kelompok 9. ' +
-      'Pengembang: buka <a href="rekap.html">halaman rekap</a>.</p>' +
+      '<p class="note center" style="margin-top:10px">Pengembang: buka <a href="rekap.html">halaman rekap</a>.</p>' +
       "</div></main>";
     var inp = document.getElementById("kodeMasuk");
     if (inp) {

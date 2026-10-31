@@ -133,6 +133,11 @@ docs/               mockup, tangkapan layar, apps-script-sheet.gs
 - `prefers-reduced-motion` mematikan animasi dadu.
 - ≤ 520 px: header 53 px dan footer 84–129 px (sebelumnya 78 / 156 px), teks sub judul
   dipendekkan, supaya isi lembar kerja dapat ± 50 px ruang tambahan.
+- Footer otomatis **ringkas** saat isi digulir: teks progres butir + status server disembunyikan,
+  tersisa tombol aksi (3 tombol); gulir ke atas memunculkannya lagi.
+- Tombol **Papan data** tiap bagian mati sampai percobaan bagian itu selesai (A 5 lemparan,
+  B 10, C 100, D 3×60, E tiga baris data); URL langsung `#/misi/2/data` juga ditolak dengan
+  catatan kunci. Alasannya: Papan Data memuat seluruh data + kode laporan.
 - < 768 px satu kolom; ≥ 1024 px dua kolom (instrumen kiri, data kanan), maksimum 1180 px.
 
 ## Deploy (Cloudflare Pages + Functions + D1)

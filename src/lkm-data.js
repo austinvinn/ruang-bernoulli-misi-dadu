@@ -66,7 +66,7 @@
           soal: "Lempar dadu sepuluh kali. Isi kolom $X_i$ (1 kalau muncul 6, 0 kalau tidak), kolom $k_i$ = jumlah sukses dari lemparan ke-1 sampai ke-$i$, dan kolom $k_i/i$ = hasil pembagiannya.",
           kolom: ["i", "Xᵢ", "kᵢ", "kᵢ ⁄ i"],
           baris: [["1"], ["2"], ["3"], ["4"], ["5"], ["6"], ["7"], ["8"], ["9"], ["10"]],
-          petunjuk: "Semua angka dadu hasil lemparanmu ada di **Papan Data** (tombol di bawah layar) — urut dari lemparan ke-1 sampai ke-10. Buka halaman itu untuk mengisi kolom $X_i$."
+          petunjuk: "Semua angka dadu hasil lemparanmu ada di **Papan Data** (tombol di bawah layar, terbuka setelah sepuluh lemparan) — urut dari lemparan ke-1 sampai ke-10. Buka halaman itu untuk mengisi kolom $X_i$."
         },
         {
           id: "B2", tipe: "teks",

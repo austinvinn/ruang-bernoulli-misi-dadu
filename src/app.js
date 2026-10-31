@@ -100,6 +100,28 @@
     return true;
   }
 
+  /* Papan Data = halaman data percobaan. Baru boleh dibuka setelah percobaan
+     bagian itu selesai (lemparan penuh), supaya siswa tidak melihat data dan
+     kode laporan sebelum mengerjakan. Bagian E tidak punya lemparan: syaratnya
+     tiga baris data sudah terisi. */
+  function papanSiap(id) {
+    if (S.status(state, id) === "selesai") return true;
+    var r = S.rek(state, id);
+    if (id === 1) return r.rolls.length >= 5;
+    if (id === 2) return r.rolls.length >= 10;
+    if (id === 3) return r.rolls.length >= 100;
+    if (id === 4) {
+      return [1, 2, 3].every(function (a) { return (r.rules[a] || []).length >= 60; });
+    }
+    if (id === 5) return m5Lengkap(r);
+    return true;
+  }
+  function tombolPapan(id) {
+    if (papanSiap(id)) return '<button class="mini-btn" data-act="data" data-id="' + id + '">Papan data</button>';
+    return '<button class="mini-btn" data-act="data" data-id="' + id +
+      '" disabled title="Terbuka setelah percobaan bagian ini selesai">Papan data</button>';
+  }
+
   /* ---------------- header ---------------- */
   function header(opts) {
     opts = opts || {};
@@ -354,7 +376,7 @@
       tujuan: "Tujuan: membuat sendiri kolom jumlah sukses dan kolom pembagiannya dari data lemparanmu.",
       langkah: [
         "Tekan <b>Lempar dadu</b> sepuluh kali; kamu boleh berhenti di tengah dan melanjutkan nanti.",
-        "Buka <b>Papan Data</b>: di sana ada seluruh sepuluh angka dadu urut dari lemparan ke-1. Pakai halaman itu untuk mengisi kolom $X_i$, $k_i$, dan $k_i/i$.",
+        "Buka <b>Papan Data</b> (tombolnya terbuka setelah sepuluh lemparan): di sana ada seluruh sepuluh angka dadu urut dari lemparan ke-1. Pakai halaman itu untuk mengisi kolom $X_i$, $k_i$, dan $k_i/i$.",
         "Bandingkan kolom terakhir dengan peluang yang kamu temukan di Bagian A."
       ]
     },
@@ -692,7 +714,7 @@
 
     /* bagian terkunci: jangan sediakan tombol lempar (bisa menembus kunci) */
     if (S.status(state, id) === "terkunci") {
-      return '<footer class="cta">' +
+      return '<footer class="cta' + (ui.ringkas ? " ringkas" : "") + '">' +
         '<div class="stack"><button class="btn btn-primary" data-act="home">Kembali ke sampul</button></div>' +
         '<p class="cta-hint">Bagian ' + b.kode + " terbuka setelah Bagian " + K.forMisi(id - 1).kode + " selesai.</p>" +
         "</footer>";
@@ -701,11 +723,11 @@
     if (selesai && nextId) {
       utama = '<button class="btn btn-primary" data-act="open" data-id="' + nextId + '">Lanjut ke Bagian ' +
         K.forMisi(nextId).kode + " &nbsp;→</button>";
-      kedua = '<button class="mini-btn" data-act="data">Papan data</button>' +
+      kedua = tombolPapan(id) +
               '<button class="mini-btn" data-act="repeat">Ulangi bagian</button>';
     } else if (selesai) {
       utama = '<button class="btn btn-primary" data-act="home">Selesai · ke sampul</button>';
-      kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+      kedua = tombolPapan(id);
     } else if (id === 1) {
       var s1 = S.sisa(state, 1);
       if (!prediksiSiap(1)) {
@@ -715,13 +737,13 @@
           (s1 > 0 ? "Lempar dadu · " + h.n + "/5" : "lima lemparan selesai") + "</button>";
       }
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi bagian</button>' +
-              '<button class="mini-btn" data-act="data">Papan data</button>';
+              tombolPapan(id);
     } else if (id === 2) {
       var s2 = S.sisa(state, 2);
       utama = '<button class="btn btn-primary" data-act="roll1"' + (s2 <= 0 ? " disabled" : "") + ">" +
         (s2 > 0 ? "Lempar dadu · " + h.n + "/10" : "sepuluh lemparan selesai") + "</button>";
       kedua = '<button class="mini-btn" data-act="repeat">Ulangi bagian</button>' +
-              '<button class="mini-btn" data-act="data">Papan data</button>';
+              tombolPapan(id);
     } else if (id === 3) {
       var siap = r.prediksi !== null && r.prediksi !== undefined;
       var s3 = S.sisa(state, 3);
@@ -731,31 +753,32 @@
           : '<button class="btn btn-primary" disabled>seratus lemparan selesai</button>')
         : '<button class="btn btn-primary" disabled>Isi butir prediksi dulu</button>';
       kedua = (s3 > 0 ? '<button class="mini-btn" data-act="roll1">Lempar 1×</button>' : "") +
-              '<button class="mini-btn" data-act="data">Papan data</button>';
+              tombolPapan(id);
     } else if (id === 4) {
       var a4 = ui.rule || 1;
       var s4 = S.sisa(state, 4, a4);
       var n4 = (r.rules[a4] || []).length;
       utama = '<button class="btn btn-primary" data-act="roll60"' + (s4 <= 0 ? " disabled" : "") + ">" +
         (s4 > 0 ? "Lempar 60× · aturan ini (" + n4 + "/60)" : "aturan ini sudah 60/60") + "</button>";
-      kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+      kedua = tombolPapan(id);
     } else {
       /* bagian E: aksi mengisi data simulasi hanya ada satu tempat — tombol di
          dalam panel ("Isi data simulasi" / "Acak ulang data simulasi") */
       if (r.mode === "simulasi" && !m5SimSiap(r)) {
         utama = "";
         kedua = '<button class="mini-btn" data-act="m5mode" data-mode="teman">Data teman</button>' +
-                '<button class="mini-btn" data-act="data">Papan data</button>';
+                tombolPapan(id);
       } else if (m5SimSiap(r)) {
         utama = '<button class="btn btn-primary" data-act="data">Buka Papan Data</button>';
-        kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+        kedua = tombolPapan(id);
       } else {
         utama = '<button class="btn btn-primary" data-act="m5mode" data-mode="simulasi">Simulasi kelas · tanpa teman</button>';
-        kedua = '<button class="mini-btn" data-act="data">Papan data</button>';
+        kedua = tombolPapan(id);
       }
     }
 
-    return '<footer class="cta">' + (utama ? '<div class="stack">' + utama + "</div>" : "") +
+    return '<footer class="cta' + (ui.ringkas ? " ringkas" : "") + '">' +
+      (utama ? '<div class="stack">' + utama + "</div>" : "") +
       (kedua ? '<div class="btn-row">' + kedua + "</div>" : "") +
       '<p class="cta-hint">Bagian ' + b.kode + " · " + (selesai ? "selesai" :
         (S.jumlahJawaban(state, b.kode).terisi + "/" + S.jumlahJawaban(state, b.kode).total + " butir terjawab")) +
@@ -893,6 +916,17 @@
   function renderData(id) {
     var m = S.def(id);
     var r = S.rek(state, id);
+    /* Papan Data terkunci sampai percobaan bagian itu selesai — penjagaan URL
+       langsung (#/misi/2/data) tidak boleh menembus aturan tombol */
+    if (!papanSiap(id)) {
+      var bk = K.forMisi(id).kode;
+      return header({ back: true, title: "Papan Data", sub: "Bagian " + bk, right: chip("Bagian " + bk) }) +
+        '<main class="body"><div class="locked-note">' +
+        "Papan Data Bagian " + bk + " terbuka setelah percobaan bagian ini selesai." +
+        '<br><button class="link" data-act="back">Kembali ke lembar kerja</button></div></main>' +
+        '<footer class="cta"><div class="stack"><button class="btn btn-primary" data-act="back">' +
+        "Kembali ke lembar kerja</button></div></footer>";
+    }
     if (id === 5) return dataM5(m, r);
     if (id === 4) return dataM4(m, r);
     return dataUmum(id, m, r);
@@ -912,6 +946,7 @@
     var kunci = r.view + ":" + r.id;
     var lama = document.querySelector(".body");
     var gulir = lama && kunci === ui.kunciRute ? lama.scrollTop : 0;
+    if (kunci !== ui.kunciRute) ui.ringkas = false;   /* layar baru: footer kembali penuh */
 
     if (r.view === "home") $app.innerHTML = renderHome();
     else if (r.view === "arena") $app.innerHTML = renderArena(r.id);
@@ -997,7 +1032,7 @@
         else go("#/");
         break;
       }
-      case "data": go("#/misi/" + id + "/data"); break;
+      case "data": if (!papanSiap(id)) { force(); break; } go("#/misi/" + id + "/data"); break;
       case "roll1": {
         if (!prediksiSiap(id)) { force(); break; }   /* Bagian A: A1 wajib diisi dulu */
         S.lempar(state, id, 1);
@@ -1148,6 +1183,19 @@
   });
 
   window.addEventListener("hashchange", render);
+
+  /* footer ringkas: begitu isi lembar kerja digulir, teks di bawah tombol
+     (progres butir + status server) disembunyikan supaya layar ponsel lega;
+     gulir kembali ke atas -> teks muncul lagi. */
+  document.addEventListener("scroll", function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains("body")) return;
+    var ringkas = t.scrollTop > 24;
+    if (ringkas === ui.ringkas) return;
+    ui.ringkas = ringkas;
+    var ft = document.querySelector("footer.cta");
+    if (ft) ft.classList.toggle("ringkas", ringkas);
+  }, true);
 
   /* keyboard: spasi = lempar 1 (kalau bukan di input) */
   document.addEventListener("keydown", function (e) {

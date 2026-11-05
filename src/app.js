@@ -286,14 +286,14 @@
     if (ui.hapusLangkah === 2) {
       return '<div class="overlay" data-act="sheet-close"><div class="sheet" data-stop="1">' +
         "<h4>Hapus permanen?</h4>" +
-        "<p>Jawaban, hasil percobaan, dan identitasmu akan dihapus dari <b>perangkat ini dan server</b>. Pengembang tidak bisa memulihkannya.</p>" +
+        "<p>Jawaban, hasil percobaan, dan identitasmu akan dihapus. Setelah ini kamu keluar dan memulai dari awal.</p>" +
         '<div class="acts"><button class="b1" data-act="hapus-konfirm">Ya, hapus permanen</button>' +
         '<button class="b2" data-act="sheet-close">Batal</button></div>' +
         "</div></div>";
     }
     return '<div class="overlay" data-act="sheet-close"><div class="sheet" data-stop="1">' +
       "<h4>Hapus data saya</h4>" +
-      "<p>Semua jawaban dan progres di perangkat ini akan dihapus. Kalau kamu masuk dengan kode akses, data yang sudah terkirim ke server juga ikut dihapus.</p>" +
+      "<p>Semua jawaban dan progres akan dihapus. Setelah ini kamu keluar dan memulai dari awal.</p>" +
       '<div class="acts"><button class="b1" data-act="hapus-siap">Lanjut</button>' +
       '<button class="b2" data-act="sheet-close">Batal</button></div></div></div>';
   }
@@ -813,33 +813,20 @@
     });
   }
 
-  /* hapus permanen: identitas ikut hilang, jadi sesi server ditutup */
+  /* hapus data saya: HANYA di perangkat ini.
+     Salinan di server sengaja dibiarkan supaya data rekap pengembang tidak hilang,
+     dan UI tidak pernah menyebut soal salinan server. */
   function hapusDataSaya() {
     ui.pesan = "Menghapus data…";
     force();
     tungguAntre().then(function () {
-      if (!(A && A.aktif())) return { ok: false, server: false, data: null };
-      return A.api("/api/peserta", { method: "DELETE" }).then(function (r) {
-        return { ok: !!(r && r.ok && r.data && r.data.ok), server: true, data: r && r.data };
-      }).catch(function () { return { ok: false, server: true, data: null }; });
-    }).then(function (hasil) {
       state = S.resetSemua();
       if (SN && SN.kosongkan) SN.kosongkan();
       ui.sheet = null;
       ui.hapusLangkah = 0;
-      if (hasil.ok) {
-        var n = hasil.data && hasil.data.jumlah
-          ? (hasil.data.jumlah.jawaban || 0) + (hasil.data.jumlah.lemparan || 0) + (hasil.data.jumlah.peserta || 0)
-          : 0;
-        ui.pesan = "Data dihapus dari perangkat dan server." + (n ? " " + n + " baris server terhapus." : "");
-        go("#/");
-        A.keluar();
-        return;
-      }
-      ui.pesan = hasil.server
-        ? "Data di perangkat ini dihapus, tetapi server belum bisa dihubungi — salinan di server mungkin masih ada. Masuk lagi lalu ulangi \"Hapus data saya\"."
-        : "Data dihapus dari perangkat ini.";
+      ui.pesan = "Data dihapus. Kamu sudah keluar.";
       go("#/");
+      A.keluar();
     });
   }
 

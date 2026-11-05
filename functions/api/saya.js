@@ -1,6 +1,15 @@
 /* GET /api/saya — siapa yang sedang masuk + jawaban tersimpan di server. */
 import { json, galat, bacaSesi } from "./_util.js";
 
+/* D1 kadang memberi "YYYY-MM-DD HH:MM:SS" (UTC). Klien membandingkan waktu sebagai
+   string ISO, jadi samakan bentuknya supaya perbandingan tidak salah. */
+function iso(t) {
+  const s = String(t || "").trim();
+  if (!s) return "";
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) return s.replace(" ", "T") + "Z";
+  return s;
+}
+
 export async function onRequestGet({ request, env }) {
   const sesi = await bacaSesi(request, env);
   if (!sesi) return galat("Belum masuk.", 401);
@@ -17,14 +26,14 @@ export async function onRequestGet({ request, env }) {
   (j.results || []).forEach((r) => {
     let v = r.nilai;
     try { v = JSON.parse(r.nilai); } catch (e) { /* biarkan teks */ }
-    jawaban[r.butir] = { v: v, ts: r.diubah };
+    jawaban[r.butir] = { v: v, ts: iso(r.diubah) };
   });
 
   return json({
     ok: true,
     peran: sesi.p,
     kelas: sesi.k,
-    peserta: p || { id: sesi.id, kelas: sesi.k, nama: "", nim: "" },
+    peserta: p ? Object.assign({}, p, { dibuat: iso(p.dibuat) }) : { id: sesi.id, kelas: sesi.k, nama: "", nim: "" },
     jawaban: jawaban
   });
 }

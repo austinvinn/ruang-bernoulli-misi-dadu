@@ -11,6 +11,7 @@
   var timer = null;
   var sibuk = false;
   var keadaan = { tertunda: 0, terakhir: null, galat: null, mencoba: false };
+  var tungguDiam = [];   /* penunggu saat kosongkan() menunggu kiriman selesai */
   var MAP_MISI = { A: 1, B: 2, C: 3, D: 4, E: 5 };
 
   function bagianDari(id) { return String(id || "").charAt(0); }
@@ -35,6 +36,13 @@
     }
     el.innerHTML = '<i class="dot-ok"></i> Tersimpan ke server' + (jam ? " · " + jam : "");
     el.classList.remove("bad");
+  }
+
+  /* permintaan yang masih terbang sudah selesai: lepaskan penunggu kosongkan() */
+  function lepasTunggu() {
+    var w = tungguDiam;
+    tungguDiam = [];
+    w.forEach(function (fn) { try { fn(); } catch (e) { /* abaikan */ } });
   }
 
   function tandai(id) {
@@ -74,23 +82,29 @@
       if (res.ok && res.data && res.data.ok) {
         keadaan.terakhir = res.data.waktu || new Date().toISOString();
         keadaan.galat = null;
+        /* baca ulang state: reset/hapus bisa terjadi saat permintaan masih terbang,
+           dan menulis `st` lama akan memunculkan lagi jawaban yang sudah dihapus */
+        var kini = S.baca();
         paket.forEach(function (id) {
           delete antre[id];
-          st.kirim[id] = { ts: keadaan.terakhir, ok: true };
+          kini.kirim[id] = { ts: keadaan.terakhir, ok: true };
         });
-        S.simpan(st);
+        S.simpan(kini);
         lapor();
+        lepasTunggu();
         if (jumlah()) jadwal(500);
         return;
       }
       keadaan.galat = (res.data && res.data.galat) || ("Server menjawab " + res.status);
       lapor();
+      lepasTunggu();
       jadwal(res.status === 429 ? 20000 : 8000);
     }).catch(function (e) {
       sibuk = false;
       keadaan.mencoba = false;
       keadaan.galat = e && e.message ? e.message : "jaringan";
       lapor();
+      lepasTunggu();
       jadwal(10000);
     });
   }
@@ -123,6 +137,23 @@
     if (jumlah()) jadwal(300);
   }
 
+  /* reset/hapus: buang antre, timer, dan status kirim supaya tidak ada jawaban
+     lama yang terkirim setelah data dihapus. Promise selesai saat tidak ada
+     permintaan yang masih terbang (pemanggil menunggu sebelum menghapus di server). */
+  function kosongkan() {
+    var adaTerbang = sibuk;      /* jangan setel sibuk=false: kirim() bisa jalan dobel */
+    antre = {};
+    clearTimeout(timer);
+    timer = null;
+    clearTimeout(timerIdent);
+    keadaan = { tertunda: 0, terakhir: null, galat: null, mencoba: false };
+    lapor();
+    return new Promise(function (selesai) {
+      if (!adaTerbang) return selesai(true);
+      tungguDiam.push(function () { selesai(true); });
+    });
+  }
+
   function mulai() {
     window.addEventListener("online", function () { lapor(); jadwal(400); });
     window.addEventListener("offline", lapor);
@@ -138,6 +169,7 @@
     identitas: identitas,
     kirim: kirim,
     kirimSemua: kirimSemua,
+    kosongkan: kosongkan,
     mulai: mulai,
     jumlah: jumlah,
     keadaan: function () { return keadaan; },

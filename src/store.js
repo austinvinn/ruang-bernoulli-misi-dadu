@@ -33,7 +33,11 @@
       misi: {},
       terakhir: 1,
       dibuat: now(),
-      diubah: now()
+      diubah: now(),
+      /* watermark: waktu terakhir data dikosongkan di perangkat ini.
+         Jawaban server yang lebih tua dari ini tidak boleh disalin balik
+         (lihat gabungJawabanServer di app.js). */
+      dibersihkan: null
     };
   }
 
@@ -48,6 +52,7 @@
     if (!s.jawaban || typeof s.jawaban !== "object") s.jawaban = {};
     if (!s.kirim || typeof s.kirim !== "object") s.kirim = {};
     if (!s.terakhir) s.terakhir = 1;
+    if (typeof s.dibersihkan === "undefined") s.dibersihkan = null;
     s.versi = VERSI;
     return s;
   }
@@ -268,9 +273,14 @@
     var peserta = s.peserta;
     var baru = kosong();
     baru.peserta = peserta;      /* nama/email dipertahankan */
+    baru.dibersihkan = now();    /* blokir salin-balik jawaban server yang lama */
     return simpan(baru);
   }
-  function resetSemua() { return simpan(kosong()); }
+  function resetSemua() {
+    var baru = kosong();
+    baru.dibersihkan = now();
+    return simpan(baru);
+  }
 
   /* ---------- ekspor / impor ---------- */
   function ekspor(s) {

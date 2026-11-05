@@ -1140,8 +1140,8 @@
       case "hapus-siap": ui.hapusLangkah = 2; force(); break;
       case "hapus-konfirm": hapusDataSaya(); break;
       case "sinkron": if (SN) { SN.kirim(); ui.pesan = "Mengirim jawaban yang tertunda…"; force(); } break;
-      case "reset-confirm": state = S.resetProgres(); ui.sheet = null; ui.pesan = "Progres dihapus. Mulai lagi dari Misi 1."; go("#/"); break;
-      case "reset-all": state = S.resetSemua(); ui.sheet = null; ui.pesan = "Semua data dihapus dari perangkat ini."; go("#/"); break;
+      case "reset-confirm": kosongkanData("reset"); break;
+      case "reset-all": kosongkanData("semua"); break;
       case "sheet-close": ui.sheet = null; force(); break;
       case "sheet-stop": break;
     }
@@ -1210,33 +1210,97 @@
     }
   });
 
-  /* hapus data: server dulu, lalu perangkat */
-  function hapusDataSaya() {
-    var lanjutHapus = function (hasil) {
-      state = S.resetSemua();
-      ui.sheet = null;
-      ui.hapusLangkah = 0;
-      ui.pesan = "Data dihapus." + (hasil && hasil.deleted ? " Server melaporkan " +
-        ((hasil.jumlah && (hasil.jumlah.jawaban + hasil.jumlah.lemparan + hasil.jumlah.peserta)) || 0) +
-        " baris terhapus." : "");
-      go("#/");
-      if (A && A.aktif()) { A.keluar(); }
-    };
-    if (!(A && A.aktif())) { lanjutHapus(null); return; }
-    A.api("/api/peserta", { method: "DELETE" }).then(function (r) {
-      lanjutHapus(r.ok && r.data ? r.data : null);
-    }).catch(function () { lanjutHapus(null); });
+  /* ---------- reset / hapus data ----------
+     Urutannya: antre kiriman dikosongkan -> server dibereskan -> perangkat dikosongkan.
+     Kalau server gagal, pesan tidak boleh mengaku berhasil (dulu: "Data dihapus"
+     padahal jawaban server masih ada dan muncul lagi saat halaman dimuat ulang). */
+  function tungguAntre() {
+    var janji = (SN && SN.kosongkan) ? SN.kosongkan() : Promise.resolve(true);
+    return Promise.race([janji, new Promise(function (r) { setTimeout(function () { r(false); }, 4000); })]);
   }
 
-  /* jawaban server digabung kalau perangkat ini belum punya (ganti perangkat) */
+  function kosongkanServer() {
+    if (!(A && A.aktif())) return Promise.resolve({ ok: false, server: false });
+    return A.api("/api/peserta", { method: "POST", body: JSON.stringify({ mode: "kosongkan" }) })
+      .then(function (r) { return { ok: !!(r && r.ok && r.data && r.data.ok), server: true }; })
+      .catch(function () { return { ok: false, server: true }; });
+  }
+
+  function kosongkanData(jenis) {
+    ui.pesan = "Menghapus data…";
+    force();
+    tungguAntre().then(kosongkanServer).then(function (hasil) {
+      state = jenis === "reset" ? S.resetProgres() : S.resetSemua();
+      if (SN && SN.kosongkan) SN.kosongkan();
+      ui.sheet = null;
+      ui.hapusLangkah = 0;
+      if (hasil.ok) {
+        ui.pesan = jenis === "reset"
+          ? "Progres dihapus. Mulai lagi dari Misi 1."
+          : "Semua data dihapus dari perangkat ini dan server.";
+      } else if (hasil.server) {
+        ui.pesan = "Progres di perangkat ini dihapus, tetapi server belum bisa dihubungi — salinan di server belum terhapus.";
+      } else {
+        ui.pesan = jenis === "reset"
+          ? "Progres dihapus. Mulai lagi dari Misi 1."
+          : "Semua data dihapus dari perangkat ini.";
+      }
+      go("#/");
+    });
+  }
+
+  /* hapus permanen: identitas ikut hilang, jadi sesi server ditutup */
+  function hapusDataSaya() {
+    ui.pesan = "Menghapus data…";
+    force();
+    tungguAntre().then(function () {
+      if (!(A && A.aktif())) return { ok: false, server: false, data: null };
+      return A.api("/api/peserta", { method: "DELETE" }).then(function (r) {
+        return { ok: !!(r && r.ok && r.data && r.data.ok), server: true, data: r && r.data };
+      }).catch(function () { return { ok: false, server: true, data: null }; });
+    }).then(function (hasil) {
+      state = S.resetSemua();
+      if (SN && SN.kosongkan) SN.kosongkan();
+      ui.sheet = null;
+      ui.hapusLangkah = 0;
+      if (hasil.ok) {
+        var n = hasil.data && hasil.data.jumlah
+          ? (hasil.data.jumlah.jawaban || 0) + (hasil.data.jumlah.lemparan || 0) + (hasil.data.jumlah.peserta || 0)
+          : 0;
+        ui.pesan = "Data dihapus dari perangkat dan server." + (n ? " " + n + " baris server terhapus." : "");
+        go("#/");
+        A.keluar();
+        return;
+      }
+      ui.pesan = hasil.server
+        ? "Data di perangkat ini dihapus, tetapi server belum bisa dihubungi — salinan di server mungkin masih ada. Masuk lagi lalu ulangi \"Hapus data saya\"."
+        : "Data dihapus dari perangkat ini.";
+      go("#/");
+    });
+  }
+
+  /* D1 memberi "YYYY-MM-DD HH:MM:SS" (UTC), lokal memberi ISO. Samakan dulu
+     sebelum dibandingkan, kalau tidak jawaban server selalu dianggap lebih tua. */
+  function waktuIso(t) {
+    var s = t ? String(t).trim() : "";
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(" ", "T") + "Z";
+    return s;
+  }
+
+  /* jawaban server digabung kalau perangkat ini belum punya (ganti perangkat).
+     Setelah reset/hapus, jawaban server yang lebih tua dari state.dibersihkan
+     TIDAK boleh disalin balik — itu penyebab jawaban lama muncul lagi. */
   function gabungJawabanServer(sesi) {
     var srv = (sesi && sesi.jawabanServer) || {};
+    var bersih = waktuIso(state.dibersihkan);
     var ubah = false;
     Object.keys(srv).forEach(function (id) {
-      var lokal = state.jawaban[id];
       var jauh = srv[id];
       if (!jauh) return;
-      if (!lokal || String(jauh.ts || "") > String(lokal.ts || "")) {
+      var tsJauh = waktuIso(jauh.ts);
+      if (bersih && tsJauh && tsJauh <= bersih) return;
+      var lokal = state.jawaban[id];
+      if (!lokal || tsJauh > waktuIso(lokal.ts)) {
         state.jawaban[id] = { v: jauh.v, ts: jauh.ts };
         ubah = true;
       }

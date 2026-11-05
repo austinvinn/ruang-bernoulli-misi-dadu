@@ -99,12 +99,15 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 /* dua dadu (Bagian C) dan dadu redup sebelum dilempar */
 .dice-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
 /* setiap dadu punya latar lingkaran sendiri supaya tidak terlihat menempel */
-.die-wrap{position:relative;display:grid;place-items:center;padding:16px}
-.die-wrap:before{content:"";position:absolute;inset:0;border-radius:50%;
+.die-wrap{position:relative;isolation:isolate;display:grid;place-items:center;padding:16px}
+.die-wrap:before{content:"";position:absolute;inset:0;border-radius:50%;z-index:0;
   background:radial-gradient(circle,#eaf1e6 0%,#f4f7f0 58%,rgba(244,247,240,0) 78%)}
 .die-wrap .die{position:relative;z-index:1}
+/* dadu yang belum dilempar: tetap solid, hanya pip yang dipudarkan */
+.die.kosong{background:#fbfcf8;border-color:#e7ecdf;box-shadow:0 4px 10px rgba(27,33,28,.05)}
+.die.kosong i:not(.off){background:#c9d2c1}
 .dice-row .die-wrap:nth-child(2) .die{transform:rotate(6deg)}
-.die.redup{opacity:.42;filter:grayscale(.4)}
+.die.redup{display:none}
 .die.rolling{animation:roll .28s ease}
 @keyframes roll{
   0%{transform:rotate(-7deg) scale(1)}

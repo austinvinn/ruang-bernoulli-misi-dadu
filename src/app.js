@@ -60,7 +60,9 @@
     return out;
   }
   function dieHTML(v, redup) {
-    return '<div class="die' + (redup ? " redup" : "") + '" role="img" aria-label="Dadu menunjukkan ' + v + '">' + pips(v) + "</div>";
+    /* "redup" = belum dilempar: jangan diturunkan opasitasnya, nanti latar
+       lingkaran tembus ke depan. Cukup warna pip yang dipudarkan. */
+    return '<div class="die' + (redup ? " kosong" : "") + '" role="img" aria-label="Dadu menunjukkan ' + v + '">' + pips(v) + "</div>";
   }
   function diceHTML(arr, redup) {
     var out = '<div class="dice-row">';

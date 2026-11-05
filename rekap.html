@@ -269,10 +269,12 @@ tr:hover td{background:#fcfdfa}
   function gambar() {
     var butir = data.butir || [];
     var baris = data.baris || [];
+    var bagian = data.bagian || [];
     isiKelas(baris);
 
     var kepala = "<tr><th>#</th><th>kelas</th><th>nama</th><th>NIM</th><th>butir</th>";
     butir.forEach(function (b) { kepala += "<th>" + b + "</th>"; });
+    bagian.forEach(function (g) { kepala += "<th>percobaan " + g + "</th>"; });
     kepala += "<th>diubah</th></tr>";
     $("tabel").tHead.innerHTML = kepala;
 
@@ -288,9 +290,17 @@ tr:hover td{background:#fcfdfa}
         if (teks.length > 90) teks = teks.slice(0, 90) + "…";
         isi += '<td class="jw" title="' + esc(teks) + '">' + esc(teks) + "</td>";
       });
+      bagian.forEach(function (g) {
+        var p = (b.lemparan || {})[g];
+        var teks2 = p
+          ? ((p.aturan || "—") + " · " + (p.deret || []).join("+") +
+             (p.x === null || p.x === undefined ? "" : " → " + (p.x ? "S" : "G")))
+          : "";
+        isi += '<td class="jw" title="' + esc(teks2) + '">' + esc(teks2) + "</td>";
+      });
       isi += "<td>" + (b.diubah ? esc(b.diubah.replace("T", " ").slice(0, 16)) : "—") + "</td></tr>";
     });
-    if (!baris.length) isi = '<tr><td colspan="' + (butir.length + 6) + '">Belum ada jawaban masuk.</td></tr>';
+    if (!baris.length) isi = '<tr><td colspan="' + (butir.length + bagian.length + 6) + '">Belum ada jawaban masuk.</td></tr>';
     $("tabel").tBodies[0].innerHTML = isi;
 
     var perKelas = {};

@@ -52,16 +52,32 @@ export async function onRequestPost({ request, env }) {
     tersimpan++;
   }
 
+  if (perintah.length) await env.DB.batch(perintah);
+
+  /* Satu percobaan = satu lemparan: deret berisi 1–2 angka. Deret kosong
+     (mis. siswa hanya mengubah butir) tidak boleh menimpa hasil yang ada. */
   const l = body.lemparan;
   if (l && typeof l.bagian === "string" && Array.isArray(l.deret) && /^[A-E]$/.test(l.bagian)) {
     const deret = l.deret.slice(0, 600).map((x) => Number(x)).filter((x) => x >= 1 && x <= 6);
-    perintah.push(env.DB.prepare(
-      "INSERT INTO lemparan(peserta_id, bagian, deret, diubah) VALUES(?,?,?,?) " +
-      "ON CONFLICT(peserta_id, bagian) DO UPDATE SET deret = excluded.deret, diubah = excluded.diubah"
-    ).bind(pid, l.bagian, JSON.stringify(deret), sekarang));
+    if (deret.length) {
+      const aturan = String(l.aturan || "").slice(0, 120);
+      const x = l.x === 0 || l.x === 1 ? l.x : null;
+      const isi = JSON.stringify(deret);
+      try {
+        await env.DB.prepare(
+          "INSERT INTO lemparan(peserta_id, bagian, deret, aturan, x, diubah) VALUES(?,?,?,?,?,?) " +
+          "ON CONFLICT(peserta_id, bagian) DO UPDATE SET deret = excluded.deret, " +
+          "aturan = excluded.aturan, x = excluded.x, diubah = excluded.diubah"
+        ).bind(pid, l.bagian, isi, aturan, x, sekarang).run();
+      } catch (e) {
+        /* D1 lama belum punya kolom aturan/x: simpan deret saja */
+        await env.DB.prepare(
+          "INSERT INTO lemparan(peserta_id, bagian, deret, diubah) VALUES(?,?,?,?) " +
+          "ON CONFLICT(peserta_id, bagian) DO UPDATE SET deret = excluded.deret, diubah = excluded.diubah"
+        ).bind(pid, l.bagian, isi, sekarang).run();
+      }
+    }
   }
-
-  if (perintah.length) await env.DB.batch(perintah);
 
   return json({ ok: true, tersimpan: tersimpan, waktu: sekarang });
 }

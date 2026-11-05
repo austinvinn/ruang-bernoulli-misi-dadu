@@ -67,6 +67,43 @@ export async function onRequestGet({ request, env }) {
   });
   const butir = Object.keys(kumpulanButir).sort(urutButir);
 
+  /* hasil percobaan: satu lemparan per bagian */
+  let lemparan = { results: [] };
+  try {
+    const sqlLemparan =
+      "SELECT l.peserta_id, l.bagian, l.deret, l.aturan, l.x FROM lemparan l " +
+      (kelas ? "JOIN peserta p ON p.id = l.peserta_id WHERE p.kelas = ? " : "") +
+      "ORDER BY l.bagian";
+    lemparan = kelas
+      ? await env.DB.prepare(sqlLemparan).bind(kelas).all()
+      : await env.DB.prepare(sqlLemparan).all();
+  } catch (e) {
+    /* D1 lama belum punya kolom aturan/x */
+    const sqlLama =
+      "SELECT l.peserta_id, l.bagian, l.deret FROM lemparan l " +
+      (kelas ? "JOIN peserta p ON p.id = l.peserta_id WHERE p.kelas = ? " : "") +
+      "ORDER BY l.bagian";
+    lemparan = kelas
+      ? await env.DB.prepare(sqlLama).bind(kelas).all()
+      : await env.DB.prepare(sqlLama).all();
+  }
+
+  const bagianAda = {};
+  (lemparan.results || []).forEach((r) => {
+    const b = peta[r.peserta_id];
+    if (!b) return;
+    let deret = [];
+    try { deret = JSON.parse(r.deret); } catch (e) { deret = []; }
+    b.lemparan = b.lemparan || {};
+    b.lemparan[r.bagian] = {
+      deret: deret,
+      aturan: r.aturan || "",
+      x: r.x === 0 || r.x === 1 ? r.x : null
+    };
+    bagianAda[r.bagian] = 1;
+  });
+  const bagian = Object.keys(bagianAda).sort();
+
   if (format === "csv") {
     let isi = "";
     if (bentuk === "panjang") {
@@ -81,13 +118,24 @@ export async function onRequestGet({ request, env }) {
       });
       isi = csv(rows);
     } else {
-      const kepala = ["kelas", "nama", "nim", "peserta", "dibuat"].concat(butir).concat(["terakhir_diubah", "jumlah_butir"]);
+      const kepala = ["kelas", "nama", "nim", "peserta", "dibuat"].concat(butir)
+        .concat(bagian.map((g) => "aturan_" + g))
+        .concat(bagian.map((g) => "hasil_" + g))
+        .concat(["terakhir_diubah", "jumlah_butir"]);
       const rows = [kepala];
       baris.forEach((b) => {
         const sel = [b.kelas, b.nama, b.nim, b.id, b.dibuat];
         butir.forEach((id) => {
           const v = b.jawaban[id];
           sel.push(v === undefined ? "" : (typeof v === "string" ? v : JSON.stringify(v)));
+        });
+        bagian.forEach((g) => {
+          const p = b.lemparan && b.lemparan[g];
+          sel.push(p ? p.aturan || "" : "");
+        });
+        bagian.forEach((g) => {
+          const p = b.lemparan && b.lemparan[g];
+          sel.push(p ? p.deret.join("+") + (p.x === null ? "" : " · " + (p.x ? "S" : "G")) : "");
         });
         sel.push(b.diubah || "");
         sel.push(Object.keys(b.jawaban).length);
@@ -112,6 +160,7 @@ export async function onRequestGet({ request, env }) {
     peran: hak.peran,
     kelas: kelas || null,
     butir: butir,
+    bagian: bagian,
     jumlah: baris.length,
     baris: baris
   });

@@ -33,6 +33,29 @@ export async function onRequestPost({ request, env }) {
   const butir = {};
   (jawaban.results || []).forEach((r) => { butir[r.butir] = 1; });
 
+  /* hasil percobaan (satu lemparan per bagian) ikut dikirim supaya skrip
+     Google Sheets bisa menambah kolom aturan & hasil */
+  let lemparan = { results: [] };
+  try {
+    lemparan = await env.DB.prepare(
+      "SELECT peserta_id, bagian, deret, aturan, x FROM lemparan"
+    ).all();
+  } catch (e) {
+    lemparan = await env.DB.prepare("SELECT peserta_id, bagian, deret FROM lemparan").all();
+  }
+  (lemparan.results || []).forEach((r) => {
+    const b = peta[r.peserta_id];
+    if (!b) return;
+    let deret = [];
+    try { deret = JSON.parse(r.deret); } catch (e2) { deret = []; }
+    b.lemparan = b.lemparan || {};
+    b.lemparan[r.bagian] = {
+      deret: deret,
+      aturan: r.aturan || "",
+      x: r.x === 0 || r.x === 1 ? r.x : null
+    };
+  });
+
   try {
     const resp = await fetch(env.SHEET_URL, {
       method: "POST",

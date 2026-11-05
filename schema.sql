@@ -29,10 +29,15 @@ CREATE TABLE IF NOT EXISTS jawaban (
   PRIMARY KEY (peserta_id, bagian, butir)
 );
 
+/* Satu percobaan = satu lemparan: deret berisi 1 angka (satu dadu) atau
+   2 angka (dua dadu). aturan = aturan sukses yang dipilih siswa,
+   x = hasil (1 sukses, 0 gagal). */
 CREATE TABLE IF NOT EXISTS lemparan (
   peserta_id TEXT NOT NULL,
   bagian     TEXT NOT NULL,
   deret      TEXT NOT NULL,
+  aturan     TEXT NOT NULL DEFAULT '',
+  x          INTEGER,
   diubah     TEXT NOT NULL,
   PRIMARY KEY (peserta_id, bagian)
 );

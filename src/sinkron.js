@@ -64,7 +64,7 @@
     var bagian = bagianDari(paket[0]);
     var misi = MAP_MISI[bagian] || 1;
     var r = S.rek(st, misi);
-    var deret = misi === 4 ? ((r.rules && r.rules[1]) || []) : (r.rolls || []);
+    var deret = (r.hasil || []).slice();
 
     sibuk = true;
     keadaan.mencoba = true;
@@ -74,7 +74,13 @@
         nama: st.peserta.nama || "",
         nim: st.peserta.nim || "",
         butir: paket.map(function (id) { return { id: id, nilai: S.jawabNilai(st, id) }; }),
-        lemparan: { bagian: bagian, deret: deret }
+        /* satu percobaan = satu lemparan: deret berisi 1–2 angka */
+        lemparan: {
+          bagian: bagian,
+          deret: deret,
+          aturan: r.aturan ? S.label(r.aturan) : "",
+          x: deret.length && r.aturan ? (S.cocok(deret, r.aturan) ? 1 : 0) : null
+        }
       })
     }).then(function (res) {
       sibuk = false;

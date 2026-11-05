@@ -1,9 +1,9 @@
 # Ruang Bernoulli: Misi Dadu
 
 **LKM digital** (lembar kerja mahasiswa) untuk topik **Distribusi Bernoulli**.
-Satu dadu bersisi enam, lima bagian lembar kerja, materi yang terbuka setelah siswa
-menemukan sendiri konsepnya. Light mode, tanpa build, **backend kecil di Cloudflare**
-(Pages Functions + D1) untuk mengumpulkan jawaban lewat kode akses.
+**Satu percobaan = satu lemparan** (satu atau dua dadu), lima bagian lembar kerja, materi yang
+terbuka setelah siswa menemukan sendiri konsepnya. Light mode, tanpa build, **backend kecil di
+Cloudflare** (Pages Functions + D1) untuk mengumpulkan jawaban lewat kode akses.
 
 **Tim pengembang — Kelompok 9, Statistika Matematika 2026**
 1. Ahmad As Siddiq (06081282429062)
@@ -17,16 +17,16 @@ Program Studi Pendidikan Matematika · Fakultas Keguruan dan Ilmu Pendidikan · 
 
 | Bagian | Status |
 |---|---|
-| Sampul LKM (identitas nama/NIM/kelas, tujuan, alat & bahan, petunjuk umum) | ✅ jalan |
-| Bagian A — mengubah dadu menjadi 0/1, percobaan Bernoulli | ✅ jalan |
-| Bagian B — statistik p̂ vs parameter p, kolom buatan siswa | ✅ jalan |
-| Bagian C — prediksi terkunci → 100 lemparan → hukum bilangan besar & SE | ✅ jalan |
-| Bagian D — tiga aturan sukses, fungsi likelihood, MLE | ✅ jalan |
-| Bagian E — dua cara gabung data + pengantar Binomial | ✅ jalan |
+| Sampul LKM (identitas, tujuan TP1–TP5, petunjuk umum) | ✅ jalan |
+| Bagian A (TP1) — satu lemparan, dua hasil, peubah indikator | ✅ jalan |
+| Bagian B (TP2) — siswa memilih aturan, p = |A|/6 | ✅ jalan |
+| Bagian C (TP3) — dua dadu, 36 titik sampel, tetap Bernoulli | ✅ jalan |
+| Bagian D (TP4) — tabel sebaran X → rumus p^x(1−p)^(1−x) | ✅ jalan |
+| Bagian E (TP5) — aturan buatan siswa + kesimpulan | ✅ jalan |
 | Lembar kerja per butir (teks/angka/tabel) + simpan otomatis | ✅ jalan |
 | Panel **Materi** terkunci sampai semua butir bagian itu terjawab | ✅ jalan |
 | Rumus KaTeX lokal (tanpa CDN) | ✅ jalan |
-| Papan Data (PMF, konvergensi, tabel, kode laporan) | ✅ jalan |
+| Papan Data (aturan, |A|, |Ω|, p, hasil, kode laporan) | ✅ jalan |
 | Gerbang kode akses (kode kelas / kode pengembang) | ✅ jalan |
 | Pengumpulan jawaban ke D1 + outbox luring | ✅ jalan |
 | Halaman pengembang `/rekap.html` (tabel, filter kelas, unduh CSV, kelola kode) | ✅ jalan |
@@ -66,7 +66,8 @@ satu IP NAT, jadi tidak boleh terkunci gara-gara salah ketik orang lain).
 | `/api/masuk` | POST | publik | `{kode}` → cookie sesi |
 | `/api/keluar` | POST | sesi | hapus cookie |
 | `/api/saya` | GET | sesi | identitas + jawaban tersimpan (pemulihan antar perangkat) |
-| `/api/jawaban` | GET/POST | sesi | ambil / simpan jawaban butir + deret lemparan (upsert) |
+| `/api/jawaban` | GET/POST | sesi | ambil / simpan jawaban butir + percobaan (`lemparan`: deret 1–2 angka, aturan, x) |
+| `/api/peserta` | POST | sesi | `{mode:"kosongkan"}` hapus jawaban + percobaan, peserta tetap (tombol "Mulai ulang") |
 | `/api/peserta` | DELETE | sesi | hapus data sendiri (benar-benar dihapus di D1) |
 | `/api/rekap` | GET | dev/baca | JSON atau CSV, filter `?kelas=` |
 | `/api/kode` | GET/POST | dev | daftar, buat, matikan/aktifkan kode |
@@ -92,19 +93,19 @@ berkas SQLite yang sama dan menyebabkan `SQLITE_IOERR`.
 index.html          kerangka + CSS (palet sage)
 src/lkm-data.js     isi soal & materi Bagian A–E (pola discovery)
 src/lkm.js          render butir, simpan jawaban, buka materi, render KaTeX
-src/store.js        progres, status bagian, jawaban, reset, ekspor/impor, lempar dadu
+src/store.js        progres, status bagian, jawaban, aturan sukses, satu lemparan, reset, ekspor/impor
 src/auth.js         gerbang kode akses + sesi server (mode lokal kalau API tidak ada)
 src/sinkron.js      outbox: kirim jawaban ke server, tahan saat luring
-src/charts.js       grafik SVG (PMF, konvergensi, batang aturan)
 src/app.js          router hash, layar sampul/bagian/papan data, interaksi
-src/laporan.js      codec kode laporan 7 karakter (Crockford base32 + CRC-8)
+src/laporan.js      codec kode laporan 7–8 karakter (Crockford base32 + CRC-8, versi 1 & 2)
 vendor/katex/       KaTeX 0.16.11 (js + css + font woff2, tanpa CDN)
 functions/api/*.js  Pages Functions: masuk, keluar, saya, jawaban, peserta, rekap, kode, sheet
 schema.sql          skema D1 (kode, peserta, jawaban, lemparan, coba)
 wrangler.toml       binding D1 + config Pages
 rekap.html          halaman pengembang (rekap server, CSV, kelola kode)
 rekap-kode.html     pembaca kode laporan 7 karakter (alat lama, tetap ada)
-tests/              uji codec (node tests/laporan.test.cjs)
+migrations/         ALTER TABLE untuk basis data yang sudah ada
+tests/              codec + mesin aturan + rekap (node tests/*.test.cjs)
 docs/               mockup, tangkapan layar, apps-script-sheet.gs
 ```
 
@@ -119,10 +120,12 @@ docs/               mockup, tangkapan layar, apps-script-sheet.gs
   belum terkirim masuk antrean outbox dan dikirim ulang saat online.
 - **Hapus data sendiri.** Tombol `Hapus data saya` menghapus `localStorage` dan baris D1,
   dengan bukti jumlah baris yang terhapus.
-- **Kode laporan** `XXXX-EFG` per bagian: pelengkap, bisa dibaca ulang di `rekap-kode.html`.
+- **Kode laporan** 8 karakter `XXXX-EFGH` per bagian (versi 2: misi, jumlah dadu, |A|, hasil x);
+  kode lama 7 karakter masih bisa dibaca. Pembaca: `rekap-kode.html`.
 - **Navigasi**: Sampul → Bagian A–E → Papan Data; URL ber-hash (`#/misi/3`) supaya tombol back wajar.
 - **Reset** hanya di sampul, dua pilihan: hapus progres (identitas tetap) atau hapus semua.
-- **Data mentah** (nilai dadu tiap lemparan) yang disimpan, bukan agregat.
+- **Satu percobaan = satu lemparan.** Tombol lempar boleh ditekan lagi, tetapi hasil lama tidak
+  dijumlahkan; peluang dihitung dari banyaknya sisi (|A|/|Ω|), bukan dari frekuensi.
 
 ## Aksesibilitas & responsif
 
@@ -145,6 +148,8 @@ docs/               mockup, tangkapan layar, apps-script-sheet.gs
 ```bash
 git push origin main
 npx wrangler d1 execute misi-dadu-db --remote --file=schema.sql       # sekali / saat skema berubah
+npx wrangler d1 execute misi-dadu-db --remote \
+  --file=migrations/2026-11-05-lemparan-aturan.sql                     # v4: kolom aturan + x
 npx wrangler pages secret put SESI_SECRET --project-name=misi-dadu     # sekali
 npx wrangler pages deploy . --project-name=misi-dadu --commit-hash $(git rev-parse HEAD)
 ```

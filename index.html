@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Misi Dadu">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="description" content="LKM digital Distribusi Bernoulli: lima bagian lembar kerja dengan percobaan dadu, jawaban isian, dan materi yang terbuka setelah discovery.">
+<meta name="description" content="LKM digital Distribusi Bernoulli: lima bagian lembar kerja, satu lemparan per percobaan, jawaban isian, dan materi yang terbuka setelah discovery.">
 <title>Ruang Bernoulli: Misi Dadu</title>
 <link rel="stylesheet" href="vendor/katex/katex.min.css">
 <style>
@@ -97,6 +97,9 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
   position:relative;z-index:1}
 .die i{width:13px;height:13px;border-radius:50%;background:#23302a;align-self:center;justify-self:center}
 .die i.off{background:transparent}
+/* dua dadu (Bagian C) dan dadu redup sebelum dilempar */
+.dice-row{display:flex;gap:16px;align-items:center;justify-content:center}
+.die.redup{opacity:.42;filter:grayscale(.4)}
 .die.rolling{animation:roll .28s ease}
 @keyframes roll{
   0%{transform:rotate(-7deg) scale(1)}
@@ -441,7 +444,6 @@ table.t-lkm td.t-auto{text-align:center;font-weight:700;color:var(--ink);
 <script src="src/store.js"></script>
 <script src="src/auth.js"></script>
 <script src="src/sinkron.js"></script>
-<script src="src/charts.js"></script>
 <script src="src/lkm-data.js"></script>
 <script src="src/lkm.js"></script>
 <script src="src/app.js"></script>

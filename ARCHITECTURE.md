@@ -1,6 +1,11 @@
 # Arsitektur — Misi Dadu (Website Pembelajaran Distribusi Bernoulli)
 
-Catatan keputusan teknis (ADR ringkas). Diperbarui: 24 Oktober 2026.
+Catatan keputusan teknis (ADR ringkas). Diperbarui: 5 November 2026.
+
+> **Status 5 Nov 2026 (revisi P12, F1–F4):** model berubah menjadi **satu percobaan = satu
+> lemparan** (Bernoulli, bukan rangkaian n lemparan). Bagian "Tanpa backend" di bawah adalah
+> catatan sejarah — sejak P6 backend Pages Functions + D1 sudah dipakai. Rincian terbaru ada di
+> `Serah Terima LKPD/TASKS-REVISI.md` (§21).
 
 ## Konteks
 
@@ -30,21 +35,25 @@ Catatan keputusan teknis (ADR ringkas). Diperbarui: 24 Oktober 2026.
 
 ## Kode laporan (pengganti backend)
 
-7 karakter Crockford base32, contoh `P8S0-48T`.
+Dua versi, keduanya Crockford base32 + CRC-8:
+
+**Versi 2 (dipakai sekarang, 8 karakter `XXXX-EFGH`)** — satu percobaan = satu lemparan:
 
 | Field | Bit | Catatan |
 |---|---|---|
-| versi | 2 | selalu 1 |
+| versi | 3 | selalu 2 |
 | misi | 3 | 1–7 |
-| aturan | 3 | jumlah sisi dadu yang dihitung sukses (0–7); 0 = tidak dipakai |
-| n | 10 | 0–1023 |
-| k | 10 | 0–n |
+| dua dadu | 1 | 0 = satu dadu, 1 = dua dadu |
+| \|A\| | 6 | banyak sisi yang dihitung sukses (1–36) |
+| x | 1 | hasil percobaan: 1 sukses, 0 gagal |
 | checksum | 8 | CRC-8 polinomial 0x07 |
 
-Total 36 bit, bit tertinggi selalu 0 → 7 karakter. Toleransi tulis tangan: huruf kecil, spasi,
-prefix `MD6-`, `O`→0, `I`/`L`→1, `U`→0. Salah ketik 1 karakter **selalu ditolak** (diuji 217 varian).
+Jadi p = |A|/6 (satu dadu) atau |A|/36 (dua dadu).
 
-Aturan penting: penggabungan data kelas memakai **Σk/Σn**, bukan rata-rata p̂ (berbeda bila n tidak seragam).
+**Versi 1 (lama, 7 karakter `XXXX-EFG`)** — misi + aturan + n + k; masih bisa dibaca supaya kode
+yang sudah ditulis tangan di LKPD kertas tidak hangus. Toleransi tulis tangan: huruf kecil, spasi,
+prefix `MD6-`, `O`→0, `I`/`L`→1, `U`→0. Salah ketik 1 karakter **selalu ditolak** (diuji otomatis
+untuk kedua versi).
 
 ## Struktur file
 

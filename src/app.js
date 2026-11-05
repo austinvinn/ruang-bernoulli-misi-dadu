@@ -15,7 +15,7 @@
   function labelSesi() { return A && A.label ? A.label() : ""; }
 
   var state = S.baca();
-  var ui = { sheet: null, pesan: null, ringkas: false, kunciRute: null, eN: 6 };
+  var ui = { sheet: null, pesan: null, ringkas: false, kunciRute: null, eN: 6, cobaLagi: false };
 
   var $app = document.getElementById("app");
 
@@ -449,17 +449,26 @@
     }
     var ok = S.cocok(r.hasil, r.aturan);
     var jumlah = r.hasil.length === 2 ? " · jumlah " + (r.hasil[0] + r.hasil[1]) : "";
-    var riwayat = (r.riwayat || []).slice(1).map(function (h, i) {
-      var okH = S.cocok(h, r.aturan);
-      return '<span class="tag">' + h.join("+") + " → " + (okH ? "S" : "G") + "</span>";
-    }).join("");
     return '<div class="die-stage">' + diceHTML(r.hasil, false) + "</div>" +
       '<div class="panel"><div class="panel-head"><b>Hasil percobaan</b><span>' + esc(S.label(r.aturan)) + jumlah + "</span></div>" +
       '<p class="note">Dadu: <b>' + r.hasil.join(" dan ") + "</b> · hasilnya " + sgTanda(ok) +
       " (" + (ok ? "masuk aturan" : "tidak masuk aturan") + ").</p>" +
-      (riwayat ? '<div class="chips"><span class="tag">percobaan sebelumnya</span>' + riwayat + "</div>" +
-        '<p class="note">Riwayat hanya pengamatan; tidak dijumlahkan dan tidak dipakai menghitung peluang.</p>' : "") +
+      '<p class="note">Satu percobaan = satu lemparan. Hasil ini yang kamu pakai di lembar kerja.</p>' +
       "</div>";
+  }
+
+  /* saat siswa menekan "Lempar lagi": jelaskan aturannya, jangan langsung melempar */
+  function notisUlang(id) {
+    return '<div class="predict" id="notisUlang" data-stop="1">' +
+      '<div class="q">Percobaan Bagian ' + K.forMisi(id).kode + ' sudah dilakukan.</div>' +
+      '<p class="note" style="color:#6f4a10">Satu percobaan = <b>satu lemparan</b>. Lemparan kedua tidak dipakai ' +
+      'dan tidak dijumlahkan dengan hasil pertama, jadi yang kamu olah di lembar kerja tetap satu percobaan Bernoulli. ' +
+      'Kalau ingin mengganti hasil (misalnya tadi salah tekan), tekan <b>Ulangi percobaan</b>: hasil lama dihapus, ' +
+      'lalu kamu melempar sekali lagi.</p>' +
+      '<div class="acts">' +
+      '<button class="b1 ok" data-act="ulangi" data-id="' + id + '">Ulangi percobaan</button>' +
+      '<button class="b2" data-act="tutup-notis">Tetap pakai hasil ini</button>' +
+      "</div></div>";
   }
 
   function selesaiCard(id, r, opts) {
@@ -496,6 +505,7 @@
         (S.def(id).dadu === 0 ? "" : panelAturan(id, r)) +
         K.renderPra(b.kode, state) +
         kartuHasil(id, r) +
+        (ui.cobaLagi && r.hasil ? notisUlang(id) : "") +
         (st === "selesai" ? selesaiCard(id, r) : "") +
         K.renderPanel(b.kode, state);
     }
@@ -541,7 +551,7 @@
     } else if (selesai && nextId) {
       utama = '<button class="btn btn-primary" data-act="open" data-id="' + nextId + '">Lanjut ke Bagian ' +
         K.forMisi(nextId).kode + " &nbsp;→</button>";
-      kedua = tombolPapan(id) + '<button class="mini-btn" data-act="lempar" data-id="' + id + '">Lempar lagi</button>';
+      kedua = tombolPapan(id) + '<button class="mini-btn" data-act="ulangi" data-id="' + id + '">Ulangi percobaan</button>';
     } else if (selesai) {
       utama = '<button class="btn btn-primary" data-act="home">Selesai · ke sampul</button>';
       kedua = tombolPapan(id);
@@ -552,12 +562,15 @@
         utama = '<button class="btn btn-primary" disabled>Pilih aturan dulu</button>';
       } else if (!prediksiSiap(id)) {
         utama = '<button class="btn btn-primary" disabled>Isi butir prediksi dulu</button>';
+      } else if (r.hasil) {
+        /* satu percobaan = satu lemparan: tidak ada lempar kedua */
+        utama = '<button class="btn btn-ghost" data-act="coba-lagi" data-id="' + id + '">Lempar lagi</button>';
       } else {
         utama = '<button class="btn btn-primary" data-act="lempar" data-id="' + id + '"' + (bisa ? "" : " disabled") + ">" +
-          (r.hasil ? "Lempar lagi (percobaan baru)" : label) + "</button>";
+          label + "</button>";
       }
       kedua = tombolPapan(id) +
-        (r.hasil ? '<button class="mini-btn" data-act="ulangi" data-id="' + id + '">Hapus hasil</button>' : "");
+        (r.hasil ? '<button class="mini-btn" data-act="ulangi" data-id="' + id + '">Ulangi percobaan</button>' : "");
     }
 
     return '<footer class="cta' + (ui.ringkas ? " ringkas" : "") + '">' +
@@ -902,8 +915,22 @@
         setTimeout(force, 260);
         break;
       }
+      case "coba-lagi":
+        /* jangan lempar lagi: beri pengertian dulu, lalu gulir ke kartunya */
+        ui.cobaLagi = true;
+        force();
+        setTimeout(function () {
+          var n = document.getElementById("notisUlang");
+          if (n) n.scrollIntoView({ block: "center", behavior: "smooth" });
+        }, 80);
+        break;
+      case "tutup-notis":
+        ui.cobaLagi = false;
+        force();
+        break;
       case "ulangi":
         S.ulangi(state, id);
+        ui.cobaLagi = false;
         force();
         break;
       case "pilih-aturan": {

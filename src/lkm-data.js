@@ -48,7 +48,7 @@
         judul: "Materi A — Percobaan Bernoulli dan peubah indikator",
         isi: [
           "**Percobaan Bernoulli** adalah percobaan yang hanya punya **dua hasil**: sukses dan gagal. Dadu bersisi enam sebenarnya punya enam hasil, tetapi setelah hasilnya dikelompokkan menjadi \u201cmuncul 6\u201d dan \u201cbukan 6\u201d, percobaannya menjadi dua hasil.",
-          "Ruang hasil dadu $\\\\Omega=\\\\{1,2,3,4,5,6\\\\}$. Kalau $A=\\\\{6\\\\}$, maka $|A|=1$ dan $|\\\\Omega|=6$, sehingga $p=\\\\dfrac{|A|}{|\\\\Omega|}=\\\\dfrac{1}{6}$.",
+          "Ruang hasil dadu $\\Omega=\\{1,2,3,4,5,6\\}$. Kalau $A=\\{6\\}$, maka $|A|=1$ dan $|\\Omega|=6$, sehingga $p=\\dfrac{|A|}{|\\Omega|}=\\dfrac{1}{6}$.",
           "Hasil percobaan dipetakan ke angka lewat **peubah indikator** $X$: $X=1$ bila sukses, $X=0$ bila gagal. Jadi $P(X=1)=p$ dan $P(X=0)=1-p$.",
           "Satu percobaan = satu lemparan. Peluang di sini dihitung dari banyaknya sisi, **bukan** dari hasil lemparanmu: satu lemparan tidak bisa membuktikan peluang 1/6."
         ]
@@ -70,7 +70,7 @@
         },
         {
           id: "B2", tipe: "teks",
-          soal: "Berapa banyak sisi dadu yang masuk aturanmu? Hitung $p = \\\\dfrac{\\\\text{banyak sisi itu}}{6}$, lalu bandingkan dengan tebakanmu.",
+          soal: "Berapa banyak sisi dadu yang masuk aturanmu? Hitung $p = \\dfrac{\\text{banyak sisi itu}}{6}$, lalu bandingkan dengan tebakanmu.",
           petunjuk: "Contoh: aturan \u201cgenap\u201d memasukkan 2, 4, 6 sehingga p = 3/6 = 0,5."
         },
         {
@@ -87,8 +87,8 @@
       materi: {
         judul: "Materi B — Aturan menentukan |A|, bukan bentuk percobaan",
         isi: [
-          "Aturan sukses hanya memilih sebagian anggota ruang hasil: $A\\\\subseteq\\\\Omega$. Peluang sukses selalu $p=\\\\dfrac{|A|}{|\\\\Omega|}$.",
-          "Untuk satu dadu, $|\\\\Omega|=6$. Aturan \u201cangka genap\u201d memberi $|A|=3$ sehingga $p=\\\\dfrac{3}{6}=0{,}5$; aturan \u201cmuncul 5 atau lebih\u201d memberi $|A|=2$ sehingga $p=\\\\dfrac{2}{6}\\\\approx 0{,}333$.",
+          "Aturan sukses hanya memilih sebagian anggota ruang hasil: $A\\subseteq\\Omega$. Peluang sukses selalu $p=\\dfrac{|A|}{|\\Omega|}$.",
+          "Untuk satu dadu, $|\\Omega|=6$. Aturan \u201cangka genap\u201d memberi $|A|=3$ sehingga $p=\\dfrac{3}{6}=0{,}5$; aturan \u201cmuncul 5 atau lebih\u201d memberi $|A|=2$ sehingga $p=\\dfrac{2}{6}\\approx 0{,}333$.",
           "Mengganti aturan **tidak** mengubah banyaknya hasil percobaan. Percobaannya tetap dua hasil (sukses/gagal); yang berubah hanya $p$.",
           "Peluang gagal selalu $1-p$. Untuk aturan apa pun pada satu dadu, $0<p<1$ selama $A$ bukan kosong dan bukan seluruh ruang hasil."
         ]
@@ -110,7 +110,7 @@
         },
         {
           id: "C2", tipe: "teks",
-          soal: "Berapa pasangan dua dadu yang masuk aturanmu? Hitung $p = \\\\dfrac{|A|}{36}$.",
+          soal: "Berapa pasangan dua dadu yang masuk aturanmu? Hitung $p = \\dfrac{|A|}{36}$.",
           petunjuk: "Untuk aturan \u201cjumlah = 7\u201d, ada 6 pasangan: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1)."
         },
         {
@@ -127,8 +127,8 @@
       materi: {
         judul: "Materi C — Kejadian gabungan pada ruang 36 titik sampel",
         isi: [
-          "Melempar dua dadu sekali menghasilkan pasangan $(a,b)$ dengan $a,b\\\\in\\\\{1,\\\\dots,6\\\\}$. Ruang hasilnya berisi $6\\\\times 6=36$ titik sampel.",
-          "Aturan \u201cjumlah genap\u201d memasukkan 18 pasangan sehingga $p=\\\\dfrac{18}{36}=\\\\dfrac{1}{2}$. Aturan \u201cjumlah = 7\u201d memasukkan 6 pasangan sehingga $p=\\\\dfrac{6}{36}=\\\\dfrac{1}{6}$.",
+          "Melempar dua dadu sekali menghasilkan pasangan $(a,b)$ dengan $a,b\\in\\{1,\\dots,6\\}$. Ruang hasilnya berisi $6\\times 6=36$ titik sampel.",
+          "Aturan \u201cjumlah genap\u201d memasukkan 18 pasangan sehingga $p=\\dfrac{18}{36}=\\dfrac{1}{2}$. Aturan \u201cjumlah = 7\u201d memasukkan 6 pasangan sehingga $p=\\dfrac{6}{36}=\\dfrac{1}{6}$.",
           "Setelah aturan ditetapkan, hasil percobaan hanya dua: **masuk aturan** (S) atau **tidak masuk aturan** (G). Karena itu percobaannya tetap Bernoulli, dengan $p=|A|/36$.",
           "Yang berubah dibanding Bagian A hanya besar ruang hasilnya (6 menjadi 36). Bentuk percobaannya sama: satu percobaan, dua hasil, satu peluang sukses."
         ]
@@ -152,12 +152,12 @@
         },
         {
           id: "D2", tipe: "teks",
-          soal: "Coba bentuk $p^{x}(1-p)^{1-x}$. Hitung bentuk itu untuk $x=0$ dan $x=1$ dengan $p=\\\\dfrac{1}{6}$, lalu bandingkan dengan baris tabelmu.",
+          soal: "Coba bentuk $p^{x}(1-p)^{1-x}$. Hitung bentuk itu untuk $x=0$ dan $x=1$ dengan $p=\\dfrac{1}{6}$, lalu bandingkan dengan baris tabelmu.",
           petunjuk: "Untuk $x=1$: $p^{1}(1-p)^{0}$. Untuk $x=0$: $p^{0}(1-p)^{1}$. Ingat $a^{0}=1$."
         },
         {
           id: "D3", tipe: "teks",
-          soal: "Bentuk yang berlaku untuk kedua baris itu disebut **distribusi Bernoulli**, ditulis $X\\\\sim\\\\mathrm{Bernoulli}(p)$ dengan $P(X=x)=p^{x}(1-p)^{1-x}$. Sekarang ganti $p$ dengan hasil Misi B atau C: bagian mana yang berubah dan bagian mana yang tetap?",
+          soal: "Bentuk yang berlaku untuk kedua baris itu disebut **distribusi Bernoulli**, ditulis $X\\sim\\mathrm{Bernoulli}(p)$ dengan $P(X=x)=p^{x}(1-p)^{1-x}$. Sekarang ganti $p$ dengan hasil Misi B atau C: bagian mana yang berubah dan bagian mana yang tetap?",
           petunjuk: "Yang berubah hanya nilai $p$ (misalnya 1/2 pada aturan genap, atau 1/6 pada jumlah 7). Bentuk rumusnya tidak berubah."
         }
       ],
@@ -165,9 +165,9 @@
         judul: "Materi D — Sebaran dan rumus distribusi Bernoulli",
         isi: [
           "Sebaran $X$ hanya berisi dua baris: $x=0$ dengan peluang $1-p$, dan $x=1$ dengan peluang $p$. Tabel inilah **tabel distribusi** peubah Bernoulli.",
-          "Kedua baris dapat ditulis dengan satu rumus: $$P(X=x)=p^{x}(1-p)^{1-x},\\\\qquad x\\\\in\\\\{0,1\\\\}.$$ Untuk $x=1$ hasilnya $p$; untuk $x=0$ hasilnya $1-p$.",
+          "Kedua baris dapat ditulis dengan satu rumus: $$P(X=x)=p^{x}(1-p)^{1-x},\\qquad x\\in\\{0,1\\}.$$ Untuk $x=1$ hasilnya $p$; untuk $x=0$ hasilnya $1-p$.",
           "Rumus itu tidak bergantung pada dadu. Mengganti aturan hanya mengganti $p$; bentuk rumusnya tetap. Karena itu distribusi Bernoulli berlaku untuk semua percobaan dua hasil dengan peluang sukses $p$.",
-          "**Pengayaan (tidak dinilai).** Dari tabel itu diperoleh $\\\\mathbb{E}[X]=p$ dan $\\\\operatorname{Var}(X)=p(1-p)$. Ragam terbesar ada di $p=0{,}5$ karena hasilnya paling tidak pasti."
+          "**Pengayaan (tidak dinilai).** Dari tabel itu diperoleh $\\mathbb{E}[X]=p$ dan $\\operatorname{Var}(X)=p(1-p)$. Ragam terbesar ada di $p=0{,}5$ karena hasilnya paling tidak pasti."
         ]
       }
     },
@@ -205,7 +205,7 @@
         judul: "Materi E — Rangkuman percobaan Bernoulli",
         isi: [
           "Percobaan Bernoulli punya tiga ciri: (1) hanya dua hasil yang mungkin, (2) peluang sukses $p$ tetap untuk percobaan itu, (3) satu percobaan berhenti pada satu hasil.",
-          "Peubah indikatornya $X\\\\in\\\\{0,1\\\\}$ dengan $P(X=1)=p$ dan $P(X=0)=1-p$, yang dapat ditulis $P(X=x)=p^{x}(1-p)^{1-x}$.",
+          "Peubah indikatornya $X\\in\\{0,1\\}$ dengan $P(X=1)=p$ dan $P(X=0)=1-p$, yang dapat ditulis $P(X=x)=p^{x}(1-p)^{1-x}$.",
           "Aturan bebas tetap harus mempartisi ruang hasil menjadi tepat dua kelompok dengan $0<p<1$. Aturan \u201cangka berapa saja\u201d memberi $p=1$ sehingga bukan Bernoulli.",
           "**Catatan.** Kalau percobaan Bernoulli diulang $n$ kali dan **jumlah** suksesnya dihitung, peubahnya berganti menjadi Binomial. Itu materi berikutnya; di sini fokusnya satu percobaan (Bernoulli)."
         ]

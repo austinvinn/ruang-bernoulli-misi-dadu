@@ -50,6 +50,10 @@
       var el = nodes[i];
       if (el.getAttribute("data-rendered") === "1") continue;
       var tex = el.getAttribute("data-tex");
+      /* jebakan lama: string JS berisi \\\\ (dua backslash) membuat KaTeX membaca
+         "\\" sebagai baris baru lalu mencetak "dfrac"/"Omega" sebagai teks biasa.
+         Semua rumus di sini memakai satu backslash, jadi runtuhan digabung. */
+      tex = String(tex).replace(/\\\\/g, "\\");
       var blok = el.getAttribute("data-display") === "1";
       if (kx && typeof kx.render === "function") {
         try {

@@ -64,7 +64,9 @@
   }
   function diceHTML(arr, redup) {
     var out = '<div class="dice-row">';
-    for (var i = 0; i < arr.length; i++) out += dieHTML(arr[i], redup);
+    for (var i = 0; i < arr.length; i++) {
+      out += '<span class="die-wrap">' + dieHTML(arr[i], redup) + "</span>";
+    }
     return out + "</div>";
   }
   function chip(txt, tone) { return '<span class="chip ' + (tone || "") + '">' + txt + "</span>"; }

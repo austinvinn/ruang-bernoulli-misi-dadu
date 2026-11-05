@@ -89,8 +89,7 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 
 /* ---------- dadu & prediksi ---------- */
 .die-stage{display:flex;align-items:center;justify-content:center;padding:6px 0 10px;position:relative}
-.die-stage:before{content:"";position:absolute;width:150px;height:150px;border-radius:50%;
-  background:radial-gradient(circle,#eef4ea 0%,#f7f9f4 60%,transparent 76%)}
+.die-stage:before{display:none}
 .die{width:112px;height:112px;border-radius:24px;background:#fff;border:2px solid #e2e7db;
   display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:15px;gap:3px;
   box-shadow:0 8px 18px rgba(27,33,28,.10),0 2px 5px rgba(27,33,28,.06);transform:rotate(-7deg);
@@ -98,7 +97,13 @@ hr{border:0;border-top:1px solid var(--line);margin:10px 0}
 .die i{width:13px;height:13px;border-radius:50%;background:#23302a;align-self:center;justify-self:center}
 .die i.off{background:transparent}
 /* dua dadu (Bagian C) dan dadu redup sebelum dilempar */
-.dice-row{display:flex;gap:16px;align-items:center;justify-content:center}
+.dice-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+/* setiap dadu punya latar lingkaran sendiri supaya tidak terlihat menempel */
+.die-wrap{position:relative;display:grid;place-items:center;padding:16px}
+.die-wrap:before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,#eaf1e6 0%,#f4f7f0 58%,rgba(244,247,240,0) 78%)}
+.die-wrap .die{position:relative;z-index:1}
+.dice-row .die-wrap:nth-child(2) .die{transform:rotate(6deg)}
 .die.redup{opacity:.42;filter:grayscale(.4)}
 .die.rolling{animation:roll .28s ease}
 @keyframes roll{

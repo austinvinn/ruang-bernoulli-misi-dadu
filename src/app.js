@@ -202,11 +202,10 @@
 
     var petunjuk = '<div class="panel"><div class="panel-head"><b>Cara kerja</b></div>' +
       '<ol class="steps">' +
-      "<li>Kerjakan berurutan dari Bagian A sampai E; setiap bagian terbuka setelah bagian sebelumnya selesai.</li>" +
-      "<li>Tulis <b>prediksi</b> dulu. Setelah prediksi terisi, tombol lempar terbuka.</li>" +
-      "<li>Satu percobaan = <b>satu lemparan</b>. Tombol lempar boleh ditekan lagi, tetapi hasil lama tidak dihitung.</li>" +
-      "<li>Jawab pertanyaan di blok <b>refleksi</b>. Materi bagian itu terbuka setelah semua butir terjawab.</li>" +
-      "<li><b>Papan Data</b> menyimpan hasil percobaanmu dan kode laporan.</li>" +
+      "<li>Kerjakan berurutan Bagian A→E; bagian berikut terbuka setelah bagian sebelumnya selesai.</li>" +
+      "<li>Tulis <b>prediksi</b> dulu; tombol lempar baru terbuka setelah itu.</li>" +
+      "<li>Materi tiap bagian terbuka setelah semua butirnya terjawab.</li>" +
+      "<li>Hasil percobaan dan kode laporan ada di <b>Papan Data</b>.</li>" +
       "</ol></div>";
 
     var sesiKelas = masukServer() ? A.data().kelas : state.peserta.kelas;
@@ -319,45 +318,41 @@
   }
 
   /* ---------------- ARENA ---------------- */
+  /* Instruksi singkat: hanya langkah prosedural, bukan ringkasan butir. */
   var INSTRUKSI = {
     1: {
       langkah: [
-        "Isi butir <b>A1</b> dulu: hasil apa saja yang mungkin muncul.",
-        "Tekan <b>Lempar dadu</b> satu kali. Kotak dadu menunjukkan hasilnya.",
-        "Baca hasilnya: masuk kelompok <b>muncul 6</b> atau <b>bukan 6</b>?",
-        "Jawab A2–A5 di blok refleksi. Materi terbuka setelah semua butir terisi."
+        "Isi <b>A1</b> dulu: angka apa saja yang mungkin muncul.",
+        "Tekan <b>Lempar dadu</b> satu kali.",
+        "Jawab A2–A5. Materi terbuka setelah semua butir terisi."
       ]
     },
     2: {
       langkah: [
-        "Pilih salah satu <b>aturan sukses</b> di panel aturan; pilihannya bebas.",
-        "Isi butir <b>B1</b>: tulis aturanmu dan tebak peluangnya.",
-        "Tekan <b>Lempar dadu</b> satu kali, lalu periksa S atau G.",
-        "Jawab B2–B4: hitung p dari banyak sisi, lalu bandingkan dengan tebakanmu."
+        "Pilih <b>aturan sukses</b> di panel bawah (bebas).",
+        "Isi <b>B1–B2</b>: tebakan, lalu hitungan dari banyak sisi.",
+        "Tekan <b>Lempar dadu</b>, lalu jawab B3–B4."
       ]
     },
     3: {
       langkah: [
-        "Dua dadu dilempar <b>sekali</b>; yang dicatat jumlah kedua dadu.",
-        "Pilih <b>aturan</b> (jumlah genap, ganjil, atau = 7) di panel aturan, lalu isi butir <b>C1</b>.",
-        "Tekan <b>Lempar dua dadu</b>. Hasil kedua dadu muncul berdampingan.",
-        "Jawab C2–C4: hitung |A| dari 36 pasangan, lalu jelaskan mengapa tetap Bernoulli."
+        "Pilih <b>aturan dua dadu</b> di panel bawah.",
+        "Isi <b>C1–C2</b>: tebakan, lalu hitungan pasangan.",
+        "Tekan <b>Lempar dua dadu</b>, lalu jawab C3–C4."
       ]
     },
     4: {
       langkah: [
-        "Bagian ini <b>tidak melempar dadu</b>. Datanya diambil dari Misi A (p = 1/6).",
-        "Isi tabel <b>D1</b>: sebaran X untuk x = 0 dan x = 1.",
-        "Kerjakan <b>D2</b>: uji bentuk $p^{x}(1-p)^{1-x}$ untuk kedua nilai x.",
-        "Jawab <b>D3</b>: tulis lambang distribusinya, lalu ganti p dengan hasil Misi B/C."
+        "Bagian ini <b>tanpa lemparan</b>: memakai hasil Bagian A.",
+        "Isi <b>D1–D3</b> berturut-turut.",
+        "Rekap hasil Bagian A–C ada di <b>Papan Data</b> bagian ini."
       ]
     },
     5: {
       langkah: [
-        "Rancang aturanmu sendiri di panel aturan (angka tertentu, ganjil/genap, atau batas ≥/≤).",
-        "Tulis aturan dan alasannya di <b>E1</b>, lalu hitung p di <b>E2</b>.",
-        "Tekan <b>Lempar dadu</b> satu kali. Hasilnya dicatat di E3.",
-        "Jawab <b>E4</b>: ciri percobaan Bernoulli, rumusnya, dan mengapa satu lemparan saja."
+        "Rancang aturanmu di panel bawah.",
+        "Isi <b>E1–E2</b>, lalu lempar satu kali.",
+        "Jawab E3–E4."
       ]
     }
   };
@@ -400,7 +395,7 @@
     return '<div class="panel"><div class="panel-head"><b>Pilih aturan sukses</b><span>' +
       (aktif ? "aturanmu: " + esc(S.label(aktif)) : "belum dipilih") + "</span></div>" +
       '<div class="opsi">' + tombol + "</div>" +
-      '<p class="note">Pilih satu aturan. Peluangnya nanti kamu hitung sendiri; panel ini tidak menampilkan p.</p></div>';
+      '<p class="note">Pilih satu aturan; peluangnya kamu hitung sendiri di lembar kerja.</p></div>';
   }
 
   function panelE(r) {
@@ -427,7 +422,7 @@
           ? "Aturan: muncul angka " + n + "."
           : (jenis === "min" ? "Aturan: muncul " + n + " atau lebih." : "Aturan: muncul " + n + " atau kurang.")) + "</p>"
       : (jenis ? '<p class="note">Aturan: ' + esc(S.label(at)) + ".</p>"
-        : '<p class="note">Pilih jenis aturan dulu. Aturanmu harus membagi enam sisi menjadi dua kelompok, keduanya tidak boleh kosong.</p>');
+        : '<p class="note">Pilih jenis aturan dulu. Sisi sukses dan sisi gagal tidak boleh kosong.</p>');
 
     return '<div class="panel"><div class="panel-head"><b>Rancang aturan suksesmu</b><span>' +
       (jenis ? esc(S.label(at)) : "belum disusun") + "</span></div>" +
@@ -438,8 +433,8 @@
   function kartuHasil(id, r) {
     var m = S.def(id);
     if (!m || m.dadu === 0) {
-      return '<div class="panel"><div class="panel-head"><b>Tanpa lemparan</b><span>data dari Misi A</span></div>' +
-        '<p class="note">Bagian D memakai hasil percobaan Misi A. Tidak ada dadu yang perlu dilempar di sini.</p></div>';
+      return '<div class="panel"><div class="panel-head"><b>Tanpa lemparan</b><span>data dari Bagian A</span></div>' +
+        '<p class="note">Bagian D memakai hasil percobaan Bagian A. Tidak ada dadu yang perlu dilempar di sini.</p></div>';
     }
     if (!r.aturan) {
       return '<div class="predict"><div class="q">Pilih <b>aturan sukses</b> di panel bawah dulu. Tombol lempar terbuka setelah aturan dan prediksi terisi.</div></div>';
@@ -447,7 +442,7 @@
     if (!r.hasil) {
       return '<div class="die-stage">' + diceHTML(m.dadu === 2 ? [3, 4] : [1], true) + "</div>" +
         '<div class="panel"><div class="panel-head"><b>Aturanmu</b><span>' + esc(S.label(r.aturan)) + "</span></div>" +
-        '<p class="note">Tekan tombol lempar di bawah. Satu percobaan = satu lemparan.</p></div>';
+        '<p class="note">Tekan tombol lempar di bawah.</p></div>';
     }
     var ok = S.cocok(r.hasil, r.aturan);
     var jumlah = r.hasil.length === 2 ? " · jumlah " + (r.hasil[0] + r.hasil[1]) : "";
@@ -455,7 +450,6 @@
       '<div class="panel"><div class="panel-head"><b>Hasil percobaan</b><span>' + esc(S.label(r.aturan)) + jumlah + "</span></div>" +
       '<p class="note">Dadu: <b>' + r.hasil.join(" dan ") + "</b> · hasilnya " + sgTanda(ok) +
       " (" + (ok ? "masuk aturan" : "tidak masuk aturan") + ").</p>" +
-      '<p class="note">Satu percobaan = satu lemparan. Hasil ini yang kamu pakai di lembar kerja.</p>' +
       "</div>";
   }
 
@@ -463,10 +457,8 @@
   function notisUlang(id) {
     return '<div class="predict" id="notisUlang" data-stop="1">' +
       '<div class="q">Percobaan Bagian ' + K.forMisi(id).kode + ' sudah dilakukan.</div>' +
-      '<p class="note" style="color:#6f4a10">Satu percobaan = <b>satu lemparan</b>. Lemparan kedua tidak dipakai ' +
-      'dan tidak dijumlahkan dengan hasil pertama, jadi yang kamu olah di lembar kerja tetap satu percobaan Bernoulli. ' +
-      'Kalau ingin mengganti hasil (misalnya tadi salah tekan), tekan <b>Ulangi percobaan</b>: hasil lama dihapus, ' +
-      'lalu kamu melempar sekali lagi.</p>' +
+      '<p class="note" style="color:#6f4a10">Satu percobaan hanya memakai <b>satu lemparan</b>, jadi lemparan kedua tidak dipakai. ' +
+      'Kalau ingin mengganti hasil, tekan <b>Ulangi percobaan</b>: hasil lama dihapus, lalu kamu melempar sekali lagi.</p>' +
       '<div class="acts">' +
       '<button class="b1 ok" data-act="ulangi" data-id="' + id + '">Ulangi percobaan</button>' +
       '<button class="b2" data-act="tutup-notis">Tetap pakai hasil ini</button>' +
@@ -643,10 +635,6 @@
       (baris || '<tr><td colspan="5">Belum ada lemparan.</td></tr>') + "</tbody></table>" +
       '<p class="note">Riwayat maksimal lima percobaan terakhir. Tidak dijumlahkan: peluang dihitung dari banyaknya sisi.</p></div>' +
       "</div>" +
-      '<div class="colstack">' +
-      '<div class="panel"><div class="panel-head"><b>Yang dicatat</b></div>' +
-      '<p class="note">Satu percobaan = satu lemparan. Yang masuk lembar kerja adalah hasil lemparan itu, bukan frekuensi atau rata-rata.</p></div>' +
-      "</div>" +
       "</main>" +
       '<footer class="cta">' +
       '<div class="code-card"><div><div class="lab">Kode laporan</div><div class="code" id="kodeTeks">' + kodeUntuk(id) + "</div></div>" +
@@ -659,11 +647,38 @@
       '<input type="file" id="fileImpor" accept="application/json" hidden>';
   }
 
+  /* rekap Bagian A–C supaya siswa tidak perlu kembali ke halaman awal saat
+     mengerjakan Misi D (butir D3 meminta membandingkan p antarbagian). */
+  function rekapABC() {
+    var baris = "";
+    [1, 2, 3].forEach(function (mid) {
+      var rr = S.rek(state, mid);
+      var at = rr.aturan;
+      var sisi = at ? S.sisiSukses(at) : null;
+      var total = at ? S.ruangTotal(at) : null;
+      var ok = rr.hasil && at ? S.cocok(rr.hasil, at) : null;
+      baris += "<tr><td><b>" + K.forMisi(mid).kode + "</b></td>" +
+        (at
+          ? "<td>" + esc(S.label(at)) + "</td>" +
+            '<td class="n">' + sisi + "</td>" +
+            '<td class="n">' + total + "</td>" +
+            '<td class="n">' + dec(sisi / total, 3) + " (" + pecahan(sisi, total) + ")</td>"
+          : '<td colspan="4" class="n">aturan belum dipilih</td>') +
+        '<td class="n">' + (rr.hasil ? rr.hasil.join(" + ") : "—") + "</td>" +
+        '<td class="n">' + (ok === null ? "—" : (ok ? 1 : 0)) + "</td></tr>";
+    });
+    return '<div class="panel"><div class="panel-head"><b>Hasil Bagian A–C</b><span>rekap percobaanmu</span></div>' +
+      '<table><thead><tr><th>bagian</th><th>aturan</th><th class="rt" style="white-space:nowrap">|A|</th><th class="rt" style="white-space:nowrap">|Ω|</th>' +
+      '<th class="rt">p</th><th class="rt">dadu</th><th class="rt">X</th></tr></thead><tbody>' + baris + "</tbody></table>" +
+      '<p class="note">Yang berubah antarbagian hanya aturan dan p; percobaannya tetap satu lemparan dengan dua hasil.</p></div>';
+  }
+
   function dataSebaran(r) {
-    var p = S.peluang({ jenis: "angka", n: 6 });   /* data Misi A */
-    return header({ back: true, title: "Papan Data", sub: "Bagian D · sebaran X dari Misi A", right: chip("✓ Bagian D") }) +
+    var p = S.peluang({ jenis: "angka", n: 6 });   /* data Bagian A */
+    return header({ back: true, title: "Papan Data", sub: "Bagian D · sebaran X dari Bagian A", right: chip("✓ Bagian D") }) +
       '<main class="body wide">' +
-      '<div class="toast">✓ <div><b>Bagian D:</b> tabel ini memakai hasil Misi A. Kolom ' + K.md("$P(X=x)$") + ' yang kamu isi di D1 harus sama dengan angka di kolom teori.</div></div>' +
+      '<div class="toast">✓ <div><b>Bagian D:</b> tabel ini memakai hasil Bagian A. Kolom ' + K.md("$P(X=x)$") + ' yang kamu isi di D1 harus sama dengan angka di kolom teori.</div></div>' +
+      rekapABC() +
       '<div class="colstack">' +
       '<div class="panel"><div class="panel-head"><b>Sebaran teoretis</b><span>p = 1/6</span></div>' +
       '<table><thead><tr><th>x</th><th class="rt">peluang</th></tr></thead><tbody>' +

@@ -12,10 +12,10 @@
 
   /* Definisi misi. dadu = 1 | 2 | 0 (tanpa lemparan). */
   var MISI = [
-    { id: 1, judul: "Satu lemparan, dua hasil", sub: "1 dadu · 1 lemparan", dadu: 1, target: 1, lkpd: "Bagian A" },
-    { id: 2, judul: "Ganti aturan, ganti peluang", sub: "1 dadu · aturan pilihanmu", dadu: 1, target: 1, lkpd: "Bagian B" },
-    { id: 3, judul: "Dua dadu, tetap dua hasil", sub: "2 dadu · 1 lemparan", dadu: 2, target: 1, lkpd: "Bagian C" },
-    { id: 4, judul: "Menemukan rumus peluangnya", sub: "tanpa lemparan baru", dadu: 0, target: 0, lkpd: "Bagian D" },
+    { id: 1, judul: "Satu lemparan, satu aturan", sub: "1 dadu · 1 lemparan", dadu: 1, target: 1, lkpd: "Bagian A" },
+    { id: 2, judul: "Pilih aturanmu sendiri", sub: "1 dadu · aturan pilihanmu", dadu: 1, target: 1, lkpd: "Bagian B" },
+    { id: 3, judul: "Dua dadu, satu aturan", sub: "2 dadu · 1 lemparan", dadu: 2, target: 1, lkpd: "Bagian C" },
+    { id: 4, judul: "Menyusun rumus peluangnya", sub: "tanpa lemparan baru", dadu: 0, target: 0, lkpd: "Bagian D" },
     { id: 5, judul: "Rancang sendiri, lalu simpulkan", sub: "1 dadu · aturan buatanmu", dadu: 1, target: 1, lkpd: "Bagian E" }
   ];
 

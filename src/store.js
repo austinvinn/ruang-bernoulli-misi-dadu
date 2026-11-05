@@ -40,7 +40,11 @@
       /* watermark: waktu terakhir data dikosongkan di perangkat ini.
          Jawaban server yang lebih tua dari ini tidak boleh disalin balik
          (lihat gabungJawabanServer di app.js). */
-      dibersihkan: null
+      dibersihkan: null,
+      /* ronde = percobaan ke-berapa di perangkat ini. Naik setiap "Mulai ulang"
+         atau "Hapus data saya", dan ikut dikirim ke server supaya jawaban lama
+         tidak tertimpa (tabel jawaban/lemparan berkunci ronde). */
+      ronde: 1
     };
   }
 
@@ -56,6 +60,7 @@
     if (!s.kirim || typeof s.kirim !== "object") s.kirim = {};
     if (!s.terakhir) s.terakhir = 1;
     if (typeof s.dibersihkan === "undefined") s.dibersihkan = null;
+    if (typeof s.ronde !== "number" || !(s.ronde >= 1)) s.ronde = 1;
     s.versi = VERSI;
     return s;
   }
@@ -311,11 +316,14 @@
     var baru = kosong();
     baru.peserta = peserta;      /* nama/NIM dipertahankan */
     baru.dibersihkan = now();    /* blokir salin-balik jawaban server yang lama */
+    baru.ronde = (s.ronde || 1) + 1;   /* percobaan baru: jangan timpa ronde lama */
     return simpan(baru);
   }
   function resetSemua() {
+    var s = baca();
     var baru = kosong();
     baru.dibersihkan = now();
+    baru.ronde = (s.ronde || 1) + 1;
     return simpan(baru);
   }
 

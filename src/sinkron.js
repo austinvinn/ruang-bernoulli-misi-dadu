@@ -73,6 +73,7 @@
       body: JSON.stringify({
         nama: st.peserta.nama || "",
         nim: st.peserta.nim || "",
+        ronde: st.ronde || 1,
         butir: paket.map(function (id) { return { id: id, nilai: S.jawabNilai(st, id) }; }),
         /* satu percobaan = satu lemparan: deret berisi 1–2 angka */
         lemparan: {
@@ -125,7 +126,7 @@
       if (!st.peserta.nama && !st.peserta.nim) return;
       A.api("/api/jawaban", {
         method: "POST",
-        body: JSON.stringify({ nama: st.peserta.nama || "", nim: st.peserta.nim || "", butir: [] })
+        body: JSON.stringify({ nama: st.peserta.nama || "", nim: st.peserta.nim || "", ronde: st.ronde || 1, butir: [] })
       }).then(function (res) {
         if (res.ok && res.data && res.data.ok) {
           keadaan.terakhir = res.data.waktu || new Date().toISOString();

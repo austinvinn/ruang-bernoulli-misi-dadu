@@ -846,6 +846,9 @@
     if (sesi && sesi.nama && !state.peserta.nama) { state.peserta.nama = sesi.nama; ubah = true; }
     if (sesi && sesi.nim && !state.peserta.nim) { state.peserta.nim = sesi.nim; ubah = true; }
     if (sesi && sesi.kelas) { state.peserta.kelas = sesi.kelas; ubah = true; }
+    /* ronde di server bisa lebih tinggi (perangkat lain): jangan pernah turunkan,
+       supaya kiriman berikutnya tidak menimpa percobaan yang lebih baru */
+    if (sesi && sesi.ronde > (state.ronde || 1)) { state.ronde = sesi.ronde; ubah = true; }
     if (ubah) S.simpan(state);
     return ubah;
   }

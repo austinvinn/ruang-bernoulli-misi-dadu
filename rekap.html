@@ -92,6 +92,7 @@ tr:hover td{background:#fcfdfa}
           </div>
           <div style="flex:0 0 auto"><button class="btn-g" id="btnMuat">Muat ulang</button></div>
           <div style="flex:0 0 auto"><button class="btn-s" id="btnCsv">Unduh CSV</button></div>
+          <div style="flex:0 0 auto"><button class="btn-g" id="btnCsvPanjang">CSV riwayat ronde</button></div>
           <div style="flex:0 0 auto"><button class="btn-g" id="btnSheet">Sinkron ke Google Sheets</button></div>
         </div>
         <p class="note" id="pesanMuat">Belum dimuat.</p>
@@ -100,7 +101,10 @@ tr:hover td{background:#fcfdfa}
       <div class="panel">
         <h2>Jawaban per mahasiswa</h2>
         <div class="tbl-wrap"><table id="tabel"><thead></thead><tbody></tbody></table></div>
-        <p class="note">Kolom A1–E4 adalah butir lembar kerja. Sel kosong = belum dijawab. Nilai berbentuk tabel tampil sebagai JSON.</p>
+        <p class="note">Kolom A1–E4 adalah butir lembar kerja. Sel kosong = belum dijawab. Nilai berbentuk tabel tampil sebagai JSON.
+          Kolom <b>ronde</b> = percobaan ke-berapa di perangkat mahasiswa: naik setiap kali ia menekan
+          “Mulai ulang” atau “Hapus data saya”. Sel butir selalu menampilkan jawaban ronde terbaru;
+          riwayat lengkap semua ronde ada di CSV panjang.</p>
       </div>
 
       <div class="grid2">
@@ -272,7 +276,7 @@ tr:hover td{background:#fcfdfa}
     var bagian = data.bagian || [];
     isiKelas(baris);
 
-    var kepala = "<tr><th>#</th><th>kelas</th><th>nama</th><th>NIM</th><th>butir</th>";
+    var kepala = "<tr><th>#</th><th>kelas</th><th>nama</th><th>NIM</th><th>ronde</th><th>butir</th>";
     butir.forEach(function (b) { kepala += "<th>" + b + "</th>"; });
     bagian.forEach(function (g) { kepala += "<th>percobaan " + g + "</th>"; });
     kepala += "<th>diubah</th></tr>";
@@ -281,8 +285,11 @@ tr:hover td{background:#fcfdfa}
     var isi = "";
     baris.forEach(function (b, i) {
       var jml = Object.keys(b.jawaban || {}).length;
+      var rincianRonde = Object.keys(b.rondeButir || {}).sort()
+        .map(function (id) { return id + " ronde " + b.rondeButir[id]; }).join(" · ");
       isi += "<tr><td class=n>" + (i + 1) + "</td><td>" + esc(b.kelas || "—") + "</td><td>" +
-        esc(b.nama || "(tanpa nama)") + "</td><td>" + esc(b.nim || "—") + "</td><td class=n>" +
+        esc(b.nama || "(tanpa nama)") + "</td><td>" + esc(b.nim || "—") + "</td>" +
+        '<td class=n title="' + esc(rincianRonde) + '">' + (b.ronde ? b.ronde : "—") + "</td><td class=n>" +
         jml + "/" + butir.length + "</td>";
       butir.forEach(function (id) {
         var v = (b.jawaban || {})[id];
@@ -315,6 +322,12 @@ tr:hover td{background:#fcfdfa}
 
   function unduhCsv() {
     var q = "?format=csv" + (kelasSekarang() ? "&kelas=" + encodeURIComponent(kelasSekarang()) : "");
+    location.href = "/api/rekap" + q;
+  }
+
+  /* CSV panjang: satu baris per (peserta, ronde, butir) — bisa dibedakan percobaan 1, 2, dst. */
+  function unduhCsvPanjang() {
+    var q = "?format=csv&bentuk=panjang" + (kelasSekarang() ? "&kelas=" + encodeURIComponent(kelasSekarang()) : "");
     location.href = "/api/rekap" + q;
   }
 
@@ -396,6 +409,7 @@ tr:hover td{background:#fcfdfa}
   $("btnMuat").addEventListener("click", muat);
   $("kelasFilter").addEventListener("change", muat);
   $("btnCsv").addEventListener("click", unduhCsv);
+  if ($("btnCsvPanjang")) $("btnCsvPanjang").addEventListener("click", unduhCsvPanjang);
   $("btnSheet").addEventListener("click", kirimSheet);
   $("btnBuat").addEventListener("click", buatKode);
   $("btnKeluar").addEventListener("click", function () {

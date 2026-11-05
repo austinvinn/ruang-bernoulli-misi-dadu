@@ -14,17 +14,24 @@ export async function onRequestPost({ request, env }) {
     "SELECT id, kelas, nama, nim, dibuat FROM peserta ORDER BY kelas, nama"
   ).all();
   const jawaban = await env.DB.prepare(
-    "SELECT peserta_id, bagian, butir, nilai, diubah FROM jawaban ORDER BY butir"
+    "SELECT peserta_id, bagian, butir, ronde, nilai, diubah FROM jawaban ORDER BY butir"
   ).all();
 
   const baris = (peserta.results || []).map((p) => ({
-    id: p.id, kelas: p.kelas, nama: p.nama, nim: p.nim, dibuat: p.dibuat, jawaban: {}
+    id: p.id, kelas: p.kelas, nama: p.nama, nim: p.nim, dibuat: p.dibuat, jawaban: {}, ronde: 0
   }));
   const peta = {};
   baris.forEach((b) => { peta[b.id] = b; });
+  const rondeButir = {};
   (jawaban.results || []).forEach((r) => {
     const b = peta[r.peserta_id];
     if (!b) return;
+    const ronde = Number(r.ronde) >= 1 ? Number(r.ronde) : 1;
+    if (ronde > b.ronde) b.ronde = ronde;
+    /* sel = jawaban ronde terbaru per butir */
+    const kunci = r.peserta_id + "/" + r.butir;
+    if (ronde < (rondeButir[kunci] || 0)) return;
+    rondeButir[kunci] = ronde;
     let v = r.nilai;
     try { v = JSON.parse(r.nilai); } catch (e) { /* teks */ }
     b.jawaban[r.butir] = v;
@@ -38,18 +45,24 @@ export async function onRequestPost({ request, env }) {
   let lemparan = { results: [] };
   try {
     lemparan = await env.DB.prepare(
-      "SELECT peserta_id, bagian, deret, aturan, x FROM lemparan"
+      "SELECT peserta_id, bagian, ronde, deret, aturan, x FROM lemparan"
     ).all();
   } catch (e) {
     lemparan = await env.DB.prepare("SELECT peserta_id, bagian, deret FROM lemparan").all();
   }
+  const rondeBagian = {};
   (lemparan.results || []).forEach((r) => {
     const b = peta[r.peserta_id];
     if (!b) return;
+    const ronde = Number(r.ronde) >= 1 ? Number(r.ronde) : 1;
+    const kunci = r.peserta_id + "/" + r.bagian;
+    if (ronde < (rondeBagian[kunci] || 0)) return;   /* hanya percobaan terbaru */
+    rondeBagian[kunci] = ronde;
     let deret = [];
     try { deret = JSON.parse(r.deret); } catch (e2) { deret = []; }
     b.lemparan = b.lemparan || {};
     b.lemparan[r.bagian] = {
+      ronde: ronde,
       deret: deret,
       aturan: r.aturan || "",
       x: r.x === 0 || r.x === 1 ? r.x : null

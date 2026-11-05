@@ -19,8 +19,9 @@ export async function onRequestGet({ request, env }) {
   ).bind(sesi.id).first();
 
   const j = await env.DB.prepare(
-    "SELECT bagian, butir, nilai, diubah FROM jawaban WHERE peserta_id = ? ORDER BY butir"
-  ).bind(sesi.id).all();
+    "SELECT bagian, butir, nilai, diubah FROM jawaban WHERE peserta_id = ? " +
+    "AND ronde = (SELECT MAX(ronde) FROM jawaban WHERE peserta_id = ?) ORDER BY butir"
+  ).bind(sesi.id, sesi.id).all();
 
   const jawaban = {};
   (j.results || []).forEach((r) => {
@@ -29,10 +30,19 @@ export async function onRequestGet({ request, env }) {
     jawaban[r.butir] = { v: v, ts: iso(r.diubah) };
   });
 
+  let ronde = 1;
+  try {
+    const r = await env.DB.prepare(
+      "SELECT MAX(ronde) AS r FROM jawaban WHERE peserta_id = ?"
+    ).bind(sesi.id).first();
+    if (r && r.r >= 1) ronde = r.r;
+  } catch (e) { /* tabel lama tanpa kolom ronde */ }
+
   return json({
     ok: true,
     peran: sesi.p,
     kelas: sesi.k,
+    ronde: ronde,
     peserta: p ? Object.assign({}, p, { dibuat: iso(p.dibuat) }) : { id: sesi.id, kelas: sesi.k, nama: "", nim: "" },
     jawaban: jawaban
   });

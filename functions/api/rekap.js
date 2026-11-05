@@ -42,7 +42,7 @@ export async function onRequestGet({ request, env }) {
     : await env.DB.prepare(sqlPeserta).all();
 
   const sqlJawaban =
-    "SELECT j.peserta_id, j.bagian, j.butir, j.nilai, j.diubah FROM jawaban j " +
+    "SELECT j.peserta_id, j.bagian, j.butir, j.ronde, j.nilai, j.diubah FROM jawaban j " +
     (kelas ? "JOIN peserta p ON p.id = j.peserta_id WHERE p.kelas = ? " : "") +
     "ORDER BY j.butir";
   const jawaban = kelas
@@ -50,7 +50,8 @@ export async function onRequestGet({ request, env }) {
     : await env.DB.prepare(sqlJawaban).all();
 
   const baris = (peserta.results || []).map((p) => ({
-    id: p.id, kelas: p.kelas, nama: p.nama, nim: p.nim, dibuat: p.dibuat, jawaban: {}, diubah: ""
+    id: p.id, kelas: p.kelas, nama: p.nama, nim: p.nim, dibuat: p.dibuat,
+    jawaban: {}, rondeButir: {}, ronde: 0, riwayat: [], diubah: ""
   }));
   const peta = {};
   baris.forEach((b) => { peta[b.id] = b; });
@@ -62,23 +63,35 @@ export async function onRequestGet({ request, env }) {
     if (!b) return;
     let v = r.nilai;
     try { v = JSON.parse(r.nilai); } catch (e) { /* teks apa adanya */ }
-    b.jawaban[r.butir] = v;
+    const ronde = Number(r.ronde) >= 1 ? Number(r.ronde) : 1;
+
+    /* nilai sel = jawaban dari ronde terbaru (dalam ronde yang sama, yang terakhir diubah) */
+    const rondeLama = b.rondeButir[r.butir] || 0;
+    if (ronde > rondeLama || (ronde === rondeLama && (!b.diubah || r.diubah >= b.diubah))) {
+      b.jawaban[r.butir] = v;
+      b.rondeButir[r.butir] = ronde;
+    }
+    if (ronde > b.ronde) b.ronde = ronde;
+    b.riwayat.push({ ronde: ronde, butir: r.butir, nilai: v, diubah: r.diubah });
     if (!b.diubah || r.diubah > b.diubah) b.diubah = r.diubah;
+  });
+  baris.forEach((b) => {
+    b.riwayat.sort((x, y) => (x.ronde - y.ronde) || urutButir(x.butir, y.butir));
   });
   const butir = Object.keys(kumpulanButir).sort(urutButir);
 
-  /* hasil percobaan: satu lemparan per bagian */
+  /* hasil percobaan: satu lemparan per bagian per ronde */
   let lemparan = { results: [] };
   try {
     const sqlLemparan =
-      "SELECT l.peserta_id, l.bagian, l.deret, l.aturan, l.x FROM lemparan l " +
+      "SELECT l.peserta_id, l.bagian, l.ronde, l.deret, l.aturan, l.x FROM lemparan l " +
       (kelas ? "JOIN peserta p ON p.id = l.peserta_id WHERE p.kelas = ? " : "") +
       "ORDER BY l.bagian";
     lemparan = kelas
       ? await env.DB.prepare(sqlLemparan).bind(kelas).all()
       : await env.DB.prepare(sqlLemparan).all();
   } catch (e) {
-    /* D1 lama belum punya kolom aturan/x */
+    /* D1 lama belum punya kolom ronde/aturan/x */
     const sqlLama =
       "SELECT l.peserta_id, l.bagian, l.deret FROM lemparan l " +
       (kelas ? "JOIN peserta p ON p.id = l.peserta_id WHERE p.kelas = ? " : "") +
@@ -94,12 +107,18 @@ export async function onRequestGet({ request, env }) {
     if (!b) return;
     let deret = [];
     try { deret = JSON.parse(r.deret); } catch (e) { deret = []; }
-    b.lemparan = b.lemparan || {};
-    b.lemparan[r.bagian] = {
+    const ronde = Number(r.ronde) >= 1 ? Number(r.ronde) : 1;
+    const isi = {
+      ronde: ronde,
       deret: deret,
       aturan: r.aturan || "",
       x: r.x === 0 || r.x === 1 ? r.x : null
     };
+    b.lemparan = b.lemparan || {};
+    const lama = b.lemparan[r.bagian];
+    if (!lama || ronde >= (lama.ronde || 1)) b.lemparan[r.bagian] = isi;
+    b.lemparanRiwayat = b.lemparanRiwayat || [];
+    b.lemparanRiwayat.push(Object.assign({ bagian: r.bagian }, isi));
     bagianAda[r.bagian] = 1;
   });
   const bagian = Object.keys(bagianAda).sort();
@@ -107,24 +126,25 @@ export async function onRequestGet({ request, env }) {
   if (format === "csv") {
     let isi = "";
     if (bentuk === "panjang") {
-      const kepala = ["kelas", "nama", "nim", "peserta", "bagian", "butir", "nilai", "diubah"];
+      const kepala = ["kelas", "nama", "nim", "peserta", "ronde", "bagian", "butir", "nilai", "diubah"];
       const rows = [kepala];
       (jawaban.results || []).forEach((r) => {
         const b = peta[r.peserta_id] || {};
         let v = r.nilai;
         try { v = JSON.parse(r.nilai); } catch (e) { /* teks */ }
-        rows.push([b.kelas || "", b.nama || "", b.nim || "", r.peserta_id, r.bagian, r.butir,
+        rows.push([b.kelas || "", b.nama || "", b.nim || "", r.peserta_id,
+          Number(r.ronde) >= 1 ? Number(r.ronde) : 1, r.bagian, r.butir,
           typeof v === "string" ? v : JSON.stringify(v), r.diubah]);
       });
       isi = csv(rows);
     } else {
-      const kepala = ["kelas", "nama", "nim", "peserta", "dibuat"].concat(butir)
+      const kepala = ["kelas", "nama", "nim", "peserta", "dibuat", "ronde"].concat(butir)
         .concat(bagian.map((g) => "aturan_" + g))
         .concat(bagian.map((g) => "hasil_" + g))
-        .concat(["terakhir_diubah", "jumlah_butir"]);
+        .concat(["ronde_tiap_butir", "terakhir_diubah", "jumlah_butir"]);
       const rows = [kepala];
       baris.forEach((b) => {
-        const sel = [b.kelas, b.nama, b.nim, b.id, b.dibuat];
+        const sel = [b.kelas, b.nama, b.nim, b.id, b.dibuat, b.ronde || ""];
         butir.forEach((id) => {
           const v = b.jawaban[id];
           sel.push(v === undefined ? "" : (typeof v === "string" ? v : JSON.stringify(v)));
@@ -137,6 +157,8 @@ export async function onRequestGet({ request, env }) {
           const p = b.lemparan && b.lemparan[g];
           sel.push(p ? p.deret.join("+") + (p.x === null ? "" : " · " + (p.x ? "S" : "G")) : "");
         });
+        sel.push(Object.keys(b.rondeButir || {}).sort(urutButir)
+          .map((id) => id + ":" + b.rondeButir[id]).join(" "));
         sel.push(b.diubah || "");
         sel.push(Object.keys(b.jawaban).length);
         rows.push(sel);

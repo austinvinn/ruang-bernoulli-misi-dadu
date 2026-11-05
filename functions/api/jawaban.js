@@ -7,9 +7,12 @@ const POLA_BUTIR = /^[A-E][0-9]{1,2}$/;
 export async function onRequestGet({ request, env }) {
   const sesi = await bacaSesi(request, env);
   if (!sesi) return galat("Belum masuk.", 401);
+  /* hanya ronde terakhir: siswa yang menekan "Mulai ulang" tidak boleh
+     mendapat jawaban percobaan lamanya kembali */
   const j = await env.DB.prepare(
-    "SELECT bagian, butir, nilai, diubah FROM jawaban WHERE peserta_id = ? ORDER BY butir"
-  ).bind(sesi.id).all();
+    "SELECT bagian, butir, nilai, diubah, ronde FROM jawaban WHERE peserta_id = ? " +
+    "AND ronde = (SELECT MAX(ronde) FROM jawaban WHERE peserta_id = ?) ORDER BY butir"
+  ).bind(sesi.id, sesi.id).all();
   return json({ ok: true, jawaban: j.results || [] });
 }
 
@@ -24,6 +27,11 @@ export async function onRequestPost({ request, env }) {
 
   const sekarang = new Date().toISOString();
   const pid = sesi.id;
+  /* ronde: percobaan ke-berapa di perangkat siswa. Klien lama tidak mengirim
+     ronde → dianggap ronde 1. */
+  const rondeMentah = Number(body.ronde);
+  const ronde = Number.isFinite(rondeMentah) && rondeMentah >= 1 && rondeMentah <= 999
+    ? Math.floor(rondeMentah) : 1;
 
   const nama = String(body.nama || "").slice(0, 80).trim();
   const nim = String(body.nim || "").slice(0, 30).trim();
@@ -46,9 +54,9 @@ export async function onRequestPost({ request, env }) {
     const teks = typeof nilai === "string" ? nilai : JSON.stringify(nilai);
     if (teks.length > 8000) continue;
     perintah.push(env.DB.prepare(
-      "INSERT INTO jawaban(peserta_id, bagian, butir, nilai, diubah) VALUES(?,?,?,?,?) " +
-      "ON CONFLICT(peserta_id, bagian, butir) DO UPDATE SET nilai = excluded.nilai, diubah = excluded.diubah"
-    ).bind(pid, id[0], id, teks, sekarang));
+      "INSERT INTO jawaban(peserta_id, bagian, butir, ronde, nilai, diubah) VALUES(?,?,?,?,?,?) " +
+      "ON CONFLICT(peserta_id, bagian, butir, ronde) DO UPDATE SET nilai = excluded.nilai, diubah = excluded.diubah"
+    ).bind(pid, id[0], id, ronde, teks, sekarang));
     tersimpan++;
   }
 
@@ -65,12 +73,12 @@ export async function onRequestPost({ request, env }) {
       const isi = JSON.stringify(deret);
       try {
         await env.DB.prepare(
-          "INSERT INTO lemparan(peserta_id, bagian, deret, aturan, x, diubah) VALUES(?,?,?,?,?,?) " +
-          "ON CONFLICT(peserta_id, bagian) DO UPDATE SET deret = excluded.deret, " +
+          "INSERT INTO lemparan(peserta_id, bagian, ronde, deret, aturan, x, diubah) VALUES(?,?,?,?,?,?,?) " +
+          "ON CONFLICT(peserta_id, bagian, ronde) DO UPDATE SET deret = excluded.deret, " +
           "aturan = excluded.aturan, x = excluded.x, diubah = excluded.diubah"
-        ).bind(pid, l.bagian, isi, aturan, x, sekarang).run();
+        ).bind(pid, l.bagian, ronde, isi, aturan, x, sekarang).run();
       } catch (e) {
-        /* D1 lama belum punya kolom aturan/x: simpan deret saja */
+        /* D1 lama belum punya kolom ronde/aturan/x: simpan deret saja */
         await env.DB.prepare(
           "INSERT INTO lemparan(peserta_id, bagian, deret, diubah) VALUES(?,?,?,?) " +
           "ON CONFLICT(peserta_id, bagian) DO UPDATE SET deret = excluded.deret, diubah = excluded.diubah"

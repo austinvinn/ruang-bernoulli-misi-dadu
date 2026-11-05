@@ -892,6 +892,9 @@
       case "lempar": {
         if (!bisaLempar(id)) { force(); break; }
         S.lempar(state, id);
+        /* lemparan yang baru saja terjadi harus ikut terkirim walau butir
+           jawaban sudah lama terkirim (payload kiriman membawa deret hasil) */
+        if (SN && SN.tandai) SN.tandai(K.forMisi(id).kode + "1");
         var d = document.querySelector(".die");
         if (d) d.classList.add("rolling");
         setTimeout(force, 260);

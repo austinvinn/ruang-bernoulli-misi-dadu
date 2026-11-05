@@ -507,7 +507,7 @@
         (S.def(id).dadu === 0 ? "" : panelAturan(id, r)) +
         K.renderPra(b.kode, state) +
         kartuHasil(id, r) +
-        (ui.cobaLagi && r.hasil ? notisUlang(id) : "") +
+        (ui.cobaLagi && r.hasil && id === 1 ? notisUlang(id) : "") +
         (st === "selesai" ? selesaiCard(id, r) : "") +
         K.renderPanel(b.kode, state);
     }
@@ -564,9 +564,13 @@
         utama = '<button class="btn btn-primary" disabled>Pilih aturan dulu</button>';
       } else if (!prediksiSiap(id)) {
         utama = '<button class="btn btn-primary" disabled>Isi butir prediksi dulu</button>';
-      } else if (r.hasil) {
-        /* satu percobaan = satu lemparan: tidak ada lempar kedua */
+      } else if (r.hasil && id === 1) {
+        /* Misi A saja: satu percobaan = satu lemparan, jadi tidak ada lempar kedua.
+           Tombolnya tetap ada untuk memberi pengertian (kartu notisUlang). */
         utama = '<button class="btn btn-ghost" data-act="coba-lagi" data-id="' + id + '">Lempar lagi</button>';
+      } else if (r.hasil) {
+        /* bagian lain: hasil percobaan sudah ada, tidak ada tombol lempar lagi */
+        utama = "";
       } else {
         utama = '<button class="btn btn-primary" data-act="lempar" data-id="' + id + '"' + (bisa ? "" : " disabled") + ">" +
           label + "</button>";

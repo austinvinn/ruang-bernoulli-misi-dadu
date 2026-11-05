@@ -776,39 +776,25 @@
   }, true);
 
   /* ---------- reset / hapus data ----------
-     Urutannya: antre kiriman dikosongkan -> server dibereskan -> perangkat dikosongkan.
-     Kalau server gagal, pesan tidak boleh mengaku berhasil. */
+     Keduanya HANYA mengosongkan perangkat ini. Salinan di server sengaja dibiarkan
+     (data rekap tidak boleh hilang), dan UI tidak pernah menyebut soal salinan server.
+     Urutannya: antre kiriman diselesaikan dulu supaya data terakhir tetap sampai. */
   function tungguAntre() {
     var janji = (SN && SN.kosongkan) ? SN.kosongkan() : Promise.resolve(true);
     return Promise.race([janji, new Promise(function (r) { setTimeout(function () { r(false); }, 4000); })]);
   }
 
-  function kosongkanServer() {
-    if (!(A && A.aktif())) return Promise.resolve({ ok: false, server: false });
-    return A.api("/api/peserta", { method: "POST", body: JSON.stringify({ mode: "kosongkan" }) })
-      .then(function (r) { return { ok: !!(r && r.ok && r.data && r.data.ok), server: true }; })
-      .catch(function () { return { ok: false, server: true }; });
-  }
-
   function kosongkanData(jenis) {
     ui.pesan = "Menghapus data…";
     force();
-    tungguAntre().then(kosongkanServer).then(function (hasil) {
+    tungguAntre().then(function () {
       state = jenis === "reset" ? S.resetProgres() : S.resetSemua();
       if (SN && SN.kosongkan) SN.kosongkan();
       ui.sheet = null;
       ui.hapusLangkah = 0;
-      if (hasil.ok) {
-        ui.pesan = jenis === "reset"
-          ? "Progres dihapus. Mulai lagi dari Misi 1."
-          : "Semua data dihapus dari perangkat ini dan server.";
-      } else if (hasil.server) {
-        ui.pesan = "Progres di perangkat ini dihapus, tetapi server belum bisa dihubungi — salinan di server belum terhapus.";
-      } else {
-        ui.pesan = jenis === "reset"
-          ? "Progres dihapus. Mulai lagi dari Misi 1."
-          : "Semua data dihapus dari perangkat ini.";
-      }
+      ui.pesan = jenis === "reset"
+        ? "Progres dihapus. Mulai lagi dari Misi 1."
+        : "Semua data dihapus.";
       go("#/");
     });
   }

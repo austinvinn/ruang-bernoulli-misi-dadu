@@ -165,6 +165,11 @@ td.n,th.rt{text-align:right}
 .instruksi .tujuan{margin:0 0 7px;font-size:12px;line-height:1.55;color:var(--ink-2)}
 .steps{margin:0;padding-left:18px;font-size:12.2px;line-height:1.65;color:var(--ink-2)}
 .steps li{margin-bottom:4px}
+.steps li.ok{color:#2c5340}
+.steps .tick{color:var(--accent);font-weight:800}
+.lkm-terkunci{border-style:dashed;background:linear-gradient(180deg,#fbfdf9,#f6f9f4)}
+.lkm-terkunci .lkm-atur{color:var(--ink-2);font-weight:600}
+.legenda{background:var(--accent-soft);border-color:var(--accent-line)}
 .steps b{color:var(--ink)}
 .selesai{background:var(--ok-soft);border:1px solid var(--ok-line);border-radius:var(--r);padding:13px}
 .selesai .eyebrow{color:#245f40;font-size:9.5px}
@@ -344,8 +349,10 @@ table.t-lkm .inp.sel{font-size:16px;padding:7px 5px;min-height:42px;border-radiu
 
 /* ---------- rumus ---------- */
 .kx{display:inline-block;line-height:1.1}
-.kx-blk{display:block;text-align:center;margin:6px 0}
+.kx-blk{display:block;text-align:center;margin:10px 0;font-size:1.12em}
+.kx-blk .katex{font-size:1.1em}
 .katex{font-size:1.02em}
+@media (max-width:520px){.katex{font-size:1.08em}.kx-blk{font-size:1.16em}}
 .kx,.kx .katex,.stat .kx,.stat .kx .katex,.panel-head .kx{text-transform:none;letter-spacing:0}
 
 /* ---------- grafik: label sumbu, titik, dan garis putus-putus ---------- */

@@ -357,14 +357,25 @@
     }
   };
 
-  function instruksiBox(id) {
+  function instruksiBox(id, r) {
     var d = INSTRUKSI[id];
-    var li = d.langkah.map(function (t) {
-      return "<li>" + K.md(String(t).replace(/<\/?b>/g, "**")) + "</li>";
-    }).join("");
+    var b = K.forMisi(id);
     var m = S.def(id);
+    var j = S.jumlahJawaban(state, b.kode);
+    /* Revisi OTO 1: tiap langkah diberi tanda ✓ supaya urutan kerja terlihat. */
+    var tuntas = [
+      prediksiSiap(id),
+      m.dadu === 0 ? j.terisi > 0 : !!(r && r.hasil),
+      j.total > 0 && j.terisi >= j.total
+    ];
+    var li = d.langkah.map(function (t, i) {
+      var ok = tuntas[i] === true;
+      return '<li class="' + (ok ? "ok" : "") + '">' + (ok ? '<span class="tick" aria-hidden="true">✓</span> ' : "") +
+        K.md(String(t).replace(/<\/?b>/g, "**")) + "</li>";
+    }).join("");
+    var m2 = S.def(id);
     return '<div class="panel instruksi" data-stop="1">' +
-      '<div class="panel-head"><b>Bagian ' + K.forMisi(id).kode + " · Misi " + id + "</b><span>" + m.sub + "</span></div>" +
+      '<div class="panel-head"><b>Bagian ' + K.forMisi(id).kode + " · Misi " + id + "</b><span>" + m2.sub + "</span></div>" +
       '<ol class="steps">' + li + "</ol></div>";
   }
 
@@ -465,6 +476,16 @@
       "</div></div>";
   }
 
+  /* Revisi OTO 6: ganti aturan setelah melempar = percobaan baru, bukan koreksi jawaban. */
+  function notisAturan(id) {
+    var b = K.forMisi(id);
+    return '<div class="predict" id="notisAturan" data-stop="1">' +
+      '<div class="q">Aturan Bagian ' + b.kode + ' sudah diganti.</div>' +
+      '<p class="note" style="color:#6f4a10">Aturan baru berarti <b>percobaan baru</b>: hasil lemparan lama dibuang supaya tidak tertukar. ' +
+      'Jawaban B1–B2 yang kamu tulis sebelumnya <b>tidak salah</b> — biarkan, lalu lempar sekali lagi.</p>' +
+      '<div class="acts"><button class="b2" data-act="tutup-notis-aturan">Mengerti</button></div></div>';
+  }
+
   function selesaiCard(id, r, opts) {
     opts = opts || {};
     var b = K.forMisi(id);
@@ -495,13 +516,14 @@
       isi = '<div class="locked-note">Bagian ini terbuka setelah Bagian ' + K.forMisi(id - 1).kode +
         ' selesai. <br><button class="link" data-act="home">Kembali ke sampul</button></div>';
     } else {
-      isi = instruksiBox(id) + tpBox(id) +
+      isi = instruksiBox(id, r) + tpBox(id) +
         (S.def(id).dadu === 0 ? "" : panelAturan(id, r)) +
+        (ui.notisAturan === id ? notisAturan(id) : "") +
         K.renderPra(b.kode, state) +
         kartuHasil(id, r) +
         (ui.cobaLagi && r.hasil && id === 1 ? notisUlang(id) : "") +
         (st === "selesai" ? selesaiCard(id, r) : "") +
-        K.renderPanel(b.kode, state);
+        K.renderPanel(b.kode, state, { terkunci: S.def(id).dadu > 0 && !r.hasil });
     }
 
     var lkm = isi;
@@ -551,7 +573,7 @@
       kedua = tombolPapan(id);
     } else {
       var bisa = bisaLempar(id);
-      var label = m.dadu === 2 ? "Lempar dua dadu" : "Lempar dadu";
+      var label = (m.dadu === 2 ? "Langkah 2 · Lempar dua dadu" : "Langkah 2 · Lempar dadu");
       if (!aturanSiap(id)) {
         utama = '<button class="btn btn-primary" disabled>Pilih aturan dulu</button>';
       } else if (!prediksiSiap(id)) {
@@ -602,6 +624,17 @@
     } catch (e) { return "—"; }
   }
 
+  /* Revisi OTO 5: kunci baca tabel Papan Data — tanpa ini siswa tidak tahu arti kolom. */
+  function legendaTabel(dadu) {
+    return '<div class="panel legenda" data-stop="1">' +
+      '<div class="panel-head"><b>Cara membaca tabel</b><span>satu baris = satu lemparan</span></div>' +
+      '<p class="note"><b>#</b> nomor percobaan · <b>dadu</b> angka yang muncul' +
+      (dadu === 2 ? " pada kedua dadu" : "") + ' · ' +
+      (dadu === 2 ? "<b>jumlah</b> jumlah dua dadu · " : "") +
+      "<b>X</b> 1 kalau sukses, 0 kalau gagal · <b>S/G</b> nama hasilnya.</p>" +
+      '<p class="note">Baris dijumlah tidak dipakai: peluang dihitung dari banyaknya sisi, bukan dari hasil lemparan.</p></div>';
+  }
+
   function dataUmum(id, r) {
     var m = S.def(id);
     var b = K.forMisi(id);
@@ -621,6 +654,7 @@
       '<main class="body wide">' +
       (S.status(state, id) === "selesai" ? selesaiCard(id, r, { papan: true }) : "") +
       '<div class="toast">✓ <div><b>Bagian ' + b.kode + ":</b> angka di halaman ini boleh langsung kamu pakai untuk mengisi lembar kerja. <b>Kode laporan</b> ada di kotak paling bawah.</div></div>" +
+      legendaTabel(m.dadu) +
       '<div class="colstack">' +
       '<div class="stats">' +
       '<div class="stat"><span>|A|</span><b>' + (at ? sisi : "—") + "</b></div>" +
@@ -928,6 +962,10 @@
         ui.cobaLagi = false;
         force();
         break;
+      case "tutup-notis-aturan":
+        ui.notisAturan = null;
+        force();
+        break;
       case "ulangi":
         S.ulangi(state, id);
         ui.cobaLagi = false;
@@ -935,7 +973,13 @@
         break;
       case "pilih-aturan": {
         var at = aturanDariKunci(el.getAttribute("data-kunci"));
-        if (at) S.pilihAturan(state, id, at);
+        var rekLama = S.rek(state, id);
+        var adaHasil = !!(rekLama && rekLama.hasil);
+        var atLama = JSON.stringify(rekLama && rekLama.aturan ? rekLama.aturan : null);
+        if (at && S.pilihAturan(state, id, at)) {
+          /* Revisi OTO 6: beri tahu bahwa hasil lama dibuang, bukan salah. */
+          if (adaHasil && JSON.stringify(at) !== atLama) ui.notisAturan = id;
+        }
         force();
         break;
       }

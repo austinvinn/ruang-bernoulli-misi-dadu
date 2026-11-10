@@ -267,6 +267,14 @@
     var d = def(id);
     if (!d || d.dadu === 0) return simpan(s);
     var r = rek(s, id);
+    /* Revisi OTO 6: mengganti aturan setelah melempar berarti percobaan baru.
+       Hasil lama dibuang supaya tidak dihitung ulang dengan aturan baru —
+       itulah yang membuat siswa merasa "jawaban sebelumnya salah". */
+    if (r.hasil && JSON.stringify(r.aturan || null) !== JSON.stringify(at || null)) {
+      r.hasil = null;
+      r.riwayat = [];
+      r.status = "berjalan";
+    }
     r.aturan = at;
     return simpan(s);
   }

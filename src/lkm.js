@@ -255,9 +255,22 @@
       "</section>";
   }
 
-  function renderPanel(kode, state) {
+  function renderPanel(kode, state, opsi) {
     var b = bagian(kode);
     if (!b) return "";
+    var o = opsi || {};
+    /* Revisi OTO 1: butir pasca-percobaan tidak boleh diisi sebelum dadu dilempar.
+       Tanpa kunci ini siswa menjawab A2–A5 lebih dulu, lalu melempar dan mengira
+       bagian harus diulang dari awal. */
+    if (o.terkunci) {
+      return '<section class="lkm lkm-terkunci" id="lkm-panel">' +
+        '<div class="lkm-head"><div><div class="eyebrow">Lembar kerja · Bagian ' + b.kode + "</div>" +
+        "<h3>Butir terbuka setelah percobaan</h3></div></div>" +
+        '<p class="lkm-atur">Tekan <b>' + (b.dadu === 2 ? "Lempar dua dadu" : "Lempar dadu") +
+        "</b> dulu. Setelah dadu berhenti, butir Bagian " + b.kode + " muncul di sini.</p>" +
+        '<p class="note">Prediksi di atas tetap tersimpan; kamu tidak perlu mengulang.</p>' +
+        "</section>";
+    }
     var j = jumlahTerisi(kode, state);
     var daftar = b.butir.filter(function (bt) { return bt.fase !== "pra"; });
     var li = daftar.map(function (bt) { return renderButir(bt, state, bt.id); }).join("");
